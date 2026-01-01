@@ -10,7 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogIn, Zap } from "lucide-react";
+import { Menu, X, LogIn, Zap, User, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 
 const NAV_LINKS = [
     { href: "/", label: "Home" },
@@ -20,6 +21,7 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
+    const { data: session } = useSession();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
@@ -46,8 +48,8 @@ export function Navbar() {
                             key={link.href}
                             href={link.href}
                             className={`px-3 lg:px-4 py-2 rounded-lg text-sm font-medium transition-all ${pathname === link.href
-                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                : 'text-zinc-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             {link.label}
@@ -57,20 +59,42 @@ export function Navbar() {
 
                 {/* Auth Buttons - Desktop */}
                 <div className="hidden md:flex items-center gap-2 lg:gap-3">
-                    <Link
-                        href="/login"
-                        className="flex items-center gap-2 px-3 lg:px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
-                    >
-                        <LogIn className="w-4 h-4" />
-                        <span className="hidden lg:inline">Login</span>
-                    </Link>
-                    <Link
-                        href="/signup"
-                        className="flex items-center gap-2 px-4 lg:px-5 py-2 bg-emerald-500 text-black text-sm font-bold rounded-full hover:bg-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                    >
-                        <Zap className="w-4 h-4" />
-                        <span className="hidden sm:inline">Get Started</span>
-                    </Link>
+                    {session ? (
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                                {session.user?.image ? (
+                                    <img src={session.user.image} alt="" className="w-5 h-5 rounded-full" />
+                                ) : (
+                                    <User className="w-4 h-4 text-zinc-400" />
+                                )}
+                                <span className="text-sm font-medium text-zinc-300">{session.user?.name?.split(' ')[0]}</span>
+                            </div>
+                            <button
+                                onClick={() => signOut()}
+                                className="p-2 text-zinc-400 hover:text-red-400 transition-colors"
+                                title="Sign Out"
+                            >
+                                <LogOut className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <Link
+                                href="/login"
+                                className="flex items-center gap-2 px-3 lg:px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                            >
+                                <LogIn className="w-4 h-4" />
+                                <span className="hidden lg:inline">Login</span>
+                            </Link>
+                            <Link
+                                href="/signup"
+                                className="flex items-center gap-2 px-4 lg:px-5 py-2 bg-emerald-500 text-black text-sm font-bold rounded-full hover:bg-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                            >
+                                <Zap className="w-4 h-4" />
+                                <span className="hidden sm:inline">Get Started</span>
+                            </Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -103,8 +127,8 @@ export function Navbar() {
                                     href={link.href}
                                     onClick={() => setMobileMenuOpen(false)}
                                     className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${pathname === link.href
-                                            ? 'bg-emerald-500/10 text-emerald-400'
-                                            : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                        ? 'bg-emerald-500/10 text-emerald-400'
+                                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
                                         }`}
                                 >
                                     {link.label}
@@ -113,20 +137,32 @@ export function Navbar() {
 
                             <div className="h-[1px] bg-white/5 my-4" />
 
-                            <Link
-                                href="/login"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-xl text-base font-medium text-zinc-400 hover:text-white"
-                            >
-                                Login
-                            </Link>
-                            <Link
-                                href="/signup"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-xl text-base font-bold bg-emerald-500 text-black text-center"
-                            >
-                                Get Started
-                            </Link>
+                            {session ? (
+                                <button
+                                    onClick={() => signOut()}
+                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-zinc-400 hover:text-red-400 bg-white/5"
+                                >
+                                    <span>Sign Out</span>
+                                    <LogOut className="w-4 h-4" />
+                                </button>
+                            ) : (
+                                <>
+                                    <Link
+                                        href="/login"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="block px-4 py-3 rounded-xl text-base font-medium text-zinc-400 hover:text-white"
+                                    >
+                                        Login
+                                    </Link>
+                                    <Link
+                                        href="/signup"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="block px-4 py-3 rounded-xl text-base font-bold bg-emerald-500 text-black text-center"
+                                    >
+                                        Get Started
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </motion.div>
                 )}

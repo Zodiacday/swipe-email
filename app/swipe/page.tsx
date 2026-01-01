@@ -18,8 +18,10 @@ import {
     Ban,
     Check,
     LayoutDashboard,
+    Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { CardStack } from "@/components/SwipeCard/CardStack";
 import { ModeIndicator } from "@/components/ModeIndicator/ModeIndicator";
 import { ComboCounter } from "@/components/ComboCounter/ComboCounter";
@@ -190,7 +192,27 @@ import { MockEmailProvider } from "@/lib/providers/MockEmailProvider";
 import { ParticleEngine } from "@/components/Effects/ParticleEngine";
 
 export default function SwipePage() {
+    const { data: session, status } = useSession();
     const [mockStartIndex, setMockStartIndex] = useState(DEMO_EMAILS.length);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+    const onRefill = useCallback(async () => {
+        if (session?.accessToken) {
+            try {
+                const res = await fetch("/api/gmail/emails");
+                if (res.ok) {
+                    const data = await res.json();
+                    return data.emails;
+                }
+            } catch (error) {
+                console.error("Failed to fetch real emails:", error);
+            }
+        }
+        // Fallback to demo
+        const nextBatch = await MockEmailProvider.fetchBatch(mockStartIndex, 50);
+        setMockStartIndex(prev => prev + 50);
+        return nextBatch;
+    }, [session, mockStartIndex]);
 
     const {
         activeWindow,
@@ -202,14 +224,22 @@ export default function SwipePage() {
         reset,
         remainingCount,
         isFetching
-    } = useSwipeBuffer(
-        DEMO_EMAILS,
-        async () => {
-            const nextBatch = await MockEmailProvider.fetchBatch(mockStartIndex, 50);
-            setMockStartIndex(prev => prev + 50);
-            return nextBatch;
+    } = useSwipeBuffer([], onRefill);
+
+    // Initial load logic
+    useEffect(() => {
+        if (status === "loading") return;
+
+        const loadInitial = async () => {
+            const initialData = await onRefill();
+            reset(initialData);
+            setIsInitialLoad(false);
+        };
+
+        if (isInitialLoad) {
+            loadInitial();
         }
-    );
+    }, [status, onRefill, reset, isInitialLoad]);
 
     const [score, setScore] = useState(0);
     // ... rest of state
@@ -267,6 +297,15 @@ export default function SwipePage() {
             y: window.innerHeight / 2,
             color: colors[action as keyof typeof colors] || "#10b981"
         });
+
+        // Backend Sync
+        if (session?.accessToken && !email.id.startsWith("demo-")) {
+            fetch("/api/gmail/action", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ emailId: email.id, action })
+            }).catch(err => console.error("Action sync failed:", err));
+        }
 
         // Handle game logic
         const now = Date.now();
@@ -337,8 +376,10 @@ export default function SwipePage() {
                     <div className="flex items-center gap-3">
                         {isFetching && (
                             <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-lg animate-pulse">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                <span className="text-[10px] uppercase font-black text-emerald-500 tracking-widest">Indexing...</span>
+                                <Loader2 className="w-3 h-3 text-emerald-500 animate-spin" />
+                                <span className="text-[10px] uppercase font-black text-emerald-500 tracking-widest">
+                                    {session ? "Syncing Gmail..." : "Loading Demo..."}
+                                </span>
                             </div>
                         )}
                         <div className="hidden md:flex items-center gap-4 text-zinc-400 text-sm font-medium">

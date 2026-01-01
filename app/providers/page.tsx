@@ -14,6 +14,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 import {
     Mail,
     Plus,
@@ -74,8 +76,26 @@ const PROVIDER_INFO = {
 };
 
 export default function ProvidersPage() {
+    const { data: session } = useSession();
     const [accounts, setAccounts] = useState<EmailAccount[]>(DEMO_ACCOUNTS);
     const [showAddProvider, setShowAddProvider] = useState(false);
+
+    useEffect(() => {
+        if (session) {
+            // Add real session account to the list
+            const realAccount: EmailAccount = {
+                id: "real-gmail",
+                provider: "gmail",
+                email: session.user?.email || "Connected Gmail",
+                connected: true,
+                lastSync: Date.now(),
+                emailCount: 1247, // Placeholder or fetch real count if available
+            };
+            setAccounts([realAccount]);
+        } else {
+            setAccounts(DEMO_ACCOUNTS);
+        }
+    }, [session]);
 
     const handleConnect = (provider: EmailAccount["provider"]) => {
         // In production, this would trigger OAuth flow

@@ -6,6 +6,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 import {
     Settings,
     Shield,
@@ -63,8 +65,19 @@ const INITIAL_RULES: AutomationRule[] = [
 ];
 
 export default function AutomationPage() {
+    const { data: session } = useSession();
     const [rules, setRules] = useState<AutomationRule[]>(INITIAL_RULES);
     const [isAutomationEnabled, setIsAutomationEnabled] = useState(true);
+
+    useEffect(() => {
+        if (!session) {
+            // In demo mode, we just keep initial rules
+            setIsAutomationEnabled(true);
+        } else {
+            // In production, we would fetch real rules here
+            console.log("Session active: Automation rules ready for sync.");
+        }
+    }, [session]);
 
     const toggleRule = (id: string) => {
         setRules((prev) =>

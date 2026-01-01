@@ -23,8 +23,20 @@ import {
 } from "lucide-react";
 import { Particles, Meteors } from "@/components/ui";
 import { HeroDemo } from "@/components/HeroDemo/HeroDemo";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+    const { data: session } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (session) {
+            router.push("/swipe");
+        }
+    }, [session, router]);
+
     return (
         <div className="min-h-screen bg-[#09090b] text-[#fafafa] overflow-hidden relative font-body">
             {/* Ambient background effects */}
@@ -76,10 +88,10 @@ export default function Home() {
                             transition={{ delay: 0.3 }}
                         >
                             <Link
-                                href="/onboarding"
+                                href={session ? "/swipe" : "/onboarding"}
                                 className="w-full sm:w-auto px-8 py-4 bg-emerald-500 text-black font-black rounded-full hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)] group"
                             >
-                                Start Experience
+                                {session ? "Go to Dashboard" : "Start Experience"}
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <Link

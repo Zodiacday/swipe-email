@@ -11,31 +11,19 @@ import {
     Shield,
     Zap,
     Sparkles,
-    Flame,
-    Crown,
     Target,
     ArrowRight,
-    Mail,
-    Trash2,
-    MailX,
-    Ban,
-    Check,
 } from "lucide-react";
 import { Particles, Meteors } from "@/components/ui";
 import { HeroDemo } from "@/components/HeroDemo/HeroDemo";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
     const { data: session } = useSession();
-    const router = useRouter();
 
-    useEffect(() => {
-        if (session) {
-            router.push("/swipe");
-        }
-    }, [session, router]);
+    // Determine where CTA should go
+    const ctaHref = session ? "/mode-select" : "/login";
+    const ctaLabel = session ? "Go to App" : "Start Experience";
 
     return (
         <div className="min-h-screen bg-[#09090b] text-[#fafafa] overflow-hidden relative font-body">
@@ -88,10 +76,10 @@ export default function Home() {
                             transition={{ delay: 0.3 }}
                         >
                             <Link
-                                href={session ? "/swipe" : "/onboarding"}
+                                href={ctaHref}
                                 className="w-full sm:w-auto px-8 py-4 bg-emerald-500 text-black font-black rounded-full hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)] group"
                             >
-                                {session ? "Go to Dashboard" : "Start Experience"}
+                                {ctaLabel}
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <Link
@@ -156,10 +144,10 @@ export default function Home() {
                     <h2 className="text-4xl md:text-5xl font-heading font-black mb-6">Ready to reclaim your time?</h2>
                     <p className="text-zinc-400 mb-10 text-lg">Join thousands of users who have mastered their inbox.</p>
                     <Link
-                        href="/swipe"
+                        href={ctaHref}
                         className="inline-flex items-center gap-2 px-10 py-5 bg-white text-black text-xl rounded-full font-bold hover:bg-zinc-200 transition-all"
                     >
-                        Try the Demo
+                        {ctaLabel}
                         <ArrowRight className="w-6 h-6" />
                     </Link>
                 </div>

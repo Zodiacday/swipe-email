@@ -6,31 +6,23 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Inbox, Lock, Shield, Check, Sparkles } from "lucide-react";
-import { getPreferredMode, isReturningUser } from "@/lib/userPreferences";
+import { Shield, Check, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [redirectPath, setRedirectPath] = useState("/swipe");
 
-    // Determine redirect path on mount
-    useEffect(() => {
-        if (isReturningUser()) {
-            setRedirectPath(`/${getPreferredMode()}`);
-        } else {
-            setRedirectPath("/swipe"); // New users go to swipe
-        }
-    }, []);
+    // Always redirect to mode-select after login
+    const redirectPath = "/mode-select";
 
     // Redirect if already logged in
     useEffect(() => {
         if (session) {
             router.push(redirectPath);
         }
-    }, [session, router, redirectPath]);
+    }, [session, router]);
 
     const handleGoogleLogin = () => {
         signIn("google", { callbackUrl: redirectPath });

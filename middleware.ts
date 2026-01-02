@@ -9,8 +9,11 @@ export default withAuth({
 export const config = {
     matcher: [
         "/swipe/:path*",
+        "/dashboard/:path*",
+        "/mode-select/:path*",
         "/profile/:path*",
         "/automation/:path*",
         "/providers/:path*",
     ],
 };
+

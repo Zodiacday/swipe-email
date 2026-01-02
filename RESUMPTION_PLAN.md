@@ -1,72 +1,45 @@
-# RESUMPTION PLAN: SWIPE-THEM Audit & Debugging Session
+# SESSION SUMMARY & RESUMPTION PLAN
 
-## 1. Project Overivew & State (2026-01-02)
-Standardized the Gmail backend and stabilized bulk-action state management. The application passes all build checks.
+## What We Accomplished Today (Plain English)
 
-- **Current Blocker**: The `/swipe` page hangs indefinitely on the `SkeletonCard` UI.
-- **Repository**: `main` branch.
+### 1. Fixed the "Bulk Undo" Bug
+- **Added**: A new system that groups multiple trashing actions into one.
+- **Removed**: The annoying behavior where clicking "Undo" would only restore one sender at a time even if you deleted ten. Now, one click restores everything you just cleared.
+- **Why**: To make bulk-cleaning from the Dashboard actually usable and safe.
 
-## 2. Technical Audit: What was Changed
+### 2. Upgraded the Gmail Scanner
+- **Added**: Smart pagination. 
+- **Removed**: The 500-email limit. Previously, if a sender had 2,000 emails, we only cleared 500. Now we clear every single one, no matter how deep they are in your inbox.
+- **Why**: To ensure that when you say "Trash all from this sender," the app actually finishes the job.
 
-### A. The "Bulk Undo" Architecture (`contexts/EmailContext.tsx`)
-- **Implemented**: `trashMultipleSenders(senderEmails: string[])`.
-- **Why**: Previously, trashing 10 senders in the Dashboard created 10 separate toast notifications and 10 undo actions. Only the last one could be undone. 
-- **How**: Now, a bulk action creates a single `UndoAction` with an array of `emailIds`.
-- **Optimistic UI**: The local `emails` state is updated immediately. On error, the whole batch is reverted.
-- **Undo Logic**: Restores emails in batches of 20 via the `/api/gmail/emails` (untrash) endpoint to prevent browser socket exhaustion.
+### 3. Built an Intelligent "Safety" Filter
+- **Added**: Special rules for high-trust companies (Banks, Google, Government).
+- **Removed**: Generic scoring that treated your bank statements the same as spam. Your important emails now get a "Safety Discount" so they don't show up as dangerous.
+- **Added**: A "Nuisance Boost" for known marketing platforms like Mailchimp to push them to the top of your cleanup list.
 
-### B. Gmail API Pagination Fix (`app/api/gmail/action/route.ts`)
-- **Fixed**: The `TRASH_SENDER` action only handled the first 500 emails (one list page).
-- **Update**: Implemented a `do...while` loop with `nextPageToken`. It now aggregates **all** message IDs from a sender before trashing.
-- **Batching**: Trashing now happens in chunks of 1000 using `batchModify` to stay within Gmail API limits.
-
-### C. Smart Nuisance Scoring (`lib/engines/aggregation.ts`)
-- **Logic**: Nuisance scoring ($0-100$) is no longer purely volume-based.
-- **Trusted Domains**: If a domain is in `DOMAIN_SAFETY.neverNuke` (e.g., banking, gov), it gets a **0.2x multiplier**.
-- **Spam Domains**: If in `safeToNuke` (e.g., marketing lists), it gets a **+20 base score bonus**.
+### 4. Stability & Performance
+- **Fixed**: A "deadlock" during the loading screen that was causing the app to freeze.
+- **Added**: "Batched Restoration." When you undo a large delete, the app now pieces them back together in small groups of 20. This stops the browser from crashing or getting blocked by Google.
 
 ---
 
-## 3. DEBUGGING THE HANG: Technical Breakdown
+## Current Status: The "Stuck" Page
+Even after these fixes, the **Swipe Page** is still getting stuck on the loading skeleton for you.
 
-The user is stuck on the loading skeleton in `/swipe`. 
+### What's happening:
+The app knows you're logged in, but for some reason, the handoff between your Google session and the "fetch emails" command isn't finishing. 
 
-### Logic Chain in `SwipePage` (`app/swipe/page.tsx`):
-1. Page renders `if (status === "loading" || (isLoading && emails.length === 0))` loading UI.
-2. `status` is from `useSession()` (NextAuth).
-3. `isLoading` and `emails` are from `useEmailContext()`.
-
-### Logic Chain in `EmailProvider` (`contexts/EmailContext.tsx`):
-1. `isLoading` defaults to `false`.
-2. `useEffect` triggers `fetchEmails()` if:
-   - `status === "authenticated"`
-   - `emails.length === 0`
-   - `!isLoading`
-3. `fetchEmails` sets `setIsLoading(true)`, fetches from `/api/gmail/emails`, then `setIsLoading(false)` in `finally`.
-
-### Hypotheses for the Hang:
-1. **NextAuth "Stuck"**: `status` remains `"loading"` and never transitions to `"authenticated"` or `"unauthenticated"`. This usually happens if the `SessionProvider` in `layout.tsx` is misconfigured or the middleware/auth secret is mismatching.
-2. **API Silent Failure**: `fetchEmails` is called, but the fetch to `/api/gmail/emails` returns a 401/500 that isn't setting `isLoading(false)` or error is caught but not displayed.
-3. **Empty Data State**: If the API returns `{ emails: [] }`, `emails.length` stays `0`. If `isLoading` is `false`, the terminal condition in `SwipePage` becomes `if (false || (false && true))` which should pass, **EXCEPT** if the `emails.length === 0` check is still true and the page has no "Empty State" for that specific check. 
-   - *Refined*: `SwipePage` has an empty state check at line 375 (`if (cards.length === 0)`). If it's stuck on line 330, it means the condition `(isLoading && emails.length === 0)` is staying TRUE.
+### Why it might be stuck:
+- **Empty Inbox?** If your promotions/social folders are actually empty, the app might be waiting for data that isn't there.
+- **Broken Token?** Your Google login might need a "hard refresh" to give the app permission to actually read the email list.
+- **UI Logic?** The "Loading" screen might be staying up even after the data arrives.
 
 ---
 
-## 4. IMMEDIATE NEXT STEPS FOR NEXT AI
-1. **Console Check**: Add `console.log` inside the `EmailProvider`'s `fetchEmails` and the mount `useEffect` to see if the fetch even starts.
-2. **Network Tab**: Inspect the browser Network tab. 
-   - Is `/api/gmail/emails` being called?
-   - Is it stuck as (pending)?
-   - Does it return a 401?
-3. **Session Debug**: Log the `session` object in `EmailContext.tsx`. Ensure `session.accessToken` is present.
-4. **Empty State Check**: Check what happens if `data.emails` is an empty array. Ensure `setIsLoading(false)` is definitely called.
-
-## 5. Active Code Locations
-- **Context**: `contexts/EmailContext.tsx` -> `fetchEmails` function.
-- **API**: `app/api/gmail/emails/route.ts` -> `GET` handler.
-- **UI**: `app/swipe/page.tsx` -> Line 330 (Loading condition).
+## Next Steps for Tomorrow:
+1. **Check the "Talk"**: See if the browser is actually talking to Google (Network Tab).
+2. **Inbox Zero Logic**: Fix the UI so that if your inbox is empty, it says "You're all clear!" instead of showing a loading skeleton.
+3. **Hard Reload**: Test the login flow again from scratch to ensure tokens are valid.
 
 ---
-**Status**: Critical UI Hang. Backend Stable.
-**Next Action**: Trace the Auth-to-Fetch handoff in `EmailContext.tsx`.
-
+*Summary prepared for Nat on January 2nd, 2026.*

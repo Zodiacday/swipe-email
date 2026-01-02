@@ -1,58 +1,72 @@
 # RESUMPTION PLAN: SWIPE-THEM Audit & Debugging Session
 
-## 1. Project Status Summary (2026-01-02)
-Today's session focused on a deep audit of the codebase to stabilize bulk actions, improve the Gmail API integration, and enhance the "Nuisance Scoring" system. While significant backend and stability fixes were pushed, a critical UI hang on the `/swipe` page persisted for the user.
+## 1. Project Overivew & State (2026-01-02)
+Standardized the Gmail backend and stabilized bulk-action state management. The application passes all build checks.
 
-- **Status**: Production Build Passing. Backend Logic Stable. UI "Loading" Deadlock remains in some environments.
-- **Current Branch**: `main`
+- **Current Blocker**: The `/swipe` page hangs indefinitely on the `SkeletonCard` UI.
+- **Repository**: `main` branch.
 
-## 2. Completed Work & Changes
+## 2. Technical Audit: What was Changed
 
-### A. Gmail API & Batching Fixes
-- **Unified Bulk Trash**: Created `trashMultipleSenders` in `EmailContext.tsx`. This allows the Dashboard to trash multiple senders as a **single undoable event**, preventing the "Undo hijacking" bug where only the last sender was restored.
-- **Full Sender Clearing**: Updated `app/api/gmail/action/route.ts` (TRASH_SENDER) to handle recursive pagination. It now fetches **every** email from a sender (not just the first 500) and trashes them in chunks of 1000 to respect Gmail's limits.
-- **Restoration Throttling**: Improved `undoLastAction` to batch untrash requests (20 at a time). This prevents browser connection limit errors and API rate-limiting when restoring thousands of emails at once.
+### A. The "Bulk Undo" Architecture (`contexts/EmailContext.tsx`)
+- **Implemented**: `trashMultipleSenders(senderEmails: string[])`.
+- **Why**: Previously, trashing 10 senders in the Dashboard created 10 separate toast notifications and 10 undo actions. Only the last one could be undone. 
+- **How**: Now, a bulk action creates a single `UndoAction` with an array of `emailIds`.
+- **Optimistic UI**: The local `emails` state is updated immediately. On error, the whole batch is reverted.
+- **Undo Logic**: Restores emails in batches of 20 via the `/api/gmail/emails` (untrash) endpoint to prevent browser socket exhaustion.
 
-### B. Intelligent Scoring Engine
-- **Safety-Aware Nuisance Scores**: Updated `lib/engines/aggregation.ts` to import and respect `DOMAIN_SAFETY` rules.
-  - **80% Nuisance Discount** for high-trust domains (Banks, Government, Utilities, Big Tech).
-  - **+20 Nuisance Boost** for mass-marketing domains (Mailchimp, Substack, etc.).
-  - This ensures users don't accidentally "Danger" their bank statement emails.
+### B. Gmail API Pagination Fix (`app/api/gmail/action/route.ts`)
+- **Fixed**: The `TRASH_SENDER` action only handled the first 500 emails (one list page).
+- **Update**: Implemented a `do...while` loop with `nextPageToken`. It now aggregates **all** message IDs from a sender before trashing.
+- **Batching**: Trashing now happens in chunks of 1000 using `batchModify` to stay within Gmail API limits.
 
-### C. Build & Manifest
-- Successfully ran a production build (`npm run build`) to verify all types and imports.
-- PWA Manifest and Metadata confirmed stable.
-
-## 3. The "Stuck Swipe" Problem (Active Blocker)
-The user reports: "When I click on the site, it takes me directly to swipe and the swipe never loads."
-
-### Attempted Fixes:
-1.  **Context Deadlock**: I changed `isLoading` initialization from `true` to `false` in `EmailContext.tsx` because the `useEffect` trigger was blocked by its own initial state.
-2.  **Result**: User says it is still stuck.
-
-### Analysis of the Hang:
-The `/swipe` page hangs in the "Skeleton" state if `status === "loading" || (isLoading && emails.length === 0)`.
-- If `status` is `"authenticated"`, `fetchEmails` SHOULD trigger.
-- If it stops, search the following:
-  - **API Failure**: Check if `/api/gmail/emails` returns a 500 or 401. The Context might not be catching the error correctly in its `finally` block or the `error` state isn't rendering the Error UI in the Page.
-  - **Token Issue**: `session.accessToken` might be missing or expired in the JWT.
-  - **Empty Response**: If the user has 0 promo/social emails, the API returns `[]`. If `isLoading` isn't set to `false` in that specific case, it hangs.
-
-## 4. Detailed Steps for Tomorrow
-1.  **DevTools Audit**: Open the browser's **Network tab**. Check if the request to `/api/gmail/emails` is even being sent.
-2.  **Context Logging**: Add detailed logging to `EmailContext.tsx`:
-    ```typescript
-    console.log("Fetch Triggered. Status:", status, "IsLoading:", isLoading);
-    ```
-3.  **Error Propagation**: Ensure the `catch` block in `fetchEmails` correctly calls `setIsLoading(false)` and that the UI in `swipe/page.tsx` renders the error message if one exists.
-4.  **Session Check**: Verify `app/layout.tsx` is correctly providing the `SessionProvider` to the entire tree (confirmed, but worth re-checking if `status` is stuck).
-
-## 5. Files to Watch
-- `contexts/EmailContext.tsx` (State management)
-- `app/swipe/page.tsx` (Target page)
-- `app/api/gmail/emails/route.ts` (Data source)
-- `lib/auth.ts` (Access tokens)
+### C. Smart Nuisance Scoring (`lib/engines/aggregation.ts`)
+- **Logic**: Nuisance scoring ($0-100$) is no longer purely volume-based.
+- **Trusted Domains**: If a domain is in `DOMAIN_SAFETY.neverNuke` (e.g., banking, gov), it gets a **0.2x multiplier**.
+- **Spam Domains**: If in `safeToNuke` (e.g., marketing lists), it gets a **+20 base score bonus**.
 
 ---
-**Prepared by Antigravity**
-*Date: January 2, 2026*
+
+## 3. DEBUGGING THE HANG: Technical Breakdown
+
+The user is stuck on the loading skeleton in `/swipe`. 
+
+### Logic Chain in `SwipePage` (`app/swipe/page.tsx`):
+1. Page renders `if (status === "loading" || (isLoading && emails.length === 0))` loading UI.
+2. `status` is from `useSession()` (NextAuth).
+3. `isLoading` and `emails` are from `useEmailContext()`.
+
+### Logic Chain in `EmailProvider` (`contexts/EmailContext.tsx`):
+1. `isLoading` defaults to `false`.
+2. `useEffect` triggers `fetchEmails()` if:
+   - `status === "authenticated"`
+   - `emails.length === 0`
+   - `!isLoading`
+3. `fetchEmails` sets `setIsLoading(true)`, fetches from `/api/gmail/emails`, then `setIsLoading(false)` in `finally`.
+
+### Hypotheses for the Hang:
+1. **NextAuth "Stuck"**: `status` remains `"loading"` and never transitions to `"authenticated"` or `"unauthenticated"`. This usually happens if the `SessionProvider` in `layout.tsx` is misconfigured or the middleware/auth secret is mismatching.
+2. **API Silent Failure**: `fetchEmails` is called, but the fetch to `/api/gmail/emails` returns a 401/500 that isn't setting `isLoading(false)` or error is caught but not displayed.
+3. **Empty Data State**: If the API returns `{ emails: [] }`, `emails.length` stays `0`. If `isLoading` is `false`, the terminal condition in `SwipePage` becomes `if (false || (false && true))` which should pass, **EXCEPT** if the `emails.length === 0` check is still true and the page has no "Empty State" for that specific check. 
+   - *Refined*: `SwipePage` has an empty state check at line 375 (`if (cards.length === 0)`). If it's stuck on line 330, it means the condition `(isLoading && emails.length === 0)` is staying TRUE.
+
+---
+
+## 4. IMMEDIATE NEXT STEPS FOR NEXT AI
+1. **Console Check**: Add `console.log` inside the `EmailProvider`'s `fetchEmails` and the mount `useEffect` to see if the fetch even starts.
+2. **Network Tab**: Inspect the browser Network tab. 
+   - Is `/api/gmail/emails` being called?
+   - Is it stuck as (pending)?
+   - Does it return a 401?
+3. **Session Debug**: Log the `session` object in `EmailContext.tsx`. Ensure `session.accessToken` is present.
+4. **Empty State Check**: Check what happens if `data.emails` is an empty array. Ensure `setIsLoading(false)` is definitely called.
+
+## 5. Active Code Locations
+- **Context**: `contexts/EmailContext.tsx` -> `fetchEmails` function.
+- **API**: `app/api/gmail/emails/route.ts` -> `GET` handler.
+- **UI**: `app/swipe/page.tsx` -> Line 330 (Loading condition).
+
+---
+**Status**: Critical UI Hang. Backend Stable.
+**Next Action**: Trace the Auth-to-Fetch handoff in `EmailContext.tsx`.
+

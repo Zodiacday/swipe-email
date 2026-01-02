@@ -1,4 +1,4 @@
-import { NormalizedEmail } from "@/lib/types";
+import { NormalizedEmail, DOMAIN_SAFETY } from "@/lib/types";
 
 export interface AggregatedSender {
     id: string;      // generated from email/domain
@@ -68,8 +68,24 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
             sender.sampleSubjects.push(email.subject);
         }
 
-        // Simple scoring: High volume = higher nuisance score
-        sender.score = Math.min(100, sender.count * 2);
+        // SMART SCORING v2: Incorporate domain safety
+        const domain = email.senderDomain.toLowerCase();
+        let nuisanceBonus = 0;
+
+        // Boost score for known mass-marketing platforms
+        if (DOMAIN_SAFETY.safeToNuke.some(d => domain.includes(d))) {
+            nuisanceBonus = 20;
+        }
+
+        // Drastically reduce score for "Never Nuke" domains
+        let multiplier = 1.0;
+        if (DOMAIN_SAFETY.neverNuke.some(d => domain.includes(d))) {
+            multiplier = 0.2; // 80% discount
+        } else if (DOMAIN_SAFETY.caution.some(d => domain.includes(d))) {
+            multiplier = 0.7; // 30% discount
+        }
+
+        sender.score = Math.min(100, (sender.count * 2 + nuisanceBonus) * multiplier);
     });
 
     stats.uniqueSenders = sendersMap.size;

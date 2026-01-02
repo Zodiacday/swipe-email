@@ -22,32 +22,43 @@ export async function POST(req: Request) {
         if (action === "TRASH_SENDER") {
             const { email } = payload;
 
-            // 1. Find all messages from this sender
-            const listRes = await gmail.users.messages.list({
-                userId: "me",
-                q: `from:${email}`,
-                maxResults: 500,
-            });
+            // 1. Find ALL messages from this sender (handle pagination)
+            let allIds: string[] = [];
+            let pageToken: string | undefined;
 
-            const messages = listRes.data.messages;
+            do {
+                const listRes = await gmail.users.messages.list({
+                    userId: "me",
+                    q: `from:${email}`,
+                    maxResults: 500,
+                    pageToken
+                });
 
-            if (!messages || messages.length === 0) {
+                if (listRes.data.messages) {
+                    allIds.push(...listRes.data.messages.map(m => m.id as string));
+                }
+                pageToken = listRes.data.nextPageToken || undefined;
+            } while (pageToken);
+
+            if (allIds.length === 0) {
                 return NextResponse.json({ success: true, count: 0, message: "No emails found to trash." });
             }
 
-            // 2. Batch Trash
-            const ids = messages.map((m) => m.id as string);
+            // 2. Batch Trash in chunks of 1000 (Gmail limit for batchModify)
+            const chunkSize = 1000;
+            for (let i = 0; i < allIds.length; i += chunkSize) {
+                const chunk = allIds.slice(i, i + chunkSize);
+                await gmail.users.messages.batchModify({
+                    userId: "me",
+                    requestBody: {
+                        ids: chunk,
+                        addLabelIds: ["TRASH"],
+                        removeLabelIds: ["INBOX"],
+                    },
+                });
+            }
 
-            await gmail.users.messages.batchModify({
-                userId: "me",
-                requestBody: {
-                    ids: ids,
-                    addLabelIds: ["TRASH"],
-                    removeLabelIds: ["INBOX"],
-                },
-            });
-
-            return NextResponse.json({ success: true, count: ids.length, message: `Trashed ${ids.length} emails from ${email}` });
+            return NextResponse.json({ success: true, count: allIds.length, message: `Trashed ${allIds.length} emails from ${email}` });
         }
 
         return NextResponse.json({ error: "Invalid Action" }, { status: 400 });

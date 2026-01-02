@@ -41,7 +41,12 @@ export default function DashboardPage() {
     // --- Context ---
     const {
         aggregates, isLoading, isRefreshing, error, fetchEmails,
-        trashSender, undoLastAction, canUndo, blockSender, markPersonal
+        trashSender,
+        trashMultipleSenders,
+        undoLastAction,
+        canUndo,
+        blockSender,
+        markPersonal
     } = useEmailContext();
     const { showToast } = useToast();
 
@@ -136,9 +141,7 @@ export default function DashboardPage() {
         const totalCount = sendersToDelete.reduce((acc, s) => acc + s.count, 0);
 
         try {
-            for (const sender of sendersToDelete) {
-                await trashSender(sender.email);
-            }
+            await trashMultipleSenders(sendersToDelete.map(s => s.email));
 
             setSelectedIds(new Set());
             showToast(`Trashed ${totalCount} emails from ${sendersToDelete.length} senders ✓`, {

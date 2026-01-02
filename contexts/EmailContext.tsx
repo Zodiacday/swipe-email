@@ -36,6 +36,7 @@ interface EmailContextType {
     refreshSilently: () => Promise<void>;
     trashEmail: (id: string, email: NormalizedEmail) => Promise<void>;
     trashSender: (senderEmail: string) => Promise<void>;
+    trashMultipleSenders: (senderEmails: string[]) => Promise<void>;
     undoLastAction: () => Promise<boolean>;
     removeEmailFromLocal: (id: string) => void;
     blockSender: (senderEmail: string) => Promise<void>;
@@ -188,6 +189,41 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         }
     }, [emails]);
 
+    // --- Trash Multiple Senders ---
+    const trashMultipleSenders = useCallback(async (senderEmails: string[]) => {
+        const lowerEmails = senderEmails.map(e => e.toLowerCase());
+        const emailsToTrash = emails.filter(e => lowerEmails.includes(e.sender.toLowerCase()));
+        const ids = emailsToTrash.map(e => e.id);
+
+        if (ids.length === 0) return;
+
+        // Add to undo stack as a SINGLE action
+        setUndoStack(prev => [...prev.slice(-9), {
+            type: "trash_sender",
+            emailIds: ids,
+            timestamp: Date.now()
+        }]);
+
+        // Optimistic: Remove from local state
+        setEmails(prev => prev.filter(e => !ids.includes(e.id)));
+
+        // Fire API calls in parallel
+        try {
+            await Promise.all(senderEmails.map(senderEmail =>
+                fetch("/api/gmail/action", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "TRASH_SENDER", payload: { email: senderEmail } })
+                })
+            ));
+        } catch (err) {
+            console.error("Bulk trash senders failed:", err);
+            // Revert
+            setEmails(prev => [...emailsToTrash, ...prev]);
+            throw err;
+        }
+    }, [emails]);
+
     // --- Undo Last Action ---
     const undoLastAction = useCallback(async () => {
         if (undoStack.length === 0) return false;
@@ -196,16 +232,20 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         setUndoStack(prev => prev.slice(0, -1));
 
         try {
-            // Call untrash API for each email
-            await Promise.all(
-                lastAction.emailIds.map(id =>
-                    fetch("/api/gmail/emails", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ action: "untrash", emailId: id })
-                    })
-                )
-            );
+            // Process in batches of 20 to avoid rate limits
+            const batchSize = 20;
+            for (let i = 0; i < lastAction.emailIds.length; i += batchSize) {
+                const chunk = lastAction.emailIds.slice(i, i + batchSize);
+                await Promise.all(
+                    chunk.map(id =>
+                        fetch("/api/gmail/emails", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ action: "untrash", emailId: id })
+                        })
+                    )
+                );
+            }
 
             // Refresh to get accurate state
             await refreshSilently();
@@ -228,7 +268,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         await trashSender(senderEmail);
     }, [trashSender]);
 
-    // --- Remove email locally (for external use) ---
+    // --- Remove email locally ---
     const removeEmailFromLocal = useCallback((id: string) => {
         setEmails(prev => prev.filter(e => e.id !== id));
     }, []);
@@ -247,6 +287,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         refreshSilently,
         trashEmail,
         trashSender,
+        trashMultipleSenders,
         undoLastAction,
         removeEmailFromLocal,
         blockSender,

@@ -53,7 +53,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
 
     // Core State
     const [emails, setEmails] = useState<NormalizedEmail[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [lastFetched, setLastFetched] = useState<number | null>(null);

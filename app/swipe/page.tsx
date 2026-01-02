@@ -1,104 +1,223 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
     motion,
     useMotionValue,
     useTransform,
     useAnimation,
     PanInfo,
-    AnimatePresence
 } from "framer-motion";
-import { ArrowLeft, Check, Trash2, Zap, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Trash2, ArrowRight, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { NormalizedEmail } from "@/lib/types";
 
-// --- Mock Data Generator (Replace with real API later) ---
-const generateEmail = (id: number) => ({
-    id: `email-${id}`,
-    sender: "Newsletter Daily",
-    senderInitials: "ND",
-    senderColor: "bg-purple-500",
-    subject: "Your Weekly Tech Digest: AI Revolution Is Here",
-    preview: "Discover the latest trends in artificial intelligence, machine learning, and how they impact your workflow. Plus, a special offer inside...",
-    date: "2h ago"
-});
+// --- Card Type ---
+interface SwipeCard {
+    id: string;
+    sender: string;
+    senderInitials: string;
+    senderColor: string;
+    subject: string;
+    preview: string;
+    date: string;
+    originalEmail: NormalizedEmail;
+}
+
+// --- Helper: Generate avatar color from string ---
+function stringToColor(str: string): string {
+    const colors = [
+        "bg-red-500", "bg-orange-500", "bg-amber-500", "bg-yellow-500",
+        "bg-lime-500", "bg-green-500", "bg-emerald-500", "bg-teal-500",
+        "bg-cyan-500", "bg-sky-500", "bg-blue-500", "bg-indigo-500",
+        "bg-violet-500", "bg-purple-500", "bg-fuchsia-500", "bg-pink-500"
+    ];
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+}
+
+// --- Helper: Transform API email to SwipeCard ---
+function transformToCard(email: NormalizedEmail): SwipeCard {
+    const initials = (email.senderName || email.sender)
+        .split(" ")
+        .map(n => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+
+    const timeAgo = getTimeAgo(email.timestamp);
+
+    return {
+        id: email.id,
+        sender: email.senderName || email.sender,
+        senderInitials: initials || "?",
+        senderColor: stringToColor(email.sender),
+        subject: email.subject || "(No Subject)",
+        preview: email.preview || "",
+        date: timeAgo,
+        originalEmail: email,
+    };
+}
+
+function getTimeAgo(timestamp: number): string {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return new Date(timestamp).toLocaleDateString();
+}
 
 export default function SwipePage() {
-    const [cards, setCards] = useState(Array.from({ length: 5 }).map((_, i) => generateEmail(i)));
-    const [history, setHistory] = useState<any[]>([]); // For Undo
-    const x = useMotionValue(0);
-    const rotate = useTransform(x, [-200, 200], [-15, 15]);
-    const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0.5, 1, 1, 1, 0.5]);
+    // --- State ---
+    const [cards, setCards] = useState<SwipeCard[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [actionInProgress, setActionInProgress] = useState(false);
 
-    // Background Color Transforms (Subtle tint)
-    // We can't animate body bg easily from here without context, 
-    // but we can animate a full-screen overlay or the main container.
-    const bgOverlayOpacityTrash = useTransform(x, [-150, 0], [0.1, 0]);
-    const bgOverlayOpacityKeep = useTransform(x, [0, 150], [0, 0.1]);
-
-    const controls = useAnimation();
+    const { data: session, status } = useSession();
     const router = useRouter();
 
-    // --- Action Handlers ---
-    const handleSwipe = async (direction: "left" | "right") => {
+    // --- Motion Values (defined at top level) ---
+    const x = useMotionValue(0);
+    const rotate = useTransform(x, [-200, 200], [-15, 15]);
+    const cardOpacity = useTransform(x, [-200, -150, 0, 150, 200], [0.5, 1, 1, 1, 0.5]);
+    const bgOverlayOpacityTrash = useTransform(x, [-150, 0], [0.1, 0]);
+    const bgOverlayOpacityKeep = useTransform(x, [0, 150], [0, 0.1]);
+    const keepStampOpacity = useTransform(x, [50, 150], [0, 1]);
+    const trashStampOpacity = useTransform(x, [-150, -50], [1, 0]);
+
+    const controls = useAnimation();
+
+    // --- Fetch Emails on Mount ---
+    useEffect(() => {
+        if (status === "loading") return;
+        if (!session) {
+            router.push("/login");
+            return;
+        }
+
+        const fetchEmails = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const res = await fetch("/api/gmail/emails?limit=50");
+                if (!res.ok) throw new Error("Failed to fetch emails");
+                const data = await res.json();
+
+                if (data.emails && Array.isArray(data.emails)) {
+                    const transformed = data.emails.map(transformToCard);
+                    setCards(transformed);
+                } else {
+                    setCards([]);
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                setError("Failed to load emails. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEmails();
+    }, [session, status, router]);
+
+    // --- Swipe Handler (using useCallback to avoid stale closures) ---
+    const handleSwipe = useCallback(async (direction: "left" | "right") => {
+        if (cards.length === 0 || actionInProgress) return;
+
+        setActionInProgress(true);
         const currentCard = cards[0];
-        if (!currentCard) return;
 
         // Animate off screen
         await controls.start({
-            x: direction === "left" ? -500 : 500,
+            x: direction === "left" ? -600 : 600,
             opacity: 0,
-            rotate: direction === "left" ? -20 : 20,
-            transition: { duration: 0.2 }
+            rotate: direction === "left" ? -30 : 30,
+            transition: { duration: 0.25, ease: "easeIn" }
         });
 
-        // Actual Logic
-        const newHistory = [...history, { ...currentCard, action: direction }];
-        setHistory(newHistory);
-        setCards(cards.slice(1));
+        // Call API for action (fire and forget for speed, or await for safety)
+        if (direction === "left") {
+            // Trash action
+            fetch("/api/gmail/emails", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "trash", emailId: currentCard.id })
+            }).catch(console.error);
+        }
+        // Right swipe = keep (no API action needed, just remove from queue)
+
+        // Update state
+        setCards(prev => prev.slice(1));
 
         // Reset for next card
         x.set(0);
         controls.set({ x: 0, opacity: 1, rotate: 0 });
+        setActionInProgress(false);
+    }, [cards, actionInProgress, controls, x]);
 
-        // Fetch more if low (simulation)
-        if (cards.length < 3) {
-            setCards(prev => [...prev, generateEmail(Date.now())]);
-        }
-    };
-
-    const onDragEnd = (event: any, info: PanInfo) => {
+    // --- Drag End Handler ---
+    const onDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         const threshold = 100;
         if (info.offset.x < -threshold) {
             handleSwipe("left");
         } else if (info.offset.x > threshold) {
             handleSwipe("right");
         } else {
-            controls.start({ x: 0, opacity: 1, rotate: 0 });
+            // Snap back
+            controls.start({ x: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 500, damping: 30 } });
         }
-    };
+    }, [handleSwipe, controls]);
 
     // --- Keyboard Shortcuts ---
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "ArrowLeft") handleSwipe("left");
-            if (e.key === "ArrowRight") handleSwipe("right");
-            if (e.key === " ") handleSwipe("right"); // Space to keep
+            if (e.key === "ArrowRight" || e.key === " ") handleSwipe("right");
             if (e.key === "Escape") router.push("/mode-select");
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [cards, router]); // Dep on cards to get current state (though handleSwipe uses latest from state?) 
-    // Actually handleSwipe needs generic update or Refs to avoid stale state. 
-    // For simplicity in this artifact, assume react state updates work fine or use Ref for 'cards'.
-    // Better robustness:
-    const cardsRef = useRef(cards);
-    useEffect(() => { cardsRef.current = cards; }, [cards]);
-    // Rewriting handleKeydown below to be safe is better but for now let's stick to dependency.
+    }, [handleSwipe, router]);
 
-    // --- Render ---
+    // --- Loading State ---
+    if (status === "loading" || loading) {
+        return (
+            <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+                <p className="text-zinc-500 font-mono text-sm uppercase tracking-widest">Loading your inbox...</p>
+            </div>
+        );
+    }
+
+    // --- Error State ---
+    if (error) {
+        return (
+            <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4 p-6 text-center">
+                <div className="text-5xl mb-2">😕</div>
+                <h1 className="text-2xl font-bold text-zinc-100">Something went wrong</h1>
+                <p className="text-zinc-500 max-w-md">{error}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-6 py-3 bg-emerald-500 text-zinc-900 font-bold rounded-full flex items-center gap-2 hover:bg-emerald-400 transition-colors"
+                >
+                    <RefreshCw className="w-4 h-4" /> Try Again
+                </button>
+            </div>
+        );
+    }
+
+    // --- Empty State ---
     if (cards.length === 0) {
         return (
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
@@ -138,9 +257,12 @@ export default function SwipePage() {
                     </Link>
                 </div>
 
-                <Link href="/mode-select" className="text-zinc-500 hover:text-zinc-300 transition-colors">
-                    <ArrowLeft className="w-6 h-6" />
-                </Link>
+                <div className="flex items-center gap-4">
+                    <span className="text-zinc-600 text-sm font-mono">{cards.length} left</span>
+                    <Link href="/mode-select" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                        <ArrowLeft className="w-6 h-6" />
+                    </Link>
+                </div>
             </header>
 
             {/* --- Swipe Area --- */}
@@ -153,7 +275,6 @@ export default function SwipePage() {
                     {/* Background Stack Layer 1 */}
                     {nextCard && (
                         <div className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-3xl transform scale-95 translate-y-4 opacity-40 z-10 p-8 flex flex-col justify-between">
-                            {/* Content Skeleton of Next Card */}
                             <div className="flex items-center gap-4 opacity-50">
                                 <div className="w-12 h-12 rounded-full bg-zinc-800" />
                                 <div className="space-y-2">
@@ -166,7 +287,8 @@ export default function SwipePage() {
 
                     {/* Active Card */}
                     <motion.div
-                        style={{ x, rotate, opacity }}
+                        key={activeCard.id}
+                        style={{ x, rotate, opacity: cardOpacity }}
                         animate={controls}
                         drag="x"
                         dragConstraints={{ left: 0, right: 0 }}
@@ -175,10 +297,10 @@ export default function SwipePage() {
                         className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl z-20 flex flex-col cursor-grab active:cursor-grabbing transform-gpu"
                     >
                         {/* Drag Indicators (Stamps) */}
-                        <motion.div style={{ opacity: useTransform(x, [50, 150], [0, 1]) }} className="absolute top-8 left-8 border-4 border-emerald-500 text-emerald-500 rounded-xl px-4 py-2 text-4xl font-black uppercase tracking-widest -rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
+                        <motion.div style={{ opacity: keepStampOpacity }} className="absolute top-8 left-8 border-4 border-emerald-500 text-emerald-500 rounded-xl px-4 py-2 text-4xl font-black uppercase tracking-widest -rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
                             KEEP
                         </motion.div>
-                        <motion.div style={{ opacity: useTransform(x, [-150, -50], [1, 0]) }} className="absolute top-8 right-8 border-4 border-red-500 text-red-500 rounded-xl px-4 py-2 text-4xl font-black uppercase tracking-widest rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
+                        <motion.div style={{ opacity: trashStampOpacity }} className="absolute top-8 right-8 border-4 border-red-500 text-red-500 rounded-xl px-4 py-2 text-4xl font-black uppercase tracking-widest rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
                             TRASH
                         </motion.div>
 
@@ -201,7 +323,7 @@ export default function SwipePage() {
                                     {activeCard.subject}
                                 </h3>
                                 <div className="p-6 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
-                                    <p className="text-zinc-400 leading-relaxed text-lg">
+                                    <p className="text-zinc-400 leading-relaxed text-lg line-clamp-4">
                                         {activeCard.preview}
                                     </p>
                                 </div>
@@ -209,8 +331,8 @@ export default function SwipePage() {
 
                             {/* Footer / Hint */}
                             <div className="flex justify-between text-xs font-bold text-zinc-600 uppercase tracking-widest">
-                                <span>&larr; Swipe Left to Trash</span>
-                                <span>Swipe Right to Keep &rarr;</span>
+                                <span>← Swipe Left to Trash</span>
+                                <span>Swipe Right to Keep →</span>
                             </div>
                         </div>
                     </motion.div>
@@ -220,21 +342,23 @@ export default function SwipePage() {
                 <div className="mt-12 flex items-center gap-8 z-30">
                     <button
                         onClick={() => handleSwipe("left")}
-                        className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-red-500 hover:border-red-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 group"
+                        disabled={actionInProgress}
+                        className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-red-500 hover:border-red-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Trash2 className="w-8 h-8 group-hover:animate-pulse" />
                     </button>
 
                     <button
                         className="w-16 h-16 rounded-full bg-zinc-900/50 border border-zinc-800 flex items-center justify-center text-zinc-600 hover:text-zinc-400 transition-colors"
-                        title="Detail View (TBD)"
+                        title="Detail View (Coming Soon)"
                     >
                         <ArrowRight className="w-6 h-6 rotate-[-45deg]" />
                     </button>
 
                     <button
                         onClick={() => handleSwipe("right")}
-                        className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-emerald-500 hover:border-emerald-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 group"
+                        disabled={actionInProgress}
+                        className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-emerald-500 hover:border-emerald-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Check className="w-10 h-10 group-hover:animate-bounce" />
                     </button>

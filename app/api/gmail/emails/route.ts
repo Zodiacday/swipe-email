@@ -23,18 +23,17 @@ interface GmailMessageDetails {
 export async function GET(request: Request) {
     const session = await getServerSession(authOptions);
 
-
     if (!session?.accessToken) {
         return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const maxResults = searchParams.get("maxResults") || "20";
+    const limit = searchParams.get("limit") || searchParams.get("maxResults") || "20";
     const pageToken = searchParams.get("pageToken") || "";
 
     try {
         // Fetch list of messages
-        const listUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${maxResults}&q=category:promotions OR category:social OR is:unread${pageToken ? `&pageToken=${pageToken}` : ""}`;
+        const listUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${limit}&q=category:promotions OR category:social OR is:unread${pageToken ? `&pageToken=${pageToken}` : ""}`;
 
         const listResponse = await fetch(listUrl, {
             headers: {
@@ -50,9 +49,9 @@ export async function GET(request: Request) {
         const listData = await listResponse.json();
         const messages: GmailMessage[] = listData.messages || [];
 
-        // Fetch details for each message (batch up to 10)
+        // Fetch details for each message
         const emailDetails = await Promise.all(
-            messages.slice(0, 10).map(async (msg) => {
+            messages.map(async (msg) => {
                 const detailUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=List-Unsubscribe`;
 
                 const detailResponse = await fetch(detailUrl, {
@@ -108,3 +107,40 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Failed to fetch emails" }, { status: 500 });
     }
 }
+
+export async function POST(request: Request) {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.accessToken) {
+        return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    try {
+        const { action, emailId } = await request.json();
+
+        if (action === "trash" && emailId) {
+            const trashUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${emailId}/trash`;
+
+            const response = await fetch(trashUrl, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${session.accessToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                return NextResponse.json({ error: error.error?.message || "Failed to trash email" }, { status: response.status });
+            }
+
+            return NextResponse.json({ success: true, emailId });
+        }
+
+        return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+
+    } catch (error) {
+        console.error("Gmail API error:", error);
+        return NextResponse.json({ error: "Failed to perform action" }, { status: 500 });
+    }
+}
+

@@ -13,7 +13,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 const NAV_LINKS = [
-    { href: "/swipe", label: "The Stack", icon: Zap },
+    { href: "/swipe", label: "Swipe", icon: Zap },
     { href: "/dashboard", label: "Command Center", icon: LayoutDashboard },
     { href: "/providers", label: "Connections", icon: Settings },
 ];
@@ -23,8 +23,8 @@ export function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
-    // Don't show navbar on onboarding
-    if (pathname === "/onboarding") return null;
+    // Don't show navbar on specific app routes that have their own headers
+    if (pathname === "/onboarding" || pathname === "/swipe" || pathname === "/dashboard" || pathname === "/mode-select") return null;
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-[100] border-b border-white/5 bg-black/60 backdrop-blur-xl">

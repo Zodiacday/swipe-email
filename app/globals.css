@@ -21,8 +21,10 @@
     --color-input: #27272a;
     --color-ring: #10b981;
 
-    --font-heading: var(--font-heading);
+    --font-heading: var(--font-body);
+    /* Use Inter for heading too per spec */
     --font-body: var(--font-body);
+    --font-mono: var(--font-mono);
 }
 
 @layer base {
@@ -41,7 +43,7 @@
     h4,
     h5,
     h6 {
-        @apply font-heading tracking-tight;
+        @apply font-bold tracking-tight;
     }
 }
 
@@ -79,11 +81,15 @@
 
 /* Glassmorphism */
 .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    @apply bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/50;
 }
 
 .glass-emerald {
     @apply bg-emerald-500/5 backdrop-blur-xl border border-emerald-500/10;
+}
+
+.glass-cyan {
+    @apply bg-cyan-500/5 backdrop-blur-xl border border-cyan-500/10;
 }
 
 /* Meteor animation */
@@ -109,9 +115,21 @@
 
 /* Glow effects */
 .glow-emerald {
-    box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 32px rgba(16, 185, 129, 0.5);
+}
+
+.glow-cyan {
+    box-shadow: 0 0 32px rgba(6, 182, 212, 0.5);
+}
+
+.glow-red {
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.5);
 }
 
 .text-glow-emerald {
     text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.text-glow-cyan {
+    text-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
 }

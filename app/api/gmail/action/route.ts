@@ -1,100 +1,58 @@
-import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { google } from "googleapis";
+import { NextResponse } from "next/server";
+import { getGmailClient } from "@/lib/providers/gmail";
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
 
-
     if (!session?.accessToken) {
-        return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    const { emailId, action } = await request.json();
-
-    if (!emailId || !action) {
-        return NextResponse.json({ error: "Missing emailId or action" }, { status: 400 });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
-        let result;
+        const { action, payload } = await req.json();
+        const gmail = await getGmailClient(session.accessToken, session.refreshToken);
 
-        switch (action) {
-            case "delete":
-                // Move to trash
-                result = await fetch(
-                    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${emailId}/trash`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Authorization: `Bearer ${session.accessToken}`,
-                        },
-                    }
-                );
-                break;
+        if (action === "TRASH_SENDER") {
+            const { email } = payload;
 
-            case "keep":
-                // Mark as read and archive
-                result = await fetch(
-                    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${emailId}/modify`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Authorization: `Bearer ${session.accessToken}`,
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            removeLabelIds: ["UNREAD", "INBOX"],
-                        }),
-                    }
-                );
-                break;
+            // 1. Find all messages from this sender
+            // Note: Gmail API list limit is 500 per page usually. 
+            // For a "Nuke", we might want to loop via pageToken in a background job, 
+            // but for now let's do one batch of up to 500 to keep it responsive-ish.
+            const listRes = await gmail.users.messages.list({
+                userId: "me",
+                q: `from:${email}`,
+                maxResults: 500,
+            });
 
-            case "unsubscribe":
-                // Mark as read, we'll let the UI handle actual unsubscribe redirect
-                result = await fetch(
-                    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${emailId}/modify`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Authorization: `Bearer ${session.accessToken}`,
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            removeLabelIds: ["UNREAD"],
-                            addLabelIds: ["TRASH"],
-                        }),
-                    }
-                );
-                break;
+            const messages = listRes.data.messages;
 
-            case "block":
-                // Create a filter to auto-delete future emails from this sender
-                // For now, just trash it
-                result = await fetch(
-                    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${emailId}/trash`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Authorization: `Bearer ${session.accessToken}`,
-                        },
-                    }
-                );
-                break;
+            if (!messages || messages.length === 0) {
+                return NextResponse.json({ success: true, count: 0, message: "No emails found to trash." });
+            }
 
-            default:
-                return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+            // 2. Batch Trash
+            const ids = messages.map((m) => m.id as string);
+
+            await gmail.users.messages.batchModify({
+                userId: "me",
+                requestBody: {
+                    ids: ids,
+                    addLabelIds: ["TRASH"],
+                    removeLabelIds: ["INBOX"],
+                },
+            });
+
+            return NextResponse.json({ success: true, count: ids.length, message: `Trashed ${ids.length} emails from ${email}` });
         }
 
-        if (!result.ok) {
-            const error = await result.json();
-            return NextResponse.json({ error: error.error?.message || "Action failed" }, { status: result.status });
-        }
-
-        return NextResponse.json({ success: true, action, emailId });
+        return NextResponse.json({ error: "Invalid Action" }, { status: 400 });
 
     } catch (error) {
-        console.error("Gmail action error:", error);
-        return NextResponse.json({ error: "Action failed" }, { status: 500 });
+        console.error("Action API Error:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

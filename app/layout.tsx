@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Instrument_Sans, Inter } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar/Navbar";
 import { AuthProvider } from "@/components/AuthProvider/AuthProvider";
 
-const instrumentSans = Instrument_Sans({
-  variable: "--font-heading",
+const inter = Inter({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
-const inter = Inter({
-  variable: "--font-body",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${instrumentSans.variable} ${inter.variable} font-body antialiased bg-black text-white`}
+        className={`${inter.variable} ${jetbrainsMono.variable} font-body antialiased bg-black text-white`}
       >
         <AuthProvider>
           <Navbar />

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Zap, LayoutDashboard, ArrowRight } from "lucide-react";
 
-const springConfig = { type: "spring", stiffness: 300, damping: 30 };
+const springConfig = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 export default function ModeSelectPage() {
     return (

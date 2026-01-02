@@ -6,7 +6,9 @@
 
 // ... imports
 import { useSession, signOut } from "next-auth/react";
-// ... icons
+import { motion } from "framer-motion";
+import { LogOut, Mail, Calendar, Zap, Trash2, Shield, User, Clock, Trophy, Settings, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 export default function ProfilePage() {
     const { data: session } = useSession();

@@ -35,18 +35,18 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
         // For metadata only, we guess average HTML email size
         stats.storageEstimate += 50 * 1024;
 
-        if (email.date < stats.oldestEmail) {
-            stats.oldestEmail = email.date;
+        if (email.timestamp < stats.oldestEmail) {
+            stats.oldestEmail = email.timestamp;
         }
 
         // 2. Aggregate by Sender
-        const senderKey = email.senderEmail.toLowerCase();
+        const senderKey = email.sender.toLowerCase();
 
         if (!sendersMap.has(senderKey)) {
             sendersMap.set(senderKey, {
                 id: senderKey,
-                name: email.senderName || email.senderEmail.split('@')[0],
-                email: email.senderEmail,
+                name: email.senderName || email.sender.split('@')[0],
+                email: email.sender,
                 domain: email.senderDomain,
                 count: 0,
                 lastActive: 0,
@@ -57,8 +57,8 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
 
         const sender = sendersMap.get(senderKey)!;
         sender.count++;
-        if (email.date > sender.lastActive) {
-            sender.lastActive = email.date;
+        if (email.timestamp > sender.lastActive) {
+            sender.lastActive = email.timestamp;
         }
 
         // Simple scoring: High volume = higher nuisance score

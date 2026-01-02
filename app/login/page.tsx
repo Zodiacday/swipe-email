@@ -8,7 +8,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Inbox, Lock, Shield, Check } from "lucide-react";
+import { ArrowRight, Inbox, Lock, Shield, Check, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
     const { data: session, status } = useSession();

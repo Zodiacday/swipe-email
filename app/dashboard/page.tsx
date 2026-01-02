@@ -18,15 +18,15 @@ import Link from "next/link";
 import { AggregatedSender, DashboardStats } from "@/lib/engines/aggregation";
 
 // --- Framer Motion Config ---
-const springConfig = { type: "spring", stiffness: 300, damping: 30 };
-const bounceConfig = { type: "spring", stiffness: 300, damping: 20, mass: 0.8 };
+const springConfig = { type: "spring" as const, stiffness: 300, damping: 30 };
+const bounceConfig = { type: "spring" as const, stiffness: 300, damping: 20, mass: 0.8 };
 
 const rowVariants = {
     hidden: { opacity: 0, x: -20 },
     visible: (i: number) => ({
         opacity: 1,
         x: 0,
-        transition: { delay: i * 0.05, ...springConfig }
+        transition: { delay: i * 0.05, type: "spring" as const, stiffness: 300, damping: 30 }
     })
 };
 

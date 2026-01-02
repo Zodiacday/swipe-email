@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     LayoutDashboard,
@@ -10,7 +10,10 @@ import {
     Loader2,
     RefreshCw,
     ArrowLeft,
-    X
+    X,
+    ChevronDown,
+    ChevronRight,
+    Mail
 } from "lucide-react";
 import Link from "next/link";
 import { SkeletonRow } from "@/components/Skeleton";
@@ -41,6 +44,7 @@ export default function DashboardPage() {
     const [processing, setProcessing] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [timeRange, setTimeRange] = useState<"7d" | "30d" | "all">("all");
+    const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
     const { senders, stats } = aggregates;
 
@@ -299,82 +303,124 @@ export default function DashboardPage() {
                     {selectedView === "senders" ? (
                         <div className="divide-y divide-zinc-800/50">
                             {filteredSenders.map((sender, i) => (
-                                <motion.div
-                                    key={sender.id}
-                                    custom={i}
-                                    variants={rowVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    className={`
+                                <React.Fragment key={sender.id}>
+                                    <motion.div
+                                        key={sender.id}
+                                        custom={i}
+                                        variants={rowVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        className={`
                                         grid grid-cols-12 gap-4 px-6 h-[84px] items-center group transition-colors duration-200
                                         ${sender.count > 100 ? "border-l-4 border-l-red-500 bg-red-500/5" : "border-l-2 border-l-transparent"}
                                         ${selectedIds.has(sender.id) ? "bg-cyan-500/5 !border-l-cyan-500" : "hover:bg-zinc-800/30"}
                                     `}
-                                >
-                                    {/* Checkbox */}
-                                    <div className="col-span-1 flex justify-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedIds.has(sender.id)}
-                                            onChange={() => toggleSelection(sender.id)}
-                                            className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-cyan-500 focus:ring-cyan-500/20 cursor-pointer"
-                                        />
-                                    </div>
-
-                                    {/* Identity */}
-                                    <div className="col-span-5 flex items-center gap-4 min-w-0 pl-2">
-                                        <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 font-bold text-base shrink-0 border border-zinc-700">
-                                            {sender.name[0]}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <div className="font-semibold text-zinc-100 truncate">{sender.name}</div>
-                                            <div className="text-sm text-zinc-500 truncate">{sender.email}</div>
-                                        </div>
-                                    </div>
-
-                                    {/* Volume Bar */}
-                                    <div className="col-span-4 flex items-center gap-4">
-                                        <div className={`font-mono font-bold w-14 text-right text-lg ${sender.count > 100 ? "text-red-400" :
-                                            sender.count > 20 ? "text-cyan-400" : "text-zinc-300"
-                                            }`}>
-                                            {sender.count}
-                                        </div>
-                                        <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${Math.min((sender.count / 50) * 100, 100)}%` }}
-                                                transition={{ duration: 1, ease: "easeOut" }}
-                                                className={`h-full rounded-full ${sender.count > 100 ? "bg-red-500" :
-                                                    sender.count > 20 ? "bg-cyan-500" : "bg-zinc-600"
-                                                    }`}
+                                    >
+                                        {/* Checkbox */}
+                                        <div className="col-span-1 flex justify-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.has(sender.id)}
+                                                onChange={() => toggleSelection(sender.id)}
+                                                className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-cyan-500 focus:ring-cyan-500/20 cursor-pointer"
                                             />
                                         </div>
-                                        <div className={`text-xs font-mono w-12 text-right ${sender.count > 100 ? "text-red-400 font-bold" : "text-zinc-600"
-                                            }`}>
-                                            {sender.count > 100 ? "DANGER" : sender.count > 20 ? "HIGH" : "LOW"}
-                                        </div>
-                                    </div>
 
-                                    {/* Actions */}
-                                    <div className="col-span-2 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={async () => {
-                                                await trashSender(sender.email);
-                                                showToast(`Trashed ${sender.count} emails from ${sender.name} ✓`, { type: "success" });
-                                            }}
-                                            className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
-                                            title="Trash all from sender"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:bg-zinc-700 transition-colors"
-                                            title="Block sender"
-                                        >
-                                            <Shield className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </motion.div>
+                                        {/* Identity */}
+                                        <div className="col-span-5 flex items-center gap-4 min-w-0 pl-2">
+                                            <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 font-bold text-base shrink-0 border border-zinc-700">
+                                                {sender.name[0]}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="font-semibold text-zinc-100 truncate">{sender.name}</div>
+                                                <div className="text-sm text-zinc-500 truncate">{sender.email}</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Volume Bar */}
+                                        <div className="col-span-4 flex items-center gap-4">
+                                            <div className={`font-mono font-bold w-14 text-right text-lg ${sender.count > 100 ? "text-red-400" :
+                                                sender.count > 20 ? "text-cyan-400" : "text-zinc-300"
+                                                }`}>
+                                                {sender.count}
+                                            </div>
+                                            <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${Math.min((sender.count / 50) * 100, 100)}%` }}
+                                                    transition={{ duration: 1, ease: "easeOut" }}
+                                                    className={`h-full rounded-full ${sender.count > 100 ? "bg-red-500" :
+                                                        sender.count > 20 ? "bg-cyan-500" : "bg-zinc-600"
+                                                        }`}
+                                                />
+                                            </div>
+                                            <div className={`text-xs font-mono w-12 text-right ${sender.count > 100 ? "text-red-400 font-bold" : "text-zinc-600"
+                                                }`}>
+                                                {sender.count > 100 ? "DANGER" : sender.count > 20 ? "HIGH" : "LOW"}
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="col-span-2 flex justify-center gap-2">
+                                            {/* Expand Toggle */}
+                                            <button
+                                                onClick={() => setExpandedRow(expandedRow === sender.id ? null : sender.id)}
+                                                className={`p-2 rounded-lg border transition-colors ${expandedRow === sender.id
+                                                    ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
+                                                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
+                                                    }`}
+                                                title="View sample subjects"
+                                            >
+                                                {expandedRow === sender.id ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                            </button>
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    await trashSender(sender.email);
+                                                    showToast(`Trashed ${sender.count} emails from ${sender.name} ✓`, { type: "success" });
+                                                }}
+                                                className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+                                                title="Trash all from sender"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:bg-zinc-700 transition-colors"
+                                                title="Block sender"
+                                            >
+                                                <Shield className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+
+                                    {/* Expanded Row - Sample Subjects */}
+                                    <AnimatePresence>
+                                        {expandedRow === sender.id && sender.sampleSubjects?.length > 0 && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="bg-zinc-900/50 border-l-4 border-l-cyan-500/30 overflow-hidden"
+                                            >
+                                                <div className="px-8 py-4">
+                                                    <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                        <Mail className="w-3 h-3" />
+                                                        Sample Subjects
+                                                    </p>
+                                                    <ul className="space-y-2">
+                                                        {sender.sampleSubjects.map((subject, idx) => (
+                                                            <li key={idx} className="text-sm text-zinc-400 flex items-start gap-2">
+                                                                <span className="text-cyan-500/50">•</span>
+                                                                <span className="truncate">{subject}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </React.Fragment>
                             ))}
 
                             {filteredSenders.length === 0 && (

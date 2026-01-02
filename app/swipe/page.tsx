@@ -7,8 +7,9 @@ import {
     useTransform,
     useAnimation,
     PanInfo,
+    AnimatePresence,
 } from "framer-motion";
-import { ArrowLeft, Check, Trash2, Clock, Loader2, RefreshCw, Undo2 } from "lucide-react";
+import { ArrowLeft, Check, Trash2, Clock, Loader2, RefreshCw, Flame, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -83,7 +84,7 @@ function transformToCard(email: NormalizedEmail): SwipeCard {
 
 export default function SwipePage() {
     // --- Context ---
-    const { emails, isLoading, error, fetchEmails, trashEmail, canUndo, undoLastAction, isRefreshing } = useEmailContext();
+    const { emails, isLoading, error, fetchEmails, trashEmail, trashSender, canUndo, undoLastAction, isRefreshing } = useEmailContext();
     const { showToast } = useToast();
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -93,6 +94,10 @@ export default function SwipePage() {
     const [actionInProgress, setActionInProgress] = useState(false);
     const [sessionStats, setSessionStats] = useState({ reviewed: 0, trashed: 0, kept: 0 });
     const [initialCount, setInitialCount] = useState(0);
+    const [streak, setStreak] = useState(0);
+    const [lastActionTime, setLastActionTime] = useState<number | null>(null);
+    const [celebration, setCelebration] = useState<string | null>(null);
+    const [bulkPrompt, setBulkPrompt] = useState<{ sender: string, count: number, email: string } | null>(null);
 
     // --- Derived: Cards to show (filter out processed) ---
     const cards = useMemo(() => {
@@ -148,27 +153,53 @@ export default function SwipePage() {
         // Mark as processed locally
         setProcessedIds(prev => new Set([...prev, currentCard.id]));
 
+        // Update streak
+        const now = Date.now();
+        if (lastActionTime && now - lastActionTime < 4000) {
+            setStreak(s => s + 1);
+        } else {
+            setStreak(1);
+        }
+        setLastActionTime(now);
+
         // Update stats
+        const newReviewed = sessionStats.reviewed + 1;
         if (direction === "left") {
             setSessionStats(s => ({ ...s, reviewed: s.reviewed + 1, trashed: s.trashed + 1 }));
 
             // Trash via context
             try {
                 await trashEmail(currentCard.id, currentCard.originalEmail);
-                showToast("Trashed ✓", {
-                    type: "success",
-                    undoAction: async () => {
-                        const success = await undoLastAction();
-                        if (success) {
-                            setProcessedIds(prev => {
-                                const next = new Set(prev);
-                                next.delete(currentCard.id);
-                                return next;
-                            });
-                            showToast("Restored ✓", { type: "info" });
+
+                // Smart Prompt: If there are many more from this sender, ask to trash all
+                const remainingFromSender = emails.filter(e =>
+                    !processedIds.has(e.id) &&
+                    e.id !== currentCard.id &&
+                    e.sender.toLowerCase() === currentCard.originalEmail.sender.toLowerCase()
+                ).length;
+
+                if (remainingFromSender >= 3) {
+                    setBulkPrompt({
+                        sender: currentCard.sender,
+                        count: remainingFromSender,
+                        email: currentCard.originalEmail.sender
+                    });
+                } else {
+                    showToast("Trashed ✓", {
+                        type: "success",
+                        undoAction: async () => {
+                            const success = await undoLastAction();
+                            if (success) {
+                                setProcessedIds(prev => {
+                                    const next = new Set(prev);
+                                    next.delete(currentCard.id);
+                                    return next;
+                                });
+                                showToast("Restored ✓", { type: "info" });
+                            }
                         }
-                    }
-                });
+                    });
+                }
             } catch {
                 showToast("Failed to trash", { type: "error" });
             }
@@ -177,11 +208,23 @@ export default function SwipePage() {
             showToast("Kept ✓", { type: "info" });
         }
 
+        // Celebration milestones
+        if (newReviewed === 10) {
+            setCelebration("🚀 Great start!");
+            setTimeout(() => setCelebration(null), 2000);
+        } else if (newReviewed === 25) {
+            setCelebration("🔥 25 done!");
+            setTimeout(() => setCelebration(null), 2000);
+        } else if (initialCount > 0 && newReviewed === Math.floor(initialCount / 2)) {
+            setCelebration("💪 Halfway there!");
+            setTimeout(() => setCelebration(null), 2000);
+        }
+
         // Reset for next card
         x.set(0);
         controls.set({ x: 0, opacity: 1, rotate: 0 });
         setActionInProgress(false);
-    }, [cards, actionInProgress, controls, x, trashEmail, showToast, undoLastAction]);
+    }, [cards, actionInProgress, controls, x, trashEmail, showToast, undoLastAction, lastActionTime, sessionStats.reviewed, initialCount]);
 
     // --- Skip Handler ---
     const handleSkip = useCallback(async () => {
@@ -207,6 +250,41 @@ export default function SwipePage() {
         controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
         setActionInProgress(false);
     }, [cards, actionInProgress, controls, x, showToast]);
+
+    // --- Bulk Trash Handler ---
+    const handleBulkTrash = async () => {
+        if (!bulkPrompt) return;
+        const { email, count, sender } = bulkPrompt;
+        setBulkPrompt(null);
+        setActionInProgress(true);
+
+        try {
+            await trashSender(email);
+            // Mark all from this sender as processed
+            const fromSenderIds = emails
+                .filter(e => e.sender.toLowerCase() === email.toLowerCase())
+                .map(e => e.id);
+
+            setProcessedIds(prev => {
+                const next = new Set(prev);
+                fromSenderIds.forEach(id => next.add(id));
+                return next;
+            });
+
+            setSessionStats(s => ({
+                ...s,
+                reviewed: s.reviewed + count,
+                trashed: s.trashed + count
+            }));
+
+            showToast(`Cleared ${count + 1} emails from ${sender} ✓`, { type: "success" });
+        } catch (err) {
+            console.error("Bulk trash failed:", err);
+            showToast("Bulk action failed", { type: "error" });
+        } finally {
+            setActionInProgress(false);
+        }
+    };
 
     // --- Drag End ---
     const onDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -343,8 +421,19 @@ export default function SwipePage() {
                     </Link>
                 </div>
 
-                {/* Progress Counter */}
+                {/* Progress Counter + Streak */}
                 <div className="flex items-center gap-4">
+                    {/* Streak Indicator */}
+                    {streak >= 3 && (
+                        <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="flex items-center gap-1 bg-orange-500/20 border border-orange-500/30 rounded-full px-3 py-1"
+                        >
+                            <Flame className="w-4 h-4 text-orange-400" />
+                            <span className="text-orange-400 font-bold text-sm">{streak}x</span>
+                        </motion.div>
+                    )}
                     <div className="flex items-center gap-2 text-sm font-mono">
                         <span className="text-emerald-400 font-bold">{sessionStats.reviewed}</span>
                         <span className="text-zinc-600">/</span>
@@ -358,7 +447,67 @@ export default function SwipePage() {
                 </div>
             </header>
 
-            {/* --- Swipe Area --- */}
+            {/* Celebration Overlay */}
+            <AnimatePresence>
+                {celebration && (
+                    <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.5, opacity: 0 }}
+                        className="fixed inset-0 flex items-center justify-center z-[60] pointer-events-none"
+                    >
+                        <div className="bg-zinc-900/90 backdrop-blur-xl border border-emerald-500/30 rounded-2xl px-8 py-6 shadow-2xl">
+                            <p className="text-3xl font-black text-white">{celebration}</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Bulk Action Prompt */}
+            <AnimatePresence>
+                {bulkPrompt && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl"
+                        >
+                            <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                                <Trash2 className="w-8 h-8 text-red-400" />
+                            </div>
+                            <h2 className="text-xl font-bold text-center mb-2">Trash them all?</h2>
+                            <p className="text-zinc-400 text-center mb-8">
+                                There are <span className="text-white font-bold">{bulkPrompt.count}</span> more emails from <span className="text-white font-bold">{bulkPrompt.sender}</span>. Want to trash all of them at once?
+                            </p>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={handleBulkTrash}
+                                    className="w-full py-4 bg-red-500 hover:bg-red-400 text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Zap className="w-5 h-5" />
+                                    YES, NUKE ALL {bulkPrompt.count + 1}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setBulkPrompt(null);
+                                        showToast("Trashed single email ✓", { type: "success" });
+                                    }}
+                                    className="w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded-2xl transition-colors"
+                                >
+                                    NO, JUST THIS ONE
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* --- Swipe Area --- --- */}
             <main className="flex-1 flex flex-col items-center justify-center p-4 relative w-full max-w-lg mx-auto">
                 <div className="relative w-full aspect-[3/4] max-h-[600px]">
 

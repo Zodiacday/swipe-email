@@ -9,6 +9,7 @@ export interface AggregatedSender {
     lastActive: number; // timestamp
     category: "Promotion" | "Social" | "Update" | "Personal";
     score: number;   // 0-100 nuisance score
+    sampleSubjects: string[]; // Up to 5 sample subjects for preview
 }
 
 export interface DashboardStats {
@@ -51,7 +52,8 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
                 count: 0,
                 lastActive: 0,
                 category: "Update", // default, would need better classification
-                score: 0
+                score: 0,
+                sampleSubjects: []
             });
         }
 
@@ -59,6 +61,11 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
         sender.count++;
         if (email.timestamp > sender.lastActive) {
             sender.lastActive = email.timestamp;
+        }
+
+        // Collect up to 5 sample subjects
+        if (sender.sampleSubjects.length < 5 && email.subject) {
+            sender.sampleSubjects.push(email.subject);
         }
 
         // Simple scoring: High volume = higher nuisance score
@@ -77,3 +84,4 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
         senders: sortedSenders
     };
 }
+

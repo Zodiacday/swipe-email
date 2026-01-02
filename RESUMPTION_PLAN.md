@@ -1,45 +1,106 @@
 # SESSION SUMMARY & RESUMPTION PLAN
 
-## What We Accomplished Today (Plain English)
-
-### 1. Fixed the "Bulk Undo" Bug
-- **Added**: A new system that groups multiple trashing actions into one.
-- **Removed**: The annoying behavior where clicking "Undo" would only restore one sender at a time even if you deleted ten. Now, one click restores everything you just cleared.
-- **Why**: To make bulk-cleaning from the Dashboard actually usable and safe.
-
-### 2. Upgraded the Gmail Scanner
-- **Added**: Smart pagination. 
-- **Removed**: The 500-email limit. Previously, if a sender had 2,000 emails, we only cleared 500. Now we clear every single one, no matter how deep they are in your inbox.
-- **Why**: To ensure that when you say "Trash all from this sender," the app actually finishes the job.
-
-### 3. Built an Intelligent "Safety" Filter
-- **Added**: Special rules for high-trust companies (Banks, Google, Government).
-- **Removed**: Generic scoring that treated your bank statements the same as spam. Your important emails now get a "Safety Discount" so they don't show up as dangerous.
-- **Added**: A "Nuisance Boost" for known marketing platforms like Mailchimp to push them to the top of your cleanup list.
-
-### 4. Stability & Performance
-- **Fixed**: A "deadlock" during the loading screen that was causing the app to freeze.
-- **Added**: "Batched Restoration." When you undo a large delete, the app now pieces them back together in small groups of 20. This stops the browser from crashing or getting blocked by Google.
+> Last updated: January 2nd, 2026 (afternoon session)
 
 ---
 
-## Current Status: The "Stuck" Page
-Even after these fixes, the **Swipe Page** is still getting stuck on the loading skeleton for you.
+## Today's Accomplishments
 
-### What's happening:
-The app knows you're logged in, but for some reason, the handoff between your Google session and the "fetch emails" command isn't finishing. 
+### 1. Bug Audit & Fixes (12 bugs fixed)
 
-### Why it might be stuck:
-- **Empty Inbox?** If your promotions/social folders are actually empty, the app might be waiting for data that isn't there.
-- **Broken Token?** Your Google login might need a "hard refresh" to give the app permission to actually read the email list.
-- **UI Logic?** The "Loading" screen might be staying up even after the data arrives.
+**Critical:**
+- ✅ OAuth token refresh — auto-refreshes 5 min before expiry
+- ✅ Stale undo closure — undo button always works now
+- ✅ Missing stage dependency in onboarding
+
+**High-Priority:**
+- ✅ ConnectStage uses real session status
+- ✅ Fixed `min-height-screen` typo
+- ✅ Storage estimates use real email size
+- ✅ Domain nuke creates single undo entry
+
+**Medium:**
+- ✅ Empty inbox vs first-load distinction
+- ✅ Duplicate fetch prevention
+
+**Low:**
+- ✅ Debug disabled in production
+- ✅ SignIn error handling added
 
 ---
 
-## Next Steps for Tomorrow:
-1. **Check the "Talk"**: See if the browser is actually talking to Google (Network Tab).
-2. **Inbox Zero Logic**: Fix the UI so that if your inbox is empty, it says "You're all clear!" instead of showing a loading skeleton.
-3. **Hard Reload**: Test the login flow again from scratch to ensure tokens are valid.
+### 2. User Flow Simplification (3-click flow)
+
+**Before:** 7+ screens through onboarding  
+**After:** Landing → Login → Mode Select → Start
+
+- Removed auto-redirect from landing page
+- Users always see landing first, choose to enter
+- Login redirects to mode-select, not directly to swipe
 
 ---
-*Summary prepared for Nat on January 2nd, 2026.*
+
+### 3. Swipe Page Overhaul
+
+- **Smaller card** — `aspect-[4/5]`, `max-h-[450px]` (mobile-friendly)
+- **4-way swipe gestures:**
+  - ←Left = Trash
+  - →Right = Keep  
+  - ↑Up = Unsubscribe (opens link)
+  - ↓Down = Skip
+- **4 visual stamps** — KEEP, TRASH, UNSUB, SKIP
+- **Sticky bottom controls** — Always visible with 4 buttons
+- **Responsive hints** — Shows all 4 directions
+
+---
+
+### 4. Profile Page Updates
+
+- **Real stats** — Emails processed and minutes saved from actual data
+- **Removed streak** — Simplified to 2 stat cards
+
+---
+
+### 5. Dashboard Mobile Optimization
+
+- **Collapsible filter drawer** — Tap hamburger to toggle filters
+- **Responsive sender rows** — Card layout on mobile
+- **Mobile select all** — Simplified header
+- **Floating action button** — "Trash X selected" appears when items checked
+- **Optimized touch targets** — Bigger checkboxes, cleaner layout
+
+---
+
+## Current Status
+
+✅ All changes pushed to GitHub  
+✅ Latest commit: `245e17b`
+
+---
+
+## Known Issues / Future Work
+
+1. **Custom confirmation modal** — Native `confirm()` still used for domain nuke (planned but not yet implemented)
+2. **Build verification** — PowerShell execution policy blocked `npm run build` locally (not a code issue)
+
+---
+
+## Files Changed Today
+
+| File | Changes |
+|------|---------|
+| `lib/auth.ts` | Token refresh logic, debug mode |
+| `types/next-auth.d.ts` | Added error field |
+| `app/dashboard/page.tsx` | Undo closure, domain nuke, mobile layout |
+| `app/onboarding/page.tsx` | ConnectStage, deps, error handling |
+| `app/swipe/page.tsx` | 4-way swipe, smaller card, mobile controls |
+| `app/profile/page.tsx` | Real stats, removed streak |
+| `lib/engines/aggregation.ts` | Real email size |
+| `contexts/EmailContext.tsx` | Duplicate fetch prevention |
+| `middleware.ts` | Protected /mode-select and /dashboard |
+| `app/page.tsx` | Removed auto-redirect |
+| `app/login/page.tsx` | Redirect to mode-select |
+
+---
+
+*Prepared for Nat — January 2nd, 2026*

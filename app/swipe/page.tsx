@@ -16,6 +16,7 @@ import { useEmailContext } from "@/contexts/EmailContext";
 import { useToast } from "@/contexts/ToastContext";
 import { setLastMode } from "@/lib/userPreferences";
 import { NormalizedEmail } from "@/lib/types";
+import { SkeletonCard } from "@/components/Skeleton";
 
 // --- Card Type ---
 interface SwipeCard {
@@ -231,12 +232,30 @@ export default function SwipePage() {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [handleSwipe, handleSkip, router]);
 
-    // --- Loading State ---
+    // --- Loading State (Skeleton) ---
     if (status === "loading" || (isLoading && emails.length === 0)) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4">
-                <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
-                <p className="text-zinc-500 font-mono text-sm uppercase tracking-widest">Loading your inbox...</p>
+            <div className="min-h-screen bg-zinc-950 overflow-hidden flex flex-col font-sans">
+                {/* Skeleton Header */}
+                <header className="h-16 px-6 bg-zinc-900/50 backdrop-blur-xl border-b border-zinc-800/50 flex items-center justify-between">
+                    <div className="w-48 h-8 bg-zinc-800 rounded-full animate-pulse" />
+                    <div className="flex items-center gap-4">
+                        <div className="w-24 h-4 bg-zinc-800 rounded animate-pulse" />
+                        <div className="w-6 h-6 bg-zinc-800 rounded animate-pulse" />
+                    </div>
+                </header>
+
+                {/* Skeleton Card Area */}
+                <main className="flex-1 flex flex-col items-center justify-center p-4 w-full max-w-lg mx-auto">
+                    <SkeletonCard />
+
+                    {/* Skeleton Controls */}
+                    <div className="mt-16 flex items-center gap-8">
+                        <div className="w-20 h-20 bg-zinc-800 rounded-full animate-pulse" />
+                        <div className="w-16 h-16 bg-zinc-800 rounded-full animate-pulse" />
+                        <div className="w-20 h-20 bg-zinc-800 rounded-full animate-pulse" />
+                    </div>
+                </main>
             </div>
         );
     }
@@ -390,9 +409,9 @@ export default function SwipePage() {
                                     <div className="flex items-center gap-2">
                                         <p className="text-sm text-zinc-500 font-mono">{activeCard.date}</p>
                                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${activeCard.category === "promo" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
-                                                activeCard.category === "social" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
-                                                    activeCard.category === "newsletter" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
-                                                        "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                                            activeCard.category === "social" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                                activeCard.category === "newsletter" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
+                                                    "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
                                             }`}>
                                             {activeCard.category}
                                         </span>

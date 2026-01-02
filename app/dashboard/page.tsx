@@ -13,6 +13,7 @@ import {
     X
 } from "lucide-react";
 import Link from "next/link";
+import { SkeletonRow } from "@/components/Skeleton";
 import { useEmailContext } from "@/contexts/EmailContext";
 import { useToast } from "@/contexts/ToastContext";
 import { setLastMode } from "@/lib/userPreferences";
@@ -127,12 +128,42 @@ export default function DashboardPage() {
         }
     };
 
-    // --- Loading State ---
+    // --- Loading State (Skeleton) ---
     if (isLoading && senders.length === 0) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4">
-                <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
-                <div className="text-zinc-500 font-mono text-sm tracking-widest uppercase animate-pulse">Scanning Inbox...</div>
+            <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans">
+                {/* Skeleton Header */}
+                <header className="h-16 px-6 bg-zinc-900/50 backdrop-blur-xl border-b border-zinc-800/50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 bg-zinc-800 rounded animate-pulse" />
+                        <div className="w-32 h-5 bg-zinc-800 rounded animate-pulse" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="w-20 h-4 bg-zinc-800 rounded animate-pulse" />
+                        <div className="w-20 h-4 bg-zinc-800 rounded animate-pulse" />
+                    </div>
+                </header>
+
+                {/* Skeleton Controls */}
+                <div className="h-14 px-6 bg-zinc-900/50 border-b border-zinc-800/50 flex items-center justify-between">
+                    <div className="w-48 h-8 bg-zinc-800 rounded-full animate-pulse" />
+                    <div className="flex items-center gap-4">
+                        <div className="w-32 h-8 bg-zinc-800 rounded-lg animate-pulse" />
+                        <div className="w-64 h-9 bg-zinc-800 rounded-lg animate-pulse" />
+                    </div>
+                </div>
+
+                {/* Skeleton Table */}
+                <main className="max-w-7xl mx-auto p-8">
+                    <div className="border border-zinc-800 rounded-2xl bg-zinc-900/20">
+                        <div className="h-12 bg-zinc-900 rounded-t-2xl border-b border-zinc-800" />
+                        <div className="divide-y divide-zinc-800/50">
+                            {[1, 2, 3, 4, 5, 6].map(i => (
+                                <SkeletonRow key={i} />
+                            ))}
+                        </div>
+                    </div>
+                </main>
             </div>
         );
     }
@@ -304,7 +335,7 @@ export default function DashboardPage() {
                                     {/* Volume Bar */}
                                     <div className="col-span-4 flex items-center gap-4">
                                         <div className={`font-mono font-bold w-14 text-right text-lg ${sender.count > 100 ? "text-red-400" :
-                                                sender.count > 20 ? "text-cyan-400" : "text-zinc-300"
+                                            sender.count > 20 ? "text-cyan-400" : "text-zinc-300"
                                             }`}>
                                             {sender.count}
                                         </div>

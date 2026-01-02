@@ -133,3 +133,138 @@
 .text-glow-cyan {
     text-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
 }
+
+/* =================================
+   Interactive Button States
+   ================================= */
+
+.btn-interactive {
+    @apply transition-all duration-150 ease-out;
+}
+
+.btn-interactive:hover {
+    transform: scale(1.03);
+}
+
+.btn-interactive:active {
+    transform: scale(0.97);
+}
+
+.btn-interactive:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    transform: none !important;
+}
+
+/* Primary action button */
+.btn-primary {
+    @apply px-6 py-3 bg-emerald-500 text-zinc-900 font-bold rounded-full;
+    @apply hover:bg-emerald-400 active:bg-emerald-600;
+    @apply transition-all duration-150 ease-out;
+    @apply hover:scale-105 active:scale-95;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+}
+
+/* Secondary action button */
+.btn-secondary {
+    @apply px-6 py-3 bg-zinc-800 text-zinc-300 font-bold rounded-full;
+    @apply hover:bg-zinc-700 active:bg-zinc-600;
+    @apply transition-all duration-150 ease-out;
+    @apply hover:scale-105 active:scale-95;
+    @apply border border-zinc-700 hover:border-zinc-600;
+}
+
+/* Danger action button */
+.btn-danger {
+    @apply px-6 py-3 bg-red-500 text-white font-bold rounded-full;
+    @apply hover:bg-red-400 active:bg-red-600;
+    @apply transition-all duration-150 ease-out;
+    @apply hover:scale-105 active:scale-95;
+}
+
+/* Icon button (circular) */
+.btn-icon {
+    @apply w-10 h-10 rounded-full flex items-center justify-center;
+    @apply bg-zinc-800 border border-zinc-700 text-zinc-400;
+    @apply hover:bg-zinc-700 hover:text-zinc-200 hover:border-zinc-600;
+    @apply active:scale-95 transition-all duration-150;
+}
+
+/* =================================
+   Premium Pulse Animation
+   ================================= */
+
+@keyframes premium-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-premium-pulse {
+    animation: premium-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* =================================
+   Card Hover Effects
+   ================================= */
+
+.card-hover {
+    @apply transition-all duration-200 ease-out;
+}
+
+.card-hover:hover {
+    @apply bg-zinc-800/50 border-zinc-700;
+    transform: translateY(-2px);
+}
+
+/* =================================
+   Focus Styles
+   ================================= */
+
+.focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-zinc-900;
+}
+
+/* =================================
+   Loading Shimmer
+   ================================= */
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-shimmer {
+    background: linear-gradient(90deg,
+            rgba(39, 39, 42, 0) 0%,
+            rgba(63, 63, 70, 0.3) 50%,
+            rgba(39, 39, 42, 0) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* =================================
+   Spacing Utilities
+   ================================= */
+
+.section-gap {
+    @apply space-y-6;
+}
+
+.content-padding {
+    @apply p-6 md:p-8;
+}
+
+.comfortable-rows>* {
+    @apply py-5;
+}

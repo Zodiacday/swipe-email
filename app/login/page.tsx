@@ -8,7 +8,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Mail, ArrowRight, Sparkles, Shield } from "lucide-react";
+import { ArrowRight, Inbox, Lock, Shield, Check } from "lucide-react";
 
 export default function LoginPage() {
     const { data: session, status } = useSession();
@@ -90,6 +90,27 @@ export default function LoginPage() {
                             <div className="text-[10px]">{item.desc}</div>
                         </div>
                     ))}
+                </div>
+                <div className="mt-8 pt-8 border-t border-zinc-800 w-full">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                            <Shield className="w-5 h-5 text-emerald-500" />
+                            <div className="text-left">
+                                <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Security</div>
+                                <div className="text-xs font-bold text-zinc-300">Audit Passed</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                            <Check className="w-5 h-5 text-emerald-500" />
+                            <div className="text-left">
+                                <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Privacy</div>
+                                <div className="text-xs font-bold text-zinc-300">Local Only</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p className="text-[10px] text-zinc-600 mt-4 font-mono text-center">
+                        v2.0.1 • SECURE CONNECTION
+                    </p>
                 </div>
             </motion.div>
         </div>

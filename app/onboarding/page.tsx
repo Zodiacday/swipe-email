@@ -19,6 +19,7 @@ import {
     Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession, signIn } from "next-auth/react";
 import { PermissionGuard, PermissionStatus } from "@/lib/security/PermissionGuard";
 
 type OnboardingStage =
@@ -31,9 +32,20 @@ type OnboardingStage =
     | "first_cleanup";
 
 export default function OnboardingPage() {
+    const { data: session } = useSession();
     const [stage, setStage] = useState<OnboardingStage>("welcome");
     const [tutorialStep, setTutorialStep] = useState(0);
     const router = useRouter();
+
+    useEffect(() => {
+        if (session) {
+            // User is authenticated, skip ahead to tutorial if they aren't deep in the flow
+            // This handles the specialized callback redirect from the OAuth provider
+            if (stage === "welcome" || stage === "connect" || stage === "safety" || stage === "problem" || stage === "promise") {
+                setStage("tutorial");
+            }
+        }
+    }, [session]);
 
     const nextStage = () => {
         const stages: OnboardingStage[] = [
@@ -49,12 +61,12 @@ export default function OnboardingPage() {
         if (currentIndex < stages.length - 1) {
             setStage(stages[currentIndex + 1]);
         } else {
-            router.push("/swipe");
+            router.push("/mode-select");
         }
     };
 
     const skipToSwipe = () => {
-        router.push("/swipe");
+        router.push("/mode-select");
     };
 
     return (
@@ -293,17 +305,9 @@ function ConnectStage({ onNext }: { onNext: () => void }) {
 
     const handleConnect = async () => {
         setIsConnecting(true);
-        // Simulate OAuth Popup and Scope selection
-        setTimeout(async () => {
-            const mockGranted = [
-                "https://www.googleapis.com/auth/gmail.readonly",
-                "https://www.googleapis.com/auth/gmail.modify",
-                "https://www.googleapis.com/auth/gmail.labels"
-            ];
-            const result = await PermissionGuard.verifyPermissions(mockGranted);
-            setStatus(result);
-            setIsConnecting(false);
-        }, 1500);
+        // Trigger real authentication flow
+        // The callbackUrl ensures they return here to complete the tutorial
+        await signIn("google", { callbackUrl: "/onboarding" });
     };
 
     return (

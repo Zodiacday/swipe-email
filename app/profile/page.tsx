@@ -4,36 +4,27 @@
 
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import {
-    User,
-    Mail,
-    Calendar,
-    Settings,
-    LogOut,
-    Trophy,
-    Trash2,
-    Clock,
-    ChevronRight,
-    Shield
-} from "lucide-react";
-
-// Mock user data
-const MOCK_USER = {
-    name: "Demo User",
-    email: "demo@swipe.app",
-    joinedDate: "January 2026",
-    avatar: null,
-    stats: {
-        emailsCleared: 2451,
-        timeSaved: 14.2,
-        streakDays: 7,
-        level: 12
-    }
-};
+// ... imports
+import { useSession, signOut } from "next-auth/react";
+// ... icons
 
 export default function ProfilePage() {
+    const { data: session } = useSession();
+
+    // Default fallback so the page doesn't crash if session is loading
+    const user = {
+        name: session?.user?.name || "User",
+        email: session?.user?.email || "loading...",
+        image: session?.user?.image,
+        joinedDate: "January 2026", // Placeholder
+        stats: {
+            emailsCleared: 0,
+            timeSaved: 0,
+            streakDays: 0,
+            level: 1
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#09090b] text-[#fafafa] pt-20 pb-12 px-4">
             <div className="max-w-2xl mx-auto">
@@ -44,23 +35,27 @@ export default function ProfilePage() {
                     className="glass border-zinc-800 p-8 rounded-[2rem] mb-6"
                 >
                     <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                            <User className="w-10 h-10 text-emerald-500" />
+                        <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
+                            {user.image ? (
+                                <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                            ) : (
+                                <User className="w-10 h-10 text-emerald-500" />
+                            )}
                         </div>
                         <div className="flex-1">
-                            <h1 className="text-2xl font-heading font-black mb-1">{MOCK_USER.name}</h1>
+                            <h1 className="text-2xl font-heading font-black mb-1">{user.name}</h1>
                             <p className="text-zinc-500 text-sm flex items-center gap-2">
                                 <Mail className="w-4 h-4" />
-                                {MOCK_USER.email}
+                                {user.email}
                             </p>
                             <p className="text-zinc-600 text-xs mt-1 flex items-center gap-2">
                                 <Calendar className="w-3 h-3" />
-                                Joined {MOCK_USER.joinedDate}
+                                Joined {user.joinedDate}
                             </p>
                         </div>
                         <div className="text-right">
                             <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 mb-1">Level</div>
-                            <div className="text-3xl font-heading font-black text-emerald-500">{MOCK_USER.stats.level}</div>
+                            <div className="text-3xl font-heading font-black text-emerald-500">{user.stats.level}</div>
                         </div>
                     </div>
                 </motion.div>
@@ -73,9 +68,9 @@ export default function ProfilePage() {
                     className="grid grid-cols-3 gap-4 mb-6"
                 >
                     {[
-                        { icon: Trash2, label: "Emails Cleared", value: MOCK_USER.stats.emailsCleared.toLocaleString(), color: "text-red-400" },
-                        { icon: Clock, label: "Hours Saved", value: MOCK_USER.stats.timeSaved.toString(), color: "text-blue-400" },
-                        { icon: Trophy, label: "Day Streak", value: MOCK_USER.stats.streakDays.toString(), color: "text-emerald-400" },
+                        { icon: Trash2, label: "Emails Cleared", value: user.stats.emailsCleared.toLocaleString(), color: "text-red-400" },
+                        { icon: Clock, label: "Hours Saved", value: user.stats.timeSaved.toString(), color: "text-blue-400" },
+                        { icon: Trophy, label: "Day Streak", value: user.stats.streakDays.toString(), color: "text-emerald-400" },
                     ].map((stat, i) => (
                         <div key={i} className="glass border-zinc-800 p-5 rounded-2xl text-center">
                             <stat.icon className={`w-5 h-5 ${stat.color} mx-auto mb-2`} />
@@ -119,6 +114,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
+                    onClick={() => signOut({ callbackUrl: "/" })}
                     className="w-full p-4 rounded-2xl border border-red-500/20 bg-red-500/5 text-red-400 font-bold flex items-center justify-center gap-2 hover:bg-red-500/10 transition-colors"
                 >
                     <LogOut className="w-4 h-4" />

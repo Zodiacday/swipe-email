@@ -158,6 +158,11 @@ export default function SwipePage() {
         // Mark as processed locally
         setProcessedIds(prev => new Set([...prev, currentCard.id]));
 
+        // RESET position immediately so the next card appears centered
+        // We do this BEFORE the potentially slow API call
+        x.set(0);
+        controls.set({ x: 0, opacity: 1, rotate: 0 });
+
         // Update streak
         const now = Date.now();
         if (lastActionTime && now - lastActionTime < 4000) {
@@ -225,11 +230,17 @@ export default function SwipePage() {
             setTimeout(() => setCelebration(null), 2000);
         }
 
-        // Reset for next card
-        x.set(0);
-        controls.set({ x: 0, opacity: 1, rotate: 0 });
-        setActionInProgress(false);
-    }, [cards, actionInProgress, controls, x, trashEmail, showToast, undoLastAction, lastActionTime, sessionStats.reviewed, initialCount]);
+        // Only release lock if we're NOT showing a bulk prompt
+        const isShowingPrompt = (direction === "left" && emails.filter(e =>
+            !processedIds.has(e.id) &&
+            e.id !== currentCard.id &&
+            e.sender.toLowerCase() === currentCard.originalEmail.sender.toLowerCase()
+        ).length >= 3);
+
+        if (!isShowingPrompt) {
+            setActionInProgress(false);
+        }
+    }, [cards, actionInProgress, controls, x, trashEmail, showToast, undoLastAction, lastActionTime, sessionStats.reviewed, initialCount, emails, processedIds]);
 
     // --- Skip Handler ---
     const handleSkip = useCallback(async () => {

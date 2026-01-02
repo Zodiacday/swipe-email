@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode, useRef } from "react";
 import { NormalizedEmail } from "@/lib/types";
 import { AggregatedSender, DashboardStats, aggregateEmails } from "@/lib/engines/aggregation";
 import { useSession } from "next-auth/react";
@@ -61,6 +61,9 @@ export function EmailProvider({ children }: { children: ReactNode }) {
     const [personalSenders, setPersonalSenders] = useState<Set<string>>(new Set());
     const [blockedSenders, setBlockedSenders] = useState<Set<string>>(new Set());
 
+    // Ref to prevent duplicate fetch calls
+    const isFetchingRef = useRef(false);
+
     // Derived: Aggregates (recomputed when emails change)
     const aggregates = useMemo(() => {
         if (emails.length === 0) {
@@ -86,8 +89,11 @@ export function EmailProvider({ children }: { children: ReactNode }) {
 
     // --- Fetch Emails ---
     const fetchEmails = useCallback(async () => {
+        // Prevent duplicate calls
+        if (isFetchingRef.current) return;
         if (status !== "authenticated" || !session) return;
 
+        isFetchingRef.current = true;
         setIsLoading(true);
         setError(null);
 
@@ -105,6 +111,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
             setError("Failed to load emails. Please try again.");
         } finally {
             setIsLoading(false);
+            isFetchingRef.current = false;
         }
     }, [session, status]);
 

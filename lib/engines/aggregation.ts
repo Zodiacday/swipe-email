@@ -32,9 +32,8 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
     emails.forEach(email => {
         // 1. Update Global Stats
         stats.totalEmails++;
-        // Rough estimate: 50KB per email if body not fetched, or use payload size if available
-        // For metadata only, we guess average HTML email size
-        stats.storageEstimate += 50 * 1024;
+        // Use actual email size if available, otherwise estimate 50KB
+        stats.storageEstimate += email.size || 50 * 1024;
 
         if (email.timestamp < stats.oldestEmail) {
             stats.oldestEmail = email.timestamp;

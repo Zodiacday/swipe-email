@@ -98,6 +98,7 @@ export default function SwipePage() {
     const [lastActionTime, setLastActionTime] = useState<number | null>(null);
     const [celebration, setCelebration] = useState<string | null>(null);
     const [bulkPrompt, setBulkPrompt] = useState<{ sender: string, count: number, email: string } | null>(null);
+    const [hasSwipedOnce, setHasSwipedOnce] = useState(false);
 
     // --- Derived: Cards to show (filter out processed) ---
     const cards = useMemo(() => {
@@ -171,6 +172,7 @@ export default function SwipePage() {
             setStreak(1);
         }
         setLastActionTime(now);
+        setHasSwipedOnce(true);
 
         // Update stats
         const newReviewed = sessionStats.reviewed + 1;
@@ -371,46 +373,59 @@ export default function SwipePage() {
         );
     }
 
-    // --- Empty State (All Done) ---
+    // --- Empty State (All Done or Inbox Zero) ---
     if (cards.length === 0) {
+        const hasReviewed = hasSwipedOnce || sessionStats.reviewed > 0;
         return (
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
-                <div className="text-6xl mb-6">🎉</div>
-                <h1 className="text-4xl font-black text-zinc-100 mb-4 tracking-tight">All Done!</h1>
-                {initialCount > 0 && sessionStats.reviewed >= initialCount && (
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="mb-6 inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-900 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest animate-float"
-                    >
-                        <Star className="w-4 h-4 fill-zinc-900" />
-                        Perfect Session
-                        <Star className="w-4 h-4 fill-zinc-900" />
-                    </motion.div>
+                {hasReviewed ? (
+                    <>
+                        <div className="text-6xl mb-6">🎉</div>
+                        <h1 className="text-4xl font-black text-zinc-100 mb-4 tracking-tight">All Done!</h1>
+                        {initialCount > 0 && sessionStats.reviewed >= initialCount && (
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="mb-6 inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-900 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest animate-float"
+                            >
+                                <Star className="w-4 h-4 fill-zinc-900" />
+                                Perfect Session
+                                <Star className="w-4 h-4 fill-zinc-900" />
+                            </motion.div>
+                        )}
+                        <p className="text-zinc-500 mb-8 max-w-md mx-auto">
+                            You reviewed <span className="text-zinc-100 font-bold">{sessionStats.reviewed}</span> emails this session.
+                        </p>
+
+                        {/* Session Stats */}
+                        <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8">
+                            <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+                                <div className="text-2xl font-bold text-red-400">{sessionStats.trashed}</div>
+                                <div className="text-xs text-zinc-500 uppercase tracking-wider">Trashed</div>
+                            </div>
+                            <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+                                <div className="text-2xl font-bold text-emerald-400">{sessionStats.kept}</div>
+                                <div className="text-xs text-zinc-500 uppercase tracking-wider">Kept</div>
+                            </div>
+                            <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+                                <div className="text-2xl font-bold text-zinc-300">{sessionStats.reviewed}</div>
+                                <div className="text-xs text-zinc-500 uppercase tracking-wider">Total</div>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-zinc-600 mb-8">
+                            Gmail keeps trashed emails for 30 days. Nothing is permanently deleted.
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <div className="text-6xl mb-6">📭</div>
+                        <h1 className="text-4xl font-black text-zinc-100 mb-4 tracking-tight">Inbox is Clean!</h1>
+                        <p className="text-zinc-500 mb-8 max-w-md mx-auto">
+                            No promotional or social emails found. Your inbox is already in great shape!
+                        </p>
+                    </>
                 )}
-                <p className="text-zinc-500 mb-8 max-w-md mx-auto">
-                    You reviewed <span className="text-zinc-100 font-bold">{sessionStats.reviewed}</span> emails this session.
-                </p>
-
-                {/* Session Stats */}
-                <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8">
-                    <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
-                        <div className="text-2xl font-bold text-red-400">{sessionStats.trashed}</div>
-                        <div className="text-xs text-zinc-500 uppercase tracking-wider">Trashed</div>
-                    </div>
-                    <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
-                        <div className="text-2xl font-bold text-emerald-400">{sessionStats.kept}</div>
-                        <div className="text-xs text-zinc-500 uppercase tracking-wider">Kept</div>
-                    </div>
-                    <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
-                        <div className="text-2xl font-bold text-zinc-300">{sessionStats.reviewed}</div>
-                        <div className="text-xs text-zinc-500 uppercase tracking-wider">Total</div>
-                    </div>
-                </div>
-
-                <p className="text-xs text-zinc-600 mb-8">
-                    Gmail keeps trashed emails for 30 days. Nothing is permanently deleted.
-                </p>
 
                 <div className="flex gap-4">
                     <Link href="/dashboard" className="px-8 py-3 bg-cyan-500 text-zinc-900 font-bold rounded-full hover:bg-cyan-400 transition-colors">

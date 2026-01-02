@@ -45,7 +45,7 @@ export default function OnboardingPage() {
                 setStage("tutorial");
             }
         }
-    }, [session]);
+    }, [session, stage]);
 
     const nextStage = () => {
         const stages: OnboardingStage[] = [
@@ -300,19 +300,27 @@ function SafetyStage({ onNext }: { onNext: () => void }) {
 
 // Stage 5: Connect
 function ConnectStage({ onNext }: { onNext: () => void }) {
-    const [status, setStatus] = useState<PermissionStatus | null>(null);
+    const { data: session } = useSession();
     const [isConnecting, setIsConnecting] = useState(false);
+    const [connectError, setConnectError] = useState<string | null>(null);
 
     const handleConnect = async () => {
         setIsConnecting(true);
-        // Trigger real authentication flow
-        // The callbackUrl ensures they return here to complete the tutorial
-        await signIn("google", { callbackUrl: "/onboarding" });
+        setConnectError(null);
+        try {
+            // Trigger real authentication flow
+            // The callbackUrl ensures they return here to complete the tutorial
+            await signIn("google", { callbackUrl: "/onboarding" });
+        } catch (error) {
+            console.error("Sign in failed:", error);
+            setConnectError("Failed to connect. Please try again.");
+            setIsConnecting(false);
+        }
     };
 
     return (
         <motion.div
-            className="min-height-screen flex items-center justify-center p-6 text-center"
+            className="min-h-screen flex items-center justify-center p-6 text-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -321,7 +329,7 @@ function ConnectStage({ onNext }: { onNext: () => void }) {
                 <h2 className="text-4xl font-heading font-black mb-8">Establish Connection.</h2>
 
                 <div className="glass border-zinc-800 p-8 rounded-3xl mb-8">
-                    {!status ? (
+                    {!session ? (
                         <>
                             <div className="flex justify-center gap-6 mb-8">
                                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center grayscale hover:grayscale-0 transition-all cursor-pointer border border-blue-500/20 active:scale-95">
@@ -332,6 +340,9 @@ function ConnectStage({ onNext }: { onNext: () => void }) {
                                 </div>
                             </div>
                             <p className="text-zinc-500 text-sm mb-6">Connect your primary provider to begin indexing your inbox metadata.</p>
+                            {connectError && (
+                                <p className="text-red-400 text-sm mb-4">{connectError}</p>
+                            )}
                             <button
                                 onClick={handleConnect}
                                 disabled={isConnecting}
@@ -348,13 +359,8 @@ function ConnectStage({ onNext }: { onNext: () => void }) {
                             </div>
 
                             <div className="space-y-3">
-                                <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Required Permissions</p>
-                                {status.granted.map(scope => (
-                                    <div key={scope} className="flex items-center gap-2 text-xs text-zinc-300">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                        {scope.split('/').pop()}
-                                    </div>
-                                ))}
+                                <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Connected Account</p>
+                                <p className="text-sm text-zinc-300">{session.user?.email}</p>
                             </div>
 
                             <button

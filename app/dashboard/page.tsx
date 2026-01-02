@@ -146,10 +146,14 @@ export default function DashboardPage() {
             setSelectedIds(new Set());
             showToast(`Trashed ${totalCount} emails from ${sendersToDelete.length} senders ✓`, {
                 type: "success",
-                undoAction: canUndo ? async () => {
-                    await undoLastAction();
-                    showToast("Restored ✓", { type: "info" });
-                } : undefined
+                undoAction: async () => {
+                    const success = await undoLastAction();
+                    if (success) {
+                        showToast("Restored ✓", { type: "info" });
+                    } else {
+                        showToast("Nothing to undo", { type: "error" });
+                    }
+                }
             });
         } catch (err) {
             console.error("Trash failed", err);
@@ -539,10 +543,16 @@ export default function DashboardPage() {
                                             </div>
                                             <button
                                                 onClick={async () => {
-                                                    for (const sender of group.senders) {
-                                                        await trashSender(sender.email);
-                                                    }
-                                                    showToast(`Trashed all emails from @${group.domain} ✓`, { type: "success" });
+                                                    await trashMultipleSenders(group.senders.map(s => s.email));
+                                                    showToast(`Trashed all emails from @${group.domain} ✓`, {
+                                                        type: "success",
+                                                        undoAction: async () => {
+                                                            const success = await undoLastAction();
+                                                            if (success) {
+                                                                showToast("Restored ✓", { type: "info" });
+                                                            }
+                                                        }
+                                                    });
                                                 }}
                                                 className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors text-sm font-bold"
                                             >

@@ -9,7 +9,7 @@ import {
     PanInfo,
     AnimatePresence,
 } from "framer-motion";
-import { ArrowLeft, Check, Trash2, Clock, Loader2, RefreshCw, Flame, Zap } from "lucide-react";
+import { ArrowLeft, Check, Trash2, Clock, Loader2, RefreshCw, Flame, Zap, Star } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -141,6 +141,11 @@ export default function SwipePage() {
 
         setActionInProgress(true);
         const currentCard = cards[0];
+
+        // Haptic feedback
+        if (typeof window !== "undefined" && window.navigator.vibrate) {
+            window.navigator.vibrate(20);
+        }
 
         // Animate off screen
         await controls.start({
@@ -361,8 +366,19 @@ export default function SwipePage() {
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
                 <div className="text-6xl mb-6">🎉</div>
                 <h1 className="text-4xl font-black text-zinc-100 mb-4 tracking-tight">All Done!</h1>
+                {initialCount > 0 && sessionStats.reviewed >= initialCount && (
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="mb-6 inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-900 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest animate-float"
+                    >
+                        <Star className="w-4 h-4 fill-zinc-900" />
+                        Perfect Session
+                        <Star className="w-4 h-4 fill-zinc-900" />
+                    </motion.div>
+                )}
                 <p className="text-zinc-500 mb-8 max-w-md mx-auto">
-                    You reviewed {sessionStats.reviewed} emails this session.
+                    You reviewed <span className="text-zinc-100 font-bold">{sessionStats.reviewed}</span> emails this session.
                 </p>
 
                 {/* Session Stats */}
@@ -404,7 +420,7 @@ export default function SwipePage() {
     const senderCount = emails.filter(e => e.sender.toLowerCase() === activeCard.originalEmail.sender.toLowerCase()).length;
 
     return (
-        <div className="min-h-screen bg-zinc-950 overflow-hidden flex flex-col relative select-none font-sans">
+        <div className="min-h-screen bg-zinc-950 overflow-hidden flex flex-col relative select-none font-sans touch-none">
             {/* Background Tint Overlays */}
             <motion.div style={{ opacity: bgOverlayOpacityTrash }} className="absolute inset-0 bg-red-500 pointer-events-none z-0" />
             <motion.div style={{ opacity: bgOverlayOpacityKeep }} className="absolute inset-0 bg-emerald-500 pointer-events-none z-0" />

@@ -396,8 +396,8 @@ export default function DashboardPage() {
 
                                         {/* Volume Bar */}
                                         <div className="col-span-4 flex items-center gap-4">
-                                            <div className={`font-mono font-bold w-14 text-right text-lg ${sender.count > 100 ? "text-red-400" :
-                                                sender.count > 20 ? "text-cyan-400" : "text-zinc-300"
+                                            <div className={`font-mono font-bold w-14 text-right text-lg ${sender.count > 100 ? "text-red-400 text-glow-red" :
+                                                sender.count > 20 ? "text-cyan-400 text-glow-cyan" : "text-zinc-300"
                                                 }`}>
                                                 {sender.count}
                                             </div>
@@ -406,12 +406,12 @@ export default function DashboardPage() {
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${Math.min((sender.count / 50) * 100, 100)}%` }}
                                                     transition={{ duration: 1, ease: "easeOut" }}
-                                                    className={`h-full rounded-full ${sender.count > 100 ? "bg-red-500" :
+                                                    className={`h-full rounded-full ${sender.count > 100 ? "bg-red-500 premium-pulse-red" :
                                                         sender.count > 20 ? "bg-cyan-500" : "bg-zinc-600"
                                                         }`}
                                                 />
                                             </div>
-                                            <div className={`text-xs font-mono w-12 text-right ${sender.count > 100 ? "text-red-400 font-bold" : "text-zinc-600"
+                                            <div className={`text-xs font-mono w-12 text-right ${sender.count > 100 ? "text-red-400 font-bold text-glow-red" : "text-zinc-600"
                                                 }`}>
                                                 {sender.count > 100 ? "DANGER" : sender.count > 20 ? "HIGH" : "LOW"}
                                             </div>

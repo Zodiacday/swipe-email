@@ -136,6 +136,24 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: true, emailId });
         }
 
+        if (action === "untrash" && emailId) {
+            const untrashUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${emailId}/untrash`;
+
+            const response = await fetch(untrashUrl, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${session.accessToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                return NextResponse.json({ error: error.error?.message || "Failed to untrash email" }, { status: response.status });
+            }
+
+            return NextResponse.json({ success: true, emailId });
+        }
+
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 
     } catch (error) {

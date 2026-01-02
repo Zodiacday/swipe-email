@@ -8,10 +8,13 @@ import {
     useAnimation,
     PanInfo,
 } from "framer-motion";
-import { ArrowLeft, Check, Trash2, ArrowRight, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Check, Trash2, Clock, Loader2, RefreshCw, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useEmailContext } from "@/contexts/EmailContext";
+import { useToast } from "@/contexts/ToastContext";
+import { setLastMode } from "@/lib/userPreferences";
 import { NormalizedEmail } from "@/lib/types";
 
 // --- Card Type ---
@@ -23,6 +26,7 @@ interface SwipeCard {
     subject: string;
     preview: string;
     date: string;
+    category: string;
     originalEmail: NormalizedEmail;
 }
 
@@ -41,29 +45,6 @@ function stringToColor(str: string): string {
     return colors[Math.abs(hash) % colors.length];
 }
 
-// --- Helper: Transform API email to SwipeCard ---
-function transformToCard(email: NormalizedEmail): SwipeCard {
-    const initials = (email.senderName || email.sender)
-        .split(" ")
-        .map(n => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
-
-    const timeAgo = getTimeAgo(email.timestamp);
-
-    return {
-        id: email.id,
-        sender: email.senderName || email.sender,
-        senderInitials: initials || "?",
-        senderColor: stringToColor(email.sender),
-        subject: email.subject || "(No Subject)",
-        preview: email.preview || "",
-        date: timeAgo,
-        originalEmail: email,
-    };
-}
-
 function getTimeAgo(timestamp: number): string {
     const now = Date.now();
     const diff = now - timestamp;
@@ -77,17 +58,55 @@ function getTimeAgo(timestamp: number): string {
     return new Date(timestamp).toLocaleDateString();
 }
 
-export default function SwipePage() {
-    // --- State ---
-    const [cards, setCards] = useState<SwipeCard[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [actionInProgress, setActionInProgress] = useState(false);
+// --- Transform email to card ---
+function transformToCard(email: NormalizedEmail): SwipeCard {
+    const initials = (email.senderName || email.sender)
+        .split(" ")
+        .map(n => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
 
+    return {
+        id: email.id,
+        sender: email.senderName || email.sender,
+        senderInitials: initials || "?",
+        senderColor: stringToColor(email.sender),
+        subject: email.subject || "(No Subject)",
+        preview: email.preview || "",
+        date: getTimeAgo(email.timestamp),
+        category: email.category,
+        originalEmail: email,
+    };
+}
+
+export default function SwipePage() {
+    // --- Context ---
+    const { emails, isLoading, error, fetchEmails, trashEmail, canUndo, undoLastAction, isRefreshing } = useEmailContext();
+    const { showToast } = useToast();
     const { data: session, status } = useSession();
     const router = useRouter();
 
-    // --- Motion Values (defined at top level) ---
+    // --- Local State ---
+    const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
+    const [actionInProgress, setActionInProgress] = useState(false);
+    const [sessionStats, setSessionStats] = useState({ reviewed: 0, trashed: 0, kept: 0 });
+    const [initialCount, setInitialCount] = useState(0);
+
+    // --- Derived: Cards to show (filter out processed) ---
+    const cards = useMemo(() => {
+        const filtered = emails.filter(e => !processedIds.has(e.id));
+        return filtered.map(transformToCard);
+    }, [emails, processedIds]);
+
+    // Set initial count on first load
+    useEffect(() => {
+        if (emails.length > 0 && initialCount === 0) {
+            setInitialCount(emails.length);
+        }
+    }, [emails.length, initialCount]);
+
+    // --- Motion Values ---
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-15, 15]);
     const cardOpacity = useTransform(x, [-200, -150, 0, 150, 200], [0.5, 1, 1, 1, 0.5]);
@@ -98,40 +117,19 @@ export default function SwipePage() {
 
     const controls = useAnimation();
 
-    // --- Fetch Emails on Mount ---
+    // Track mode for preferences
     useEffect(() => {
-        if (status === "loading") return;
-        if (!session) {
+        setLastMode("swipe");
+    }, []);
+
+    // Redirect if not authenticated
+    useEffect(() => {
+        if (status === "unauthenticated") {
             router.push("/login");
-            return;
         }
+    }, [status, router]);
 
-        const fetchEmails = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const res = await fetch("/api/gmail/emails?limit=50");
-                if (!res.ok) throw new Error("Failed to fetch emails");
-                const data = await res.json();
-
-                if (data.emails && Array.isArray(data.emails)) {
-                    const transformed = data.emails.map(transformToCard);
-                    setCards(transformed);
-                } else {
-                    setCards([]);
-                }
-            } catch (err) {
-                console.error("Fetch error:", err);
-                setError("Failed to load emails. Please try again.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchEmails();
-    }, [session, status, router]);
-
-    // --- Swipe Handler (using useCallback to avoid stale closures) ---
+    // --- Swipe Handler ---
     const handleSwipe = useCallback(async (direction: "left" | "right") => {
         if (cards.length === 0 || actionInProgress) return;
 
@@ -146,27 +144,70 @@ export default function SwipePage() {
             transition: { duration: 0.25, ease: "easeIn" }
         });
 
-        // Call API for action (fire and forget for speed, or await for safety)
-        if (direction === "left") {
-            // Trash action
-            fetch("/api/gmail/emails", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "trash", emailId: currentCard.id })
-            }).catch(console.error);
-        }
-        // Right swipe = keep (no API action needed, just remove from queue)
+        // Mark as processed locally
+        setProcessedIds(prev => new Set([...prev, currentCard.id]));
 
-        // Update state
-        setCards(prev => prev.slice(1));
+        // Update stats
+        if (direction === "left") {
+            setSessionStats(s => ({ ...s, reviewed: s.reviewed + 1, trashed: s.trashed + 1 }));
+
+            // Trash via context
+            try {
+                await trashEmail(currentCard.id, currentCard.originalEmail);
+                showToast("Trashed ✓", {
+                    type: "success",
+                    undoAction: async () => {
+                        const success = await undoLastAction();
+                        if (success) {
+                            setProcessedIds(prev => {
+                                const next = new Set(prev);
+                                next.delete(currentCard.id);
+                                return next;
+                            });
+                            showToast("Restored ✓", { type: "info" });
+                        }
+                    }
+                });
+            } catch {
+                showToast("Failed to trash", { type: "error" });
+            }
+        } else {
+            setSessionStats(s => ({ ...s, reviewed: s.reviewed + 1, kept: s.kept + 1 }));
+            showToast("Kept ✓", { type: "info" });
+        }
 
         // Reset for next card
         x.set(0);
         controls.set({ x: 0, opacity: 1, rotate: 0 });
         setActionInProgress(false);
-    }, [cards, actionInProgress, controls, x]);
+    }, [cards, actionInProgress, controls, x, trashEmail, showToast, undoLastAction]);
 
-    // --- Drag End Handler ---
+    // --- Skip Handler ---
+    const handleSkip = useCallback(async () => {
+        if (cards.length === 0 || actionInProgress) return;
+
+        setActionInProgress(true);
+        const currentCard = cards[0];
+
+        // Animate down
+        await controls.start({
+            y: 400,
+            opacity: 0,
+            transition: { duration: 0.2 }
+        });
+
+        // Move to end by marking processed then unprocessed
+        // Actually, for skip we just move past it temporarily
+        setProcessedIds(prev => new Set([...prev, currentCard.id]));
+        showToast("Skipped for later", { type: "info" });
+
+        // Reset
+        x.set(0);
+        controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
+        setActionInProgress(false);
+    }, [cards, actionInProgress, controls, x, showToast]);
+
+    // --- Drag End ---
     const onDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         const threshold = 100;
         if (info.offset.x < -threshold) {
@@ -174,7 +215,6 @@ export default function SwipePage() {
         } else if (info.offset.x > threshold) {
             handleSwipe("right");
         } else {
-            // Snap back
             controls.start({ x: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 500, damping: 30 } });
         }
     }, [handleSwipe, controls]);
@@ -184,14 +224,15 @@ export default function SwipePage() {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "ArrowLeft") handleSwipe("left");
             if (e.key === "ArrowRight" || e.key === " ") handleSwipe("right");
+            if (e.key === "ArrowDown") handleSkip();
             if (e.key === "Escape") router.push("/mode-select");
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [handleSwipe, router]);
+    }, [handleSwipe, handleSkip, router]);
 
     // --- Loading State ---
-    if (status === "loading" || loading) {
+    if (status === "loading" || (isLoading && emails.length === 0)) {
         return (
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4">
                 <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
@@ -201,14 +242,14 @@ export default function SwipePage() {
     }
 
     // --- Error State ---
-    if (error) {
+    if (error && emails.length === 0) {
         return (
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4 p-6 text-center">
                 <div className="text-5xl mb-2">😕</div>
                 <h1 className="text-2xl font-bold text-zinc-100">Something went wrong</h1>
                 <p className="text-zinc-500 max-w-md">{error}</p>
                 <button
-                    onClick={() => window.location.reload()}
+                    onClick={() => fetchEmails()}
                     className="mt-4 px-6 py-3 bg-emerald-500 text-zinc-900 font-bold rounded-full flex items-center gap-2 hover:bg-emerald-400 transition-colors"
                 >
                     <RefreshCw className="w-4 h-4" /> Try Again
@@ -217,13 +258,36 @@ export default function SwipePage() {
         );
     }
 
-    // --- Empty State ---
+    // --- Empty State (All Done) ---
     if (cards.length === 0) {
         return (
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
                 <div className="text-6xl mb-6">🎉</div>
-                <h1 className="text-4xl font-black text-zinc-100 mb-4 tracking-tight">You're All Caught Up!</h1>
-                <p className="text-zinc-500 mb-8 max-w-md mx-auto">Inbox Zero achieved. No more emails to review.</p>
+                <h1 className="text-4xl font-black text-zinc-100 mb-4 tracking-tight">All Done!</h1>
+                <p className="text-zinc-500 mb-8 max-w-md mx-auto">
+                    You reviewed {sessionStats.reviewed} emails this session.
+                </p>
+
+                {/* Session Stats */}
+                <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8">
+                    <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+                        <div className="text-2xl font-bold text-red-400">{sessionStats.trashed}</div>
+                        <div className="text-xs text-zinc-500 uppercase tracking-wider">Trashed</div>
+                    </div>
+                    <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+                        <div className="text-2xl font-bold text-emerald-400">{sessionStats.kept}</div>
+                        <div className="text-xs text-zinc-500 uppercase tracking-wider">Kept</div>
+                    </div>
+                    <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+                        <div className="text-2xl font-bold text-zinc-300">{sessionStats.reviewed}</div>
+                        <div className="text-xs text-zinc-500 uppercase tracking-wider">Total</div>
+                    </div>
+                </div>
+
+                <p className="text-xs text-zinc-600 mb-8">
+                    Gmail keeps trashed emails for 30 days. Nothing is permanently deleted.
+                </p>
+
                 <div className="flex gap-4">
                     <Link href="/dashboard" className="px-8 py-3 bg-cyan-500 text-zinc-900 font-bold rounded-full hover:bg-cyan-400 transition-colors">
                         Go to Dashboard
@@ -238,6 +302,9 @@ export default function SwipePage() {
 
     const activeCard = cards[0];
     const nextCard = cards[1];
+
+    // Calculate sender count
+    const senderCount = emails.filter(e => e.sender.toLowerCase() === activeCard.originalEmail.sender.toLowerCase()).length;
 
     return (
         <div className="min-h-screen bg-zinc-950 overflow-hidden flex flex-col relative select-none font-sans">
@@ -257,8 +324,15 @@ export default function SwipePage() {
                     </Link>
                 </div>
 
+                {/* Progress Counter */}
                 <div className="flex items-center gap-4">
-                    <span className="text-zinc-600 text-sm font-mono">{cards.length} left</span>
+                    <div className="flex items-center gap-2 text-sm font-mono">
+                        <span className="text-emerald-400 font-bold">{sessionStats.reviewed}</span>
+                        <span className="text-zinc-600">/</span>
+                        <span className="text-zinc-400">{initialCount || emails.length}</span>
+                        <span className="text-zinc-600 text-xs">reviewed</span>
+                    </div>
+                    {isRefreshing && <RefreshCw className="w-4 h-4 text-zinc-600 animate-spin" />}
                     <Link href="/mode-select" className="text-zinc-500 hover:text-zinc-300 transition-colors">
                         <ArrowLeft className="w-6 h-6" />
                     </Link>
@@ -305,25 +379,39 @@ export default function SwipePage() {
                         </motion.div>
 
                         {/* Card Content */}
-                        <div className="p-8 flex-1 flex flex-col">
+                        <div className="p-10 flex-1 flex flex-col">
                             {/* Header */}
-                            <div className="flex items-center gap-4 mb-8">
+                            <div className="flex items-center gap-4 mb-6">
                                 <div className={`w-14 h-14 rounded-full ${activeCard.senderColor} flex items-center justify-center text-white font-bold text-xl shadow-lg`}>
                                     {activeCard.senderInitials}
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-zinc-100">{activeCard.sender}</h2>
-                                    <p className="text-sm text-zinc-500 font-mono">{activeCard.date}</p>
+                                <div className="flex-1 min-w-0">
+                                    <h2 className="text-lg font-bold text-zinc-100 truncate">{activeCard.sender}</h2>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm text-zinc-500 font-mono">{activeCard.date}</p>
+                                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${activeCard.category === "promo" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
+                                                activeCard.category === "social" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                                    activeCard.category === "newsletter" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
+                                                        "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                                            }`}>
+                                            {activeCard.category}
+                                        </span>
+                                    </div>
+                                    {senderCount > 1 && (
+                                        <p className="text-xs text-cyan-500 mt-1">
+                                            +{senderCount - 1} more from this sender
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Body */}
-                            <div className="flex-1 flex flex-col justify-center mb-8">
-                                <h3 className="text-3xl font-black text-white leading-tight mb-6 tracking-tight">
+                            <div className="flex-1 flex flex-col justify-center mb-6">
+                                <h3 className="text-2xl font-black text-white leading-tight mb-6 tracking-tight">
                                     {activeCard.subject}
                                 </h3>
                                 <div className="p-6 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
-                                    <p className="text-zinc-400 leading-relaxed text-lg line-clamp-4">
+                                    <p className="text-zinc-400 leading-relaxed text-base line-clamp-4">
                                         {activeCard.preview}
                                     </p>
                                 </div>
@@ -331,28 +419,31 @@ export default function SwipePage() {
 
                             {/* Footer / Hint */}
                             <div className="flex justify-between text-xs font-bold text-zinc-600 uppercase tracking-widest">
-                                <span>← Swipe Left to Trash</span>
-                                <span>Swipe Right to Keep →</span>
+                                <span>← Trash</span>
+                                <span>Keep →</span>
                             </div>
                         </div>
                     </motion.div>
                 </div>
 
                 {/* --- Bottom Controls --- */}
-                <div className="mt-12 flex items-center gap-8 z-30">
+                <div className="mt-16 flex items-center gap-8 z-30">
                     <button
                         onClick={() => handleSwipe("left")}
                         disabled={actionInProgress}
                         className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-red-500 hover:border-red-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <Trash2 className="w-8 h-8 group-hover:animate-pulse" />
+                        <Trash2 className="w-8 h-8" />
                     </button>
 
                     <button
-                        className="w-16 h-16 rounded-full bg-zinc-900/50 border border-zinc-800 flex items-center justify-center text-zinc-600 hover:text-zinc-400 transition-colors"
-                        title="Detail View (Coming Soon)"
+                        onClick={handleSkip}
+                        disabled={actionInProgress}
+                        className="w-16 h-16 rounded-full bg-zinc-900/50 border border-zinc-800 flex flex-col items-center justify-center text-zinc-600 hover:text-zinc-400 hover:border-zinc-700 transition-all hover:scale-105 active:scale-95"
+                        title="Skip for later"
                     >
-                        <ArrowRight className="w-6 h-6 rotate-[-45deg]" />
+                        <Clock className="w-5 h-5" />
+                        <span className="text-[8px] uppercase mt-0.5">Later</span>
                     </button>
 
                     <button
@@ -360,7 +451,7 @@ export default function SwipePage() {
                         disabled={actionInProgress}
                         className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-emerald-500 hover:border-emerald-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <Check className="w-10 h-10 group-hover:animate-bounce" />
+                        <Check className="w-10 h-10" />
                     </button>
                 </div>
             </main>

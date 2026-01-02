@@ -3,6 +3,8 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar/Navbar";
 import { AuthProvider } from "@/components/AuthProvider/AuthProvider";
+import { EmailProvider } from "@/contexts/EmailContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 
 const inter = Inter({
   variable: "--font-body",
@@ -34,10 +36,15 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-body antialiased bg-black text-white`}
       >
         <AuthProvider>
-          <Navbar />
-          {children}
+          <EmailProvider>
+            <ToastProvider>
+              <Navbar />
+              {children}
+            </ToastProvider>
+          </EmailProvider>
         </AuthProvider>
       </body>
     </html>
   );
 }
+

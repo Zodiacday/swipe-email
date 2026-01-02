@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
     try {
         const auth = new google.auth.OAuth2();
-        setCredentials(auth, session);
+        setCredentials(auth, session.accessToken as string, session.refreshToken as string | undefined);
 
         const gmail = google.gmail({ version: "v1", auth });
 

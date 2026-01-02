@@ -237,7 +237,7 @@ export default function DashboardPage() {
                                             animate={{ width: `${Math.min((sender.count / 50) * 100, 100)}%` }}
                                             transition={{ duration: 1, ease: "easeOut" }}
                                             className={`h-full rounded-full ${sender.count > 100 ? "bg-red-500" :
-                                                    sender.count > 20 ? "bg-cyan-500" : "bg-zinc-600"
+                                                sender.count > 20 ? "bg-cyan-500" : "bg-zinc-600"
                                                 }`}
                                         />
                                     </div>

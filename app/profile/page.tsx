@@ -4,27 +4,25 @@
 
 "use client";
 
-// ... imports
 import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
-import { LogOut, Mail, Calendar, Zap, Trash2, Shield, User, Clock, Trophy, Settings, ChevronRight } from "lucide-react";
+import { LogOut, Mail, Calendar, Trash2, Shield, User, Clock, Settings, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { useEmailContext } from "@/contexts/EmailContext";
 
 export default function ProfilePage() {
     const { data: session } = useSession();
+    const { aggregates } = useEmailContext();
 
-    // Default fallback so the page doesn't crash if session is loading
+    // Calculate real stats
+    const emailsCleared = aggregates.stats.totalEmails;
+    const timeSaved = Math.round(emailsCleared * 0.1); // Estimate: 6 seconds per email = 0.1 min
+
     const user = {
         name: session?.user?.name || "User",
         email: session?.user?.email || "loading...",
         image: session?.user?.image,
-        joinedDate: "January 2026", // Placeholder
-        stats: {
-            emailsCleared: 0,
-            timeSaved: 0,
-            streakDays: 0,
-            level: 1
-        }
+        joinedDate: "January 2026", // Placeholder - could get from session/db
     };
 
     return (
@@ -55,31 +53,26 @@ export default function ProfilePage() {
                                 Joined {user.joinedDate}
                             </p>
                         </div>
-                        <div className="text-right">
-                            <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 mb-1">Level</div>
-                            <div className="text-3xl font-heading font-black text-emerald-500">{user.stats.level}</div>
-                        </div>
                     </div>
                 </motion.div>
 
-                {/* Stats Grid */}
+                {/* Stats Grid (2 items, no streak) */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="grid grid-cols-3 gap-4 mb-6"
+                    className="grid grid-cols-2 gap-4 mb-6"
                 >
-                    {[
-                        { icon: Trash2, label: "Emails Cleared", value: user.stats.emailsCleared.toLocaleString(), color: "text-red-400" },
-                        { icon: Clock, label: "Hours Saved", value: user.stats.timeSaved.toString(), color: "text-blue-400" },
-                        { icon: Trophy, label: "Day Streak", value: user.stats.streakDays.toString(), color: "text-emerald-400" },
-                    ].map((stat, i) => (
-                        <div key={i} className="glass border-zinc-800 p-5 rounded-2xl text-center">
-                            <stat.icon className={`w-5 h-5 ${stat.color} mx-auto mb-2`} />
-                            <div className="text-2xl font-heading font-black mb-1">{stat.value}</div>
-                            <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">{stat.label}</div>
-                        </div>
-                    ))}
+                    <div className="glass border-zinc-800 p-5 rounded-2xl text-center">
+                        <Trash2 className="w-5 h-5 text-red-400 mx-auto mb-2" />
+                        <div className="text-2xl font-heading font-black mb-1">{emailsCleared.toLocaleString()}</div>
+                        <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Emails Processed</div>
+                    </div>
+                    <div className="glass border-zinc-800 p-5 rounded-2xl text-center">
+                        <Clock className="w-5 h-5 text-blue-400 mx-auto mb-2" />
+                        <div className="text-2xl font-heading font-black mb-1">{timeSaved}</div>
+                        <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Minutes Saved</div>
+                    </div>
                 </motion.div>
 
                 {/* Settings Links */}
@@ -126,3 +119,4 @@ export default function ProfilePage() {
         </div>
     );
 }
+

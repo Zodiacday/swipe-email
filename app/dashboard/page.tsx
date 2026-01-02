@@ -17,7 +17,10 @@ import {
     ArrowUpDown,
     Filter,
     Star,
-    ShieldOff
+    ShieldOff,
+    Check,
+    AlertTriangle,
+    SlidersHorizontal
 } from "lucide-react";
 import Link from "next/link";
 import { SkeletonRow } from "@/components/Skeleton";
@@ -59,6 +62,7 @@ export default function DashboardPage() {
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
     const [sortField, setSortField] = useState<"count" | "score" | "newest">("count");
     const [scoreFilter, setScoreFilter] = useState<"all" | "high" | "danger">("all");
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const { senders, stats } = aggregates;
 
@@ -247,19 +251,28 @@ export default function DashboardPage() {
             </header>
 
             {/* --- Sticky Header Row 2: Controls --- */}
-            <div className="h-14 px-6 bg-zinc-900/50 backdrop-blur-xl border-b border-zinc-800/50 flex items-center justify-between sticky top-16 z-40">
+            <div className="px-4 md:px-6 py-3 bg-zinc-900/50 backdrop-blur-xl border-b border-zinc-800/50 flex flex-wrap items-center justify-between gap-3 sticky top-16 z-40">
                 {/* Mode Toggle */}
-                <div className="flex items-center gap-1 bg-zinc-800 rounded-full p-1 relative">
-                    <Link href="/swipe" className="relative z-10 px-6 py-1.5 rounded-full text-sm font-medium text-zinc-400 hover:text-zinc-300 transition-colors">
+                <div className="flex items-center gap-1 bg-zinc-800 rounded-full p-1">
+                    <Link href="/swipe" className="px-4 py-1.5 rounded-full text-sm font-medium text-zinc-400 hover:text-zinc-300 transition-colors">
                         Swipe
                     </Link>
-                    <div className="relative z-10 px-6 py-1.5 rounded-full text-sm font-medium text-zinc-900 bg-cyan-500 shadow-sm">
+                    <div className="px-4 py-1.5 rounded-full text-sm font-medium text-zinc-900 bg-cyan-500 shadow-sm">
                         Dashboard
                     </div>
                 </div>
 
-                {/* Filters & Search */}
-                <div className="flex items-center gap-4">
+                {/* Mobile Filter Toggle */}
+                <button
+                    onClick={() => setShowMobileFilters(!showMobileFilters)}
+                    className="md:hidden flex items-center gap-2 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-400"
+                >
+                    <SlidersHorizontal className="w-4 h-4" />
+                    <span className="text-xs font-bold">Filters</span>
+                </button>
+
+                {/* Desktop Filters */}
+                <div className="hidden md:flex items-center gap-4">
                     {/* View Toggle */}
                     <div className="flex items-center gap-1 bg-zinc-800/50 rounded-lg p-1 border border-zinc-700/50">
                         <button
@@ -295,8 +308,7 @@ export default function DashboardPage() {
                         <Filter className="w-3.5 h-3.5 text-zinc-500 ml-1.5" />
                         <button
                             onClick={() => setScoreFilter(scoreFilter === "all" ? "high" : scoreFilter === "high" ? "danger" : "all")}
-                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${scoreFilter !== "all" ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"
-                                }`}
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${scoreFilter !== "all" ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"}`}
                         >
                             {scoreFilter === "all" ? "All Scores" : scoreFilter === "high" ? "High Score (>50)" : "Danger (>80)"}
                         </button>
@@ -308,8 +320,7 @@ export default function DashboardPage() {
                             <button
                                 key={range}
                                 onClick={() => setTimeRange(range)}
-                                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${timeRange === range ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"
-                                    }`}
+                                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${timeRange === range ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"}`}
                             >
                                 {range === "all" ? "All Time" : range}
                             </button>
@@ -338,10 +349,68 @@ export default function DashboardPage() {
                 </div>
             </div>
 
+            {/* Mobile Filter Drawer */}
+            <AnimatePresence>
+                {showMobileFilters && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="md:hidden bg-zinc-900 border-b border-zinc-800 px-4 py-4 space-y-3 overflow-hidden"
+                    >
+                        {/* Mobile Search */}
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <input
+                                type="text"
+                                placeholder="Search senders..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full h-10 bg-zinc-800 border border-zinc-700 rounded-lg pl-10 pr-4 text-sm text-zinc-300"
+                            />
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                            {/* View Toggle */}
+                            <select
+                                value={selectedView}
+                                onChange={(e) => setSelectedView(e.target.value as any)}
+                                className="flex-1 h-10 bg-zinc-800 border border-zinc-700 rounded-lg px-3 text-sm text-zinc-300"
+                            >
+                                <option value="senders">Senders</option>
+                                <option value="domains">Domains</option>
+                            </select>
+
+                            {/* Sort */}
+                            <select
+                                value={sortField}
+                                onChange={(e) => setSortField(e.target.value as any)}
+                                className="flex-1 h-10 bg-zinc-800 border border-zinc-700 rounded-lg px-3 text-sm text-zinc-300"
+                            >
+                                <option value="count">By Volume</option>
+                                <option value="score">By Score</option>
+                                <option value="newest">By Recent</option>
+                            </select>
+
+                            {/* Time */}
+                            <select
+                                value={timeRange}
+                                onChange={(e) => setTimeRange(e.target.value as any)}
+                                className="flex-1 h-10 bg-zinc-800 border border-zinc-700 rounded-lg px-3 text-sm text-zinc-300"
+                            >
+                                <option value="7d">7 Days</option>
+                                <option value="30d">30 Days</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* --- Main Content: Data Table --- */}
-            <main className="max-w-7xl mx-auto p-8">
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 px-6 h-12 items-center bg-zinc-900 border border-zinc-800 rounded-t-2xl text-xs font-bold text-zinc-500 uppercase tracking-widest">
+            <main className="max-w-7xl mx-auto p-4 md:p-8">
+                {/* Table Header - Hidden on mobile */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-6 h-12 items-center bg-zinc-900 border border-zinc-800 rounded-t-2xl text-xs font-bold text-zinc-500 uppercase tracking-widest">
                     <div className="col-span-1 flex justify-center">
                         <input
                             type="checkbox"
@@ -353,6 +422,20 @@ export default function DashboardPage() {
                     <div className="col-span-5 pl-2">Sender Identity</div>
                     <div className="col-span-4">Volume Impact</div>
                     <div className="col-span-2 text-center">Actions</div>
+                </div>
+
+                {/* Mobile Select All */}
+                <div className="md:hidden flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-t-2xl px-4 py-3">
+                    <label className="flex items-center gap-2 text-sm text-zinc-400">
+                        <input
+                            type="checkbox"
+                            checked={selectedIds.size === filteredSenders.length && filteredSenders.length > 0}
+                            onChange={toggleAll}
+                            className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-cyan-500"
+                        />
+                        Select all
+                    </label>
+                    <span className="text-xs text-zinc-500">{filteredSenders.length} senders</span>
                 </div>
 
                 {/* Table Body */}
@@ -368,47 +451,47 @@ export default function DashboardPage() {
                                         initial="hidden"
                                         animate="visible"
                                         className={`
-                                        grid grid-cols-12 gap-4 px-6 h-[84px] items-center group transition-colors duration-200
+                                        flex md:grid md:grid-cols-12 gap-3 md:gap-4 p-4 md:px-6 md:h-[84px] items-center group transition-colors duration-200
                                         ${sender.count > 100 ? "border-l-4 border-l-red-500 bg-red-500/5" : "border-l-2 border-l-transparent"}
                                         ${selectedIds.has(sender.id) ? "bg-cyan-500/5 !border-l-cyan-500" : "hover:bg-zinc-800/30"}
                                     `}
                                     >
                                         {/* Checkbox */}
-                                        <div className="col-span-1 flex justify-center">
+                                        <div className="md:col-span-1 flex justify-center shrink-0">
                                             <input
                                                 type="checkbox"
                                                 checked={selectedIds.has(sender.id)}
                                                 onChange={() => toggleSelection(sender.id)}
-                                                className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-cyan-500 focus:ring-cyan-500/20 cursor-pointer"
+                                                className="w-5 h-5 md:w-4 md:h-4 rounded border-zinc-700 bg-zinc-800/50 text-cyan-500 focus:ring-cyan-500/20 cursor-pointer"
                                             />
                                         </div>
 
                                         {/* Identity */}
-                                        <div className="col-span-5 flex items-center gap-4 min-w-0 pl-2">
-                                            <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 font-bold text-base shrink-0 border border-zinc-700">
+                                        <div className="md:col-span-5 flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+                                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 font-bold text-sm md:text-base shrink-0 border border-zinc-700">
                                                 {sender.name[0]}
                                             </div>
-                                            <div className="min-w-0">
+                                            <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="font-semibold text-zinc-100 truncate">{sender.name}</div>
+                                                    <div className="font-semibold text-zinc-100 truncate text-sm md:text-base">{sender.name}</div>
                                                     {sender.category === "Personal" && (
-                                                        <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-tighter">
+                                                        <span className="hidden md:inline px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-tighter">
                                                             Personal
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-sm text-zinc-500 truncate">{sender.email}</div>
+                                                <div className="text-xs md:text-sm text-zinc-500 truncate">{sender.email}</div>
                                             </div>
                                         </div>
 
-                                        {/* Volume Bar */}
-                                        <div className="col-span-4 flex items-center gap-4">
-                                            <div className={`font-mono font-bold w-14 text-right text-lg ${sender.count > 100 ? "text-red-400 text-glow-red" :
-                                                sender.count > 20 ? "text-cyan-400 text-glow-cyan" : "text-zinc-300"
+                                        {/* Volume - Simplified on mobile */}
+                                        <div className="md:col-span-4 flex items-center gap-2 md:gap-4 shrink-0">
+                                            <div className={`font-mono font-bold text-base md:text-lg ${sender.count > 100 ? "text-red-400" :
+                                                sender.count > 20 ? "text-cyan-400" : "text-zinc-300"
                                                 }`}>
                                                 {sender.count}
                                             </div>
-                                            <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                            <div className="hidden md:flex flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${Math.min((sender.count / 50) * 100, 100)}%` }}
@@ -418,18 +501,18 @@ export default function DashboardPage() {
                                                         }`}
                                                 />
                                             </div>
-                                            <div className={`text-xs font-mono w-12 text-right ${sender.count > 100 ? "text-red-400 font-bold text-glow-red" : "text-zinc-600"
+                                            <div className={`hidden md:block text-xs font-mono w-12 text-right ${sender.count > 100 ? "text-red-400 font-bold text-glow-red" : "text-zinc-600"
                                                 }`}>
                                                 {sender.count > 100 ? "DANGER" : sender.count > 20 ? "HIGH" : "LOW"}
                                             </div>
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="col-span-2 flex justify-center gap-2">
-                                            {/* Expand Toggle */}
+                                        <div className="md:col-span-2 flex justify-center gap-1 md:gap-2 shrink-0">
+                                            {/* Expand Toggle - Hidden on mobile */}
                                             <button
                                                 onClick={() => setExpandedRow(expandedRow === sender.id ? null : sender.id)}
-                                                className={`p-2 rounded-lg border transition-colors ${expandedRow === sender.id
+                                                className={`hidden md:flex p-2 rounded-lg border transition-colors ${expandedRow === sender.id
                                                     ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
                                                     : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
                                                     }`}
@@ -620,6 +703,24 @@ export default function DashboardPage() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Mobile Floating Action Button */}
+            {selectedIds.size > 0 && (
+                <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+                    <button
+                        onClick={handleTrashSelected}
+                        disabled={processing}
+                        className="flex items-center gap-2 px-6 py-4 bg-red-500 text-white font-bold rounded-full shadow-lg shadow-red-500/30 active:scale-95 transition-transform disabled:opacity-50"
+                    >
+                        {processing ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <Trash2 className="w-5 h-5" />
+                        )}
+                        Trash {selectedIds.size} selected
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

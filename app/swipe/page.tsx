@@ -9,7 +9,7 @@ import {
     PanInfo,
     AnimatePresence,
 } from "framer-motion";
-import { ArrowLeft, Check, Trash2, Clock, Loader2, RefreshCw, Flame, Zap, Star } from "lucide-react";
+import { ArrowLeft, Check, Trash2, Clock, Loader2, RefreshCw, Flame, Zap, Star, MailX, BellOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -115,12 +115,17 @@ export default function SwipePage() {
 
     // --- Motion Values ---
     const x = useMotionValue(0);
+    const y = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-15, 15]);
     const cardOpacity = useTransform(x, [-200, -150, 0, 150, 200], [0.5, 1, 1, 1, 0.5]);
-    const bgOverlayOpacityTrash = useTransform(x, [-150, 0], [0.1, 0]);
-    const bgOverlayOpacityKeep = useTransform(x, [0, 150], [0, 0.1]);
+    const bgOverlayOpacityTrash = useTransform(x, [-150, 0], [0.15, 0]);
+    const bgOverlayOpacityKeep = useTransform(x, [0, 150], [0, 0.15]);
+    const bgOverlayOpacityUnsub = useTransform(y, [-150, 0], [0.15, 0]);
+    const bgOverlayOpacitySkip = useTransform(y, [0, 150], [0, 0.15]);
     const keepStampOpacity = useTransform(x, [50, 150], [0, 1]);
     const trashStampOpacity = useTransform(x, [-150, -50], [1, 0]);
+    const unsubStampOpacity = useTransform(y, [-150, -50], [1, 0]);
+    const skipStampOpacity = useTransform(y, [50, 150], [0, 1]);
 
     const controls = useAnimation();
 
@@ -304,17 +309,67 @@ export default function SwipePage() {
         }
     };
 
-    // --- Drag End ---
-    const onDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        const threshold = 100;
-        if (info.offset.x < -threshold) {
-            handleSwipe("left");
-        } else if (info.offset.x > threshold) {
-            handleSwipe("right");
+    // --- Unsubscribe Handler ---
+    const handleUnsubscribe = useCallback(async () => {
+        if (cards.length === 0 || actionInProgress) return;
+
+        setActionInProgress(true);
+        const currentCard = cards[0];
+
+        // Animate up
+        await controls.start({
+            y: -600,
+            opacity: 0,
+            transition: { duration: 0.25, ease: "easeIn" }
+        });
+
+        // Mark as processed
+        setProcessedIds(prev => new Set([...prev, currentCard.id]));
+
+        // Check for unsubscribe link
+        const unsubLink = currentCard.originalEmail.listUnsubscribe?.http;
+        if (unsubLink) {
+            // Open unsubscribe link in new tab
+            window.open(unsubLink, "_blank");
+            showToast("Unsubscribe page opened ✓", { type: "success" });
         } else {
-            controls.start({ x: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 500, damping: 30 } });
+            showToast("No unsubscribe link found - email skipped", { type: "info" });
         }
-    }, [handleSwipe, controls]);
+
+        // Reset position
+        x.set(0);
+        y.set(0);
+        controls.set({ x: 0, y: 0, opacity: 1, rotate: 0 });
+        setActionInProgress(false);
+    }, [cards, actionInProgress, controls, x, y, showToast]);
+
+    // --- Drag End (4-way) ---
+    const onDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+        const threshold = 80;
+        const absX = Math.abs(info.offset.x);
+        const absY = Math.abs(info.offset.y);
+
+        // Determine primary direction
+        if (absX > absY) {
+            // Horizontal swipe
+            if (info.offset.x < -threshold) {
+                handleSwipe("left");
+            } else if (info.offset.x > threshold) {
+                handleSwipe("right");
+            } else {
+                controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 500, damping: 30 } });
+            }
+        } else {
+            // Vertical swipe
+            if (info.offset.y < -threshold) {
+                handleUnsubscribe();
+            } else if (info.offset.y > threshold) {
+                handleSkip();
+            } else {
+                controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 500, damping: 30 } });
+            }
+        }
+    }, [handleSwipe, handleUnsubscribe, handleSkip, controls]);
 
     // --- Keyboard Shortcuts ---
     useEffect(() => {
@@ -447,9 +502,11 @@ export default function SwipePage() {
 
     return (
         <div className="min-h-screen bg-zinc-950 overflow-hidden flex flex-col relative select-none font-sans touch-none">
-            {/* Background Tint Overlays */}
+            {/* Background Tint Overlays (4-way) */}
             <motion.div style={{ opacity: bgOverlayOpacityTrash }} className="absolute inset-0 bg-red-500 pointer-events-none z-0" />
             <motion.div style={{ opacity: bgOverlayOpacityKeep }} className="absolute inset-0 bg-emerald-500 pointer-events-none z-0" />
+            <motion.div style={{ opacity: bgOverlayOpacityUnsub }} className="absolute inset-0 bg-amber-500 pointer-events-none z-0" />
+            <motion.div style={{ opacity: bgOverlayOpacitySkip }} className="absolute inset-0 bg-zinc-600 pointer-events-none z-0" />
 
             {/* --- Top Bar --- */}
             <header className="h-16 px-6 bg-zinc-900/50 backdrop-blur-xl border-b border-zinc-800/50 flex items-center justify-between sticky top-0 z-50">
@@ -549,9 +606,9 @@ export default function SwipePage() {
                 )}
             </AnimatePresence>
 
-            {/* --- Swipe Area --- --- */}
-            <main className="flex-1 flex flex-col items-center justify-center p-4 relative w-full max-w-lg mx-auto">
-                <div className="relative w-full aspect-[3/4] max-h-[600px]">
+            {/* --- Swipe Area --- */}
+            <main className="flex-1 flex flex-col items-center justify-center p-4 pb-0 relative w-full max-w-md mx-auto">
+                <div className="relative w-full aspect-[4/5] max-h-[450px]">
 
                     {/* Background Stack Layer 2 */}
                     <div className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-3xl transform scale-90 translate-y-8 opacity-20 z-0" />
@@ -572,27 +629,32 @@ export default function SwipePage() {
                     {/* Active Card */}
                     <motion.div
                         key={activeCard.id}
-                        style={{ x, rotate, opacity: cardOpacity }}
+                        style={{ x, y, rotate, opacity: cardOpacity }}
                         animate={controls}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
+                        drag
+                        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                         dragElastic={0.7}
                         onDragEnd={onDragEnd}
-                        className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl z-20 flex flex-col cursor-grab active:cursor-grabbing transform-gpu"
+                        className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl z-20 flex flex-col cursor-grab active:cursor-grabbing transform-gpu"
                     >
-                        {/* Drag Indicators (Stamps) */}
-                        <motion.div style={{ opacity: keepStampOpacity }} className="absolute top-8 left-8 border-4 border-emerald-500 text-emerald-500 rounded-xl px-4 py-2 text-4xl font-black uppercase tracking-widest -rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
+                        {/* Drag Indicators (4-way Stamps) */}
+                        <motion.div style={{ opacity: keepStampOpacity }} className="absolute top-6 left-6 border-4 border-emerald-500 text-emerald-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest -rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
                             KEEP
                         </motion.div>
-                        <motion.div style={{ opacity: trashStampOpacity }} className="absolute top-8 right-8 border-4 border-red-500 text-red-500 rounded-xl px-4 py-2 text-4xl font-black uppercase tracking-widest rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
+                        <motion.div style={{ opacity: trashStampOpacity }} className="absolute top-6 right-6 border-4 border-red-500 text-red-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
                             TRASH
+                        </motion.div>
+                        <motion.div style={{ opacity: unsubStampOpacity }} className="absolute top-6 left-1/2 -translate-x-1/2 border-4 border-amber-500 text-amber-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest z-50 bg-zinc-900/80 backdrop-blur-sm">
+                            UNSUB
+                        </motion.div>
+                        <motion.div style={{ opacity: skipStampOpacity }} className="absolute bottom-6 left-1/2 -translate-x-1/2 border-4 border-zinc-500 text-zinc-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest z-50 bg-zinc-900/80 backdrop-blur-sm">
+                            SKIP
                         </motion.div>
 
                         {/* Card Content */}
-                        <div className="p-10 flex-1 flex flex-col">
-                            {/* Header */}
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className={`w-14 h-14 rounded-full ${activeCard.senderColor} flex items-center justify-center text-white font-bold text-xl shadow-lg`}>
+                        <div className="p-6 flex-1 flex flex-col overflow-hidden">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className={`w-12 h-12 rounded-full ${activeCard.senderColor} flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0`}>
                                     {activeCard.senderInitials}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -627,41 +689,52 @@ export default function SwipePage() {
                                 </div>
                             </div>
 
-                            {/* Footer / Hint */}
-                            <div className="flex justify-between text-xs font-bold text-zinc-600 uppercase tracking-widest">
+                            {/* Footer / Hint (4-way) */}
+                            <div className="grid grid-cols-3 text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">
                                 <span>← Trash</span>
+                                <span className="flex flex-col"><span>↑ Unsub</span><span>↓ Skip</span></span>
                                 <span>Keep →</span>
                             </div>
                         </div>
                     </motion.div>
                 </div>
 
-                {/* --- Bottom Controls --- */}
-                <div className="mt-16 flex items-center gap-8 z-30">
+                {/* --- Bottom Controls (Sticky, 4-way) --- */}
+                <div className="sticky bottom-0 left-0 right-0 py-4 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent flex items-center justify-center gap-4 z-30 w-full">
                     <button
                         onClick={() => handleSwipe("left")}
                         disabled={actionInProgress}
-                        className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-red-500 hover:border-red-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-red-500 hover:border-red-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
+                        title="Trash"
                     >
-                        <Trash2 className="w-8 h-8" />
+                        <Trash2 className="w-6 h-6" />
+                    </button>
+
+                    <button
+                        onClick={handleUnsubscribe}
+                        disabled={actionInProgress}
+                        className="w-12 h-12 rounded-full bg-zinc-900/50 border border-zinc-800 hover:bg-amber-500 hover:border-amber-500 text-zinc-500 hover:text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                        title="Unsubscribe"
+                    >
+                        <BellOff className="w-5 h-5" />
                     </button>
 
                     <button
                         onClick={handleSkip}
                         disabled={actionInProgress}
-                        className="w-16 h-16 rounded-full bg-zinc-900/50 border border-zinc-800 flex flex-col items-center justify-center text-zinc-600 hover:text-zinc-400 hover:border-zinc-700 transition-all hover:scale-105 active:scale-95"
+                        className="w-12 h-12 rounded-full bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-600 hover:border-zinc-600 text-zinc-500 hover:text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95"
                         title="Skip for later"
                     >
                         <Clock className="w-5 h-5" />
-                        <span className="text-[8px] uppercase mt-0.5">Later</span>
                     </button>
 
                     <button
                         onClick={() => handleSwipe("right")}
                         disabled={actionInProgress}
-                        className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-emerald-500 hover:border-emerald-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-emerald-500 hover:border-emerald-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
+                        title="Keep"
                     >
-                        <Check className="w-10 h-10" />
+                        <Check className="w-7 h-7" />
                     </button>
                 </div>
             </main>

@@ -38,6 +38,10 @@ interface EmailContextType {
     trashSender: (senderEmail: string) => Promise<void>;
     undoLastAction: () => Promise<boolean>;
     removeEmailFromLocal: (id: string) => void;
+    blockSender: (senderEmail: string) => Promise<void>;
+    markPersonal: (senderEmail: string) => void;
+    personalSenders: Set<string>;
+    blockedSenders: Set<string>;
 }
 
 const EmailContext = createContext<EmailContextType | null>(null);
@@ -53,6 +57,8 @@ export function EmailProvider({ children }: { children: ReactNode }) {
     const [error, setError] = useState<string | null>(null);
     const [lastFetched, setLastFetched] = useState<number | null>(null);
     const [undoStack, setUndoStack] = useState<UndoAction[]>([]);
+    const [personalSenders, setPersonalSenders] = useState<Set<string>>(new Set());
+    const [blockedSenders, setBlockedSenders] = useState<Set<string>>(new Set());
 
     // Derived: Aggregates (recomputed when emails change)
     const aggregates = useMemo(() => {
@@ -62,8 +68,20 @@ export function EmailProvider({ children }: { children: ReactNode }) {
                 stats: { totalEmails: 0, uniqueSenders: 0, storageEstimate: 0, oldestEmail: Date.now() }
             };
         }
-        return aggregateEmails(emails);
-    }, [emails]);
+        // Filter out blocked senders before aggregating
+        const visibleEmails = emails.filter(e => !blockedSenders.has(e.sender.toLowerCase()));
+        const agg = aggregateEmails(visibleEmails);
+
+        // Apply personal label
+        agg.senders.forEach(s => {
+            if (personalSenders.has(s.email.toLowerCase())) {
+                s.category = "Personal";
+                s.score = 0; // Personal senders have 0 nuisance score
+            }
+        });
+
+        return agg;
+    }, [emails, personalSenders, blockedSenders]);
 
     // --- Fetch Emails ---
     const fetchEmails = useCallback(async () => {
@@ -198,6 +216,18 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         }
     }, [undoStack, refreshSilently]);
 
+    // --- Mark Personal ---
+    const markPersonal = useCallback((senderEmail: string) => {
+        setPersonalSenders(prev => new Set([...prev, senderEmail.toLowerCase()]));
+    }, []);
+
+    // --- Block Sender ---
+    const blockSender = useCallback(async (senderEmail: string) => {
+        setBlockedSenders(prev => new Set([...prev, senderEmail.toLowerCase()]));
+        // Also trash their current emails
+        await trashSender(senderEmail);
+    }, [trashSender]);
+
     // --- Remove email locally (for external use) ---
     const removeEmailFromLocal = useCallback((id: string) => {
         setEmails(prev => prev.filter(e => e.id !== id));
@@ -219,6 +249,10 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         trashSender,
         undoLastAction,
         removeEmailFromLocal,
+        blockSender,
+        markPersonal,
+        personalSenders,
+        blockedSenders,
     };
 
     return <EmailContext.Provider value={value}>{children}</EmailContext.Provider>;

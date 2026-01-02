@@ -13,7 +13,11 @@ import {
     X,
     ChevronDown,
     ChevronRight,
-    Mail
+    Mail,
+    ArrowUpDown,
+    Filter,
+    Star,
+    ShieldOff
 } from "lucide-react";
 import Link from "next/link";
 import { SkeletonRow } from "@/components/Skeleton";
@@ -35,7 +39,10 @@ const rowVariants = {
 
 export default function DashboardPage() {
     // --- Context ---
-    const { aggregates, isLoading, isRefreshing, error, fetchEmails, trashSender, undoLastAction, canUndo } = useEmailContext();
+    const {
+        aggregates, isLoading, isRefreshing, error, fetchEmails,
+        trashSender, undoLastAction, canUndo, blockSender, markPersonal
+    } = useEmailContext();
     const { showToast } = useToast();
 
     // --- Local State ---
@@ -45,6 +52,8 @@ export default function DashboardPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [timeRange, setTimeRange] = useState<"7d" | "30d" | "all">("all");
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
+    const [sortField, setSortField] = useState<"count" | "score" | "newest">("count");
+    const [scoreFilter, setScoreFilter] = useState<"all" | "high" | "danger">("all");
 
     const { senders, stats } = aggregates;
 
@@ -53,9 +62,9 @@ export default function DashboardPage() {
         setLastMode("dashboard");
     }, []);
 
-    // --- Filtered Senders ---
+    // --- Filtered & Sorted Senders ---
     const filteredSenders = useMemo(() => {
-        let result = senders;
+        let result = [...senders];
 
         // Search filter
         if (searchQuery.trim()) {
@@ -73,8 +82,23 @@ export default function DashboardPage() {
             result = result.filter(s => s.lastActive > cutoff);
         }
 
+        // Score filter
+        if (scoreFilter === "high") {
+            result = result.filter(s => s.score > 50);
+        } else if (scoreFilter === "danger") {
+            result = result.filter(s => s.score > 80);
+        }
+
+        // Sorting
+        result.sort((a, b) => {
+            if (sortField === "count") return b.count - a.count;
+            if (sortField === "score") return b.score - a.score;
+            if (sortField === "newest") return b.lastActive - a.lastActive;
+            return 0;
+        });
+
         return result;
-    }, [senders, searchQuery, timeRange]);
+    }, [senders, searchQuery, timeRange, scoreFilter, sortField]);
 
     // --- Domain Grouping ---
     const domainGroups = useMemo(() => {
@@ -245,6 +269,32 @@ export default function DashboardPage() {
                         </button>
                     </div>
 
+                    {/* Sort Selector */}
+                    <div className="flex items-center gap-1 bg-zinc-800/50 rounded-lg p-1 border border-zinc-700/50">
+                        <ArrowUpDown className="w-3.5 h-3.5 text-zinc-500 ml-1.5" />
+                        <select
+                            value={sortField}
+                            onChange={(e) => setSortField(e.target.value as any)}
+                            className="bg-transparent text-xs font-bold text-zinc-400 focus:outline-none cursor-pointer pr-2"
+                        >
+                            <option value="count">Volume</option>
+                            <option value="score">Nuisance</option>
+                            <option value="newest">Recent</option>
+                        </select>
+                    </div>
+
+                    {/* Score Filter */}
+                    <div className="flex items-center gap-1 bg-zinc-800/50 rounded-lg p-1 border border-zinc-700/50">
+                        <Filter className="w-3.5 h-3.5 text-zinc-500 ml-1.5" />
+                        <button
+                            onClick={() => setScoreFilter(scoreFilter === "all" ? "high" : scoreFilter === "high" ? "danger" : "all")}
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${scoreFilter !== "all" ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"
+                                }`}
+                        >
+                            {scoreFilter === "all" ? "All Scores" : scoreFilter === "high" ? "High Score (>50)" : "Danger (>80)"}
+                        </button>
+                    </div>
+
                     {/* Time Filter */}
                     <div className="flex items-center gap-1 bg-zinc-800/50 rounded-lg p-1 border border-zinc-700/50">
                         {(["7d", "30d", "all"] as const).map(range => (
@@ -254,7 +304,7 @@ export default function DashboardPage() {
                                 className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${timeRange === range ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"
                                     }`}
                             >
-                                {range === "all" ? "All" : range}
+                                {range === "all" ? "All Time" : range}
                             </button>
                         ))}
                     </div>
@@ -332,7 +382,14 @@ export default function DashboardPage() {
                                                 {sender.name[0]}
                                             </div>
                                             <div className="min-w-0">
-                                                <div className="font-semibold text-zinc-100 truncate">{sender.name}</div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="font-semibold text-zinc-100 truncate">{sender.name}</div>
+                                                    {sender.category === "Personal" && (
+                                                        <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-tighter">
+                                                            Personal
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <div className="text-sm text-zinc-500 truncate">{sender.email}</div>
                                             </div>
                                         </div>
@@ -376,6 +433,20 @@ export default function DashboardPage() {
                                             <button
                                                 onClick={async (e) => {
                                                     e.stopPropagation();
+                                                    markPersonal(sender.email);
+                                                    showToast(`Marked ${sender.name} as Personal ✓`, { type: "info" });
+                                                }}
+                                                className={`p-2 rounded-lg border transition-colors ${sender.category === "Personal"
+                                                    ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
+                                                    : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700"
+                                                    }`}
+                                                title="Mark as Personal"
+                                            >
+                                                <Star className={`w-4 h-4 ${sender.category === "Personal" ? "fill-amber-500" : ""}`} />
+                                            </button>
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
                                                     await trashSender(sender.email);
                                                     showToast(`Trashed ${sender.count} emails from ${sender.name} ✓`, { type: "success" });
                                                 }}
@@ -385,10 +456,17 @@ export default function DashboardPage() {
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                             <button
-                                                className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:bg-zinc-700 transition-colors"
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    if (confirm(`Block ${sender.name} and trash all emails?`)) {
+                                                        await blockSender(sender.email);
+                                                        showToast(`Blocked ${sender.name} ✓`, { type: "error" });
+                                                    }
+                                                }}
+                                                className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
                                                 title="Block sender"
                                             >
-                                                <Shield className="w-4 h-4" />
+                                                <ShieldOff className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </motion.div>

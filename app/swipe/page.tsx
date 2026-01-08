@@ -668,7 +668,7 @@ export default function SwipePage() {
             </AnimatePresence>
 
             {/* --- Swipe Area --- */}
-            <main className="flex-1 flex flex-col items-center justify-start pt-4 pb-0 relative w-full max-w-md mx-auto overflow-hidden">
+            <main className="flex-1 flex flex-col items-center justify-start pt-4 pb-0 relative w-full max-w-md mx-auto">
                 <div className="relative w-full aspect-[4/6] max-h-[480px]">
 
                     {/* Background Stack Layer 2 */}

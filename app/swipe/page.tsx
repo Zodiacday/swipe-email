@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEmailContext } from "@/contexts/EmailContext";
 import { useToast } from "@/contexts/ToastContext";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
 import { SwipeTutorial } from "@/components/SwipeTutorial";
 import { InboxZero } from "@/components/InboxZero";
@@ -90,6 +91,7 @@ export default function SwipePage() {
     // --- Context ---
     const { emails, isLoading, error, fetchEmails, trashEmail, trashSender, canUndo, undoLastAction, isRefreshing } = useEmailContext();
     const { showToast } = useToast();
+    const { play: playSound } = useSoundEffects();
     const { isFirstVisit, dismiss: dismissTutorial } = useFirstVisit("swipe_tutorial");
     const { isFirstVisit: showOnboarding, dismiss: dismissOnboarding } = useFirstVisit("onboarding_concepts");
     const { data: session, status } = useSession();
@@ -125,6 +127,12 @@ export default function SwipePage() {
     const y = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-15, 15]);
     const cardOpacity = useTransform(x, [-200, -150, 0, 150, 200], [0.5, 1, 1, 1, 0.5]);
+    // Card scale: slight lift when dragging
+    const cardScale = useTransform(
+        x,
+        [-150, -50, 0, 50, 150],
+        [1.02, 1.01, 1, 1.01, 1.02]
+    );
     const bgOverlayOpacityTrash = useTransform(x, [-150, 0], [0.15, 0]);
     const bgOverlayOpacityKeep = useTransform(x, [0, 150], [0, 0.15]);
     const bgOverlayOpacityUnsub = useTransform(y, [-150, 0], [0.15, 0]);
@@ -133,6 +141,7 @@ export default function SwipePage() {
     const trashStampOpacity = useTransform(x, [-150, -50], [1, 0]);
     const unsubStampOpacity = useTransform(y, [-150, -50], [1, 0]);
     const skipStampOpacity = useTransform(y, [50, 150], [0, 1]);
+
 
     const controls = useAnimation();
 
@@ -160,12 +169,21 @@ export default function SwipePage() {
             window.navigator.vibrate(20);
         }
 
-        // Animate off screen
+        // Play sound
+        playSound("whoosh");
+
+        // Animate off screen with spring physics
         await controls.start({
             x: direction === "left" ? -600 : 600,
             opacity: 0,
             rotate: direction === "left" ? -30 : 30,
-            transition: { duration: 0.25, ease: "easeIn" }
+            scale: 0.9,
+            transition: {
+                type: "spring",
+                stiffness: 300,
+                damping: 25,
+                mass: 1.2
+            }
         });
 
         // Mark as processed locally
@@ -202,16 +220,34 @@ export default function SwipePage() {
                     e.sender.toLowerCase() === currentCard.originalEmail.sender.toLowerCase()
                 ).length;
 
+                // Show toast with one-tap nuke action if there are more from this sender
                 if (remainingFromSender >= 3) {
-                    setBulkPrompt({
-                        sender: currentCard.sender,
-                        count: remainingFromSender,
-                        email: currentCard.originalEmail.sender
+                    showToast(`Trashed ✓`, {
+                        type: "success",
+                        duration: 6000,
+                        action: {
+                            label: `Nuke ${remainingFromSender} more`,
+                            onClick: async () => {
+                                await trashSender(currentCard.originalEmail.sender);
+                                // Mark all from this sender as processed
+                                const senderEmails = emails.filter(e =>
+                                    e.sender.toLowerCase() === currentCard.originalEmail.sender.toLowerCase()
+                                );
+                                setProcessedIds(prev => {
+                                    const next = new Set(prev);
+                                    senderEmails.forEach(e => next.add(e.id));
+                                    return next;
+                                });
+                                playSound("success");
+                                showToast(`Nuked ${remainingFromSender} emails!`, { type: "success" });
+                            }
+                        }
                     });
                 } else {
                     showToast("Trashed ✓", {
                         type: "success",
                         undoAction: async () => {
+                            playSound("undo");
                             const success = await undoLastAction();
                             if (success) {
                                 setProcessedIds(prev => {
@@ -630,14 +666,19 @@ export default function SwipePage() {
                     {/* Active Card */}
                     <motion.div
                         key={activeCard.id}
-                        style={{ x, y, rotate, opacity: cardOpacity }}
+                        style={{ x, y, rotate, opacity: cardOpacity, scale: cardScale }}
                         animate={controls}
                         drag
                         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                         dragElastic={0.7}
                         onDragEnd={onDragEnd}
-                        className="absolute inset-0 bg-zinc-950 border border-emerald-500/30 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-20 flex flex-col cursor-grab active:cursor-grabbing transform-gpu overflow-hidden"
+                        whileDrag={{
+                            boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
+                            cursor: "grabbing"
+                        }}
+                        className="absolute inset-0 bg-zinc-950 border border-emerald-500/30 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-20 flex flex-col cursor-grab transform-gpu overflow-hidden"
                     >
+
                         {/* Drag Indicators (4-way Stamps) - Sharpened */}
                         <motion.div style={{ opacity: keepStampOpacity }} className="absolute top-8 left-8 border border-emerald-500 text-emerald-500 rounded-md px-3 py-1 text-2xl font-black uppercase tracking-widest -rotate-12 z-50 bg-black/90 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                             KEEP

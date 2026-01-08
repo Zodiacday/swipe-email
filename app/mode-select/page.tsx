@@ -2,12 +2,19 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Zap, LayoutDashboard, ArrowRight, Settings } from "lucide-react";
-
+import { Zap, LayoutDashboard, ArrowRight, Settings, TrendingUp, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { loadStats, UserStats, getStreakLabel, formatTime } from "@/lib/userStats";
+import { StreakBadge } from "@/components/StreakBadge";
 
 const springConfig = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 export default function ModeSelectPage() {
+    const [stats, setStats] = useState<UserStats | null>(null);
+
+    useEffect(() => {
+        setStats(loadStats());
+    }, []);
     return (
         <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-8 font-sans selection:bg-emerald-500/30">
             <div className="max-w-6xl w-full">
@@ -124,8 +131,48 @@ export default function ModeSelectPage() {
                     </Link>
                 </div>
 
+                {/* Weekly Progress Stats */}
+                {stats && stats.totalProcessed > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ ...springConfig, delay: 0.2 }}
+                        className="mt-10 mx-auto max-w-2xl"
+                    >
+                        <div className="glass rounded-2xl p-6 border border-emerald-500/20">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                    <TrendingUp className="w-5 h-5 text-emerald-400" />
+                                    <span className="text-sm font-bold text-zinc-400 uppercase tracking-wider">This Week</span>
+                                </div>
+                                <StreakBadge size="md" showLabel={true} />
+                            </div>
+                            <div className="grid grid-cols-3 gap-6">
+                                <div className="text-center">
+                                    <div className="text-3xl font-black text-white">{stats.weeklyProcessed}</div>
+                                    <div className="text-xs text-zinc-500 uppercase tracking-wider">Processed</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-3xl font-black text-rose-400">{stats.totalTrashed}</div>
+                                    <div className="text-xs text-zinc-500 uppercase tracking-wider">Trashed</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-3xl font-black text-amber-400">{stats.totalUnsubscribed}</div>
+                                    <div className="text-xs text-zinc-500 uppercase tracking-wider">Unsubbed</div>
+                                </div>
+                            </div>
+                            {stats.bestTimeToZero && (
+                                <div className="mt-4 pt-4 border-t border-zinc-800 flex items-center justify-center gap-2 text-zinc-400">
+                                    <Clock className="w-4 h-4" />
+                                    <span className="text-sm">Best time to Inbox Zero: <span className="text-emerald-400 font-bold">{formatTime(stats.bestTimeToZero)}</span></span>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+
                 {/* Footer Link */}
-                <div className="mt-16 text-center">
+                <div className="mt-10 text-center">
                     <Link
                         href="/profile"
                         className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-full hover:border-zinc-700 hover:text-zinc-200 transition-all"

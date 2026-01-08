@@ -6,12 +6,14 @@
 
 "use client";
 
-import { Menu, X, LogIn, Zap, User, LogOut, LayoutDashboard, Settings } from "lucide-react";
+import { Menu, X, LogIn, Zap, User, LogOut, LayoutDashboard, Settings, Shield } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { StreakBadge } from "@/components/StreakBadge";
+
 const NAV_LINKS = [
     { href: "/swipe", label: "Swipe", icon: Zap },
     { href: "/dashboard", label: "Command Center", icon: LayoutDashboard },
@@ -67,7 +69,19 @@ export function Navbar() {
                 {/* Auth Buttons - Desktop */}
                 <div className="hidden md:flex items-center gap-2 lg:gap-3">
                     {session ? (
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
+                            {/* Privacy Badge */}
+                            <div
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 cursor-help"
+                                title="We never read your email content — only metadata"
+                            >
+                                <Shield className="w-3 h-3" />
+                                <span className="text-[10px] font-bold tracking-wider">ZERO-READ</span>
+                            </div>
+
+                            {/* Streak Badge */}
+                            <StreakBadge size="sm" />
+
                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
                                 {session.user?.image ? (
                                     <img src={session.user.image} alt="" className="w-5 h-5 rounded-full" />
@@ -84,6 +98,7 @@ export function Navbar() {
                                 <LogOut className="w-4 h-4" />
                             </button>
                         </div>
+
                     ) : (
                         <>
                             <Link

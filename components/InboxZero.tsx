@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trophy, RefreshCw, LayoutDashboard, Star } from "lucide-react";
+import { Trophy, RefreshCw, LayoutDashboard, Star, Clock, Zap } from "lucide-react";
 import Link from "next/link";
 import { Particles } from "./ui/particles";
 import { useEffect, useState } from "react";
+import { recordActivity, recordSessionTime, formatTime } from "@/lib/userStats";
 
 interface InboxZeroProps {
     stats: {
@@ -12,16 +13,36 @@ interface InboxZeroProps {
         kept: number;
         reviewed: number;
     };
+    sessionStartTime?: number; // timestamp when session started
     onRefresh: () => void;
 }
 
-export function InboxZero({ stats, onRefresh }: InboxZeroProps) {
+export function InboxZero({ stats, sessionStartTime, onRefresh }: InboxZeroProps) {
     const [showConfetti, setShowConfetti] = useState(true);
+    const [sessionTime, setSessionTime] = useState<number | null>(null);
+    const [isNewRecord, setIsNewRecord] = useState(false);
+    const [bestTime, setBestTime] = useState<number | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => setShowConfetti(false), 5000);
         return () => clearTimeout(timer);
     }, []);
+
+    // Record stats and session time on mount
+    useEffect(() => {
+        // Record activity
+        recordActivity(stats.reviewed, stats.trashed, 0);
+
+        // Calculate and record session time
+        if (sessionStartTime) {
+            const elapsed = Date.now() - sessionStartTime;
+            setSessionTime(elapsed);
+
+            const result = recordSessionTime(elapsed);
+            setIsNewRecord(result.isNewRecord);
+            setBestTime(result.stats.bestTimeToZero);
+        }
+    }, [stats, sessionStartTime]);
 
     const confettiColors = ["#10b981", "#34d399", "#059669", "#ffffff"];
 
@@ -63,6 +84,18 @@ export function InboxZero({ stats, onRefresh }: InboxZeroProps) {
                 </div>
             )}
 
+            {/* New Record Animation */}
+            {isNewRecord && (
+                <motion.div
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", delay: 0.5, stiffness: 200 }}
+                    className="absolute top-32 left-1/2 -translate-x-1/2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black text-lg rounded-full shadow-xl z-20"
+                >
+                    🎉 NEW RECORD!
+                </motion.div>
+            )}
+
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -83,9 +116,29 @@ export function InboxZero({ stats, onRefresh }: InboxZeroProps) {
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600 not-italic">ZERO.</span>
                 </h1>
 
-                <p className="text-xl text-zinc-400 font-medium mb-12">
+                <p className="text-xl text-zinc-400 font-medium mb-6">
                     You're a legend. Time to touch grass.
                 </p>
+
+                {/* Session Time Display */}
+                {sessionTime && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex items-center justify-center gap-6 mb-8"
+                    >
+                        <div className="flex items-center gap-2 text-zinc-300">
+                            <Clock className="w-5 h-5 text-emerald-400" />
+                            <span className="text-2xl font-black">{formatTime(sessionTime)}</span>
+                        </div>
+                        {bestTime && !isNewRecord && (
+                            <div className="text-zinc-500 text-sm">
+                                Best: <span className="text-emerald-400 font-bold">{formatTime(bestTime)}</span>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
 
                 {/* Session Stats */}
                 <div className="grid grid-cols-2 gap-4 mb-12">

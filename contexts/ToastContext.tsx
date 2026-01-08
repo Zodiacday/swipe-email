@@ -2,14 +2,20 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, Info, Undo2 } from "lucide-react";
+import { CheckCircle, XCircle, Info, Undo2, Zap } from "lucide-react";
 
 // --- Types ---
+interface ToastAction {
+    label: string;
+    onClick: () => void | Promise<void>;
+}
+
 interface Toast {
     id: string;
     message: string;
     type: "success" | "error" | "info";
     undoAction?: () => void;
+    action?: ToastAction;
     duration: number;
 }
 
@@ -23,6 +29,7 @@ const ToastContext = createContext<ToastContextType | null>(null);
 // --- Toast Item Component ---
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
     const [progress, setProgress] = useState(100);
+    const [actionLoading, setActionLoading] = useState(false);
 
     React.useEffect(() => {
         const startTime = Date.now();
@@ -38,6 +45,17 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
 
         return () => clearInterval(interval);
     }, [toast.duration, onDismiss]);
+
+    const handleAction = async () => {
+        if (!toast.action || actionLoading) return;
+        setActionLoading(true);
+        try {
+            await toast.action.onClick();
+        } finally {
+            setActionLoading(false);
+            onDismiss();
+        }
+    };
 
     const icons = {
         success: <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />,
@@ -68,7 +86,21 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
             <div className="flex items-center gap-3">
                 {icons[toast.type]}
                 <span className="text-zinc-200 text-sm font-medium flex-1">{toast.message}</span>
-                {toast.undoAction && (
+
+                {/* Action Button (One-Tap Nuke) */}
+                {toast.action && (
+                    <button
+                        onClick={handleAction}
+                        disabled={actionLoading}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-900 font-bold text-xs rounded-full transition-all disabled:opacity-50 active:scale-95"
+                    >
+                        <Zap className="w-3.5 h-3.5" />
+                        {actionLoading ? "..." : toast.action.label}
+                    </button>
+                )}
+
+                {/* Undo Button */}
+                {toast.undoAction && !toast.action && (
                     <button
                         onClick={() => {
                             toast.undoAction?.();
@@ -93,6 +125,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
         </motion.div>
     );
 }
+
 
 // --- Provider ---
 export function ToastProvider({ children }: { children: ReactNode }) {

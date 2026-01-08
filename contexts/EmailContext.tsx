@@ -66,6 +66,47 @@ export function EmailProvider({ children }: { children: ReactNode }) {
 
     // Ref to prevent duplicate fetch calls
     const isFetchingRef = useRef(false);
+    const isInitializedRef = useRef(false);
+
+    // --- Load from localStorage on mount ---
+    useEffect(() => {
+        if (isInitializedRef.current) return;
+        isInitializedRef.current = true;
+
+        try {
+            const savedBlocked = localStorage.getItem("swipe_blocked_senders");
+            const savedPersonal = localStorage.getItem("swipe_personal_senders");
+
+            if (savedBlocked) {
+                setBlockedSenders(new Set(JSON.parse(savedBlocked)));
+            }
+            if (savedPersonal) {
+                setPersonalSenders(new Set(JSON.parse(savedPersonal)));
+            }
+        } catch (err) {
+            console.warn("Failed to load saved senders:", err);
+        }
+    }, []);
+
+    // --- Persist blockedSenders to localStorage ---
+    useEffect(() => {
+        if (!isInitializedRef.current) return;
+        try {
+            localStorage.setItem("swipe_blocked_senders", JSON.stringify([...blockedSenders]));
+        } catch (err) {
+            console.warn("Failed to save blocked senders:", err);
+        }
+    }, [blockedSenders]);
+
+    // --- Persist personalSenders to localStorage ---
+    useEffect(() => {
+        if (!isInitializedRef.current) return;
+        try {
+            localStorage.setItem("swipe_personal_senders", JSON.stringify([...personalSenders]));
+        } catch (err) {
+            console.warn("Failed to save personal senders:", err);
+        }
+    }, [personalSenders]);
 
     // Derived: Aggregates (recomputed when emails change)
     const aggregates = useMemo(() => {

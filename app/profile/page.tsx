@@ -6,13 +6,16 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
-import { LogOut, Mail, Calendar, Trash2, Shield, User, Clock, Settings, ChevronRight } from "lucide-react";
+import { LogOut, Mail, Calendar, Trash2, Shield, User, Clock, Settings, ChevronRight, X, Heart, ShieldOff } from "lucide-react";
 import Link from "next/link";
 import { useEmailContext } from "@/contexts/EmailContext";
+import { useState } from "react";
 
 export default function ProfilePage() {
     const { data: session } = useSession();
-    const { aggregates } = useEmailContext();
+    const { aggregates, blockedSenders, personalSenders } = useEmailContext();
+    const [showBlocked, setShowBlocked] = useState(false);
+    const [showPersonal, setShowPersonal] = useState(false);
 
     // Calculate real stats
     const emailsCleared = aggregates.stats.totalEmails;
@@ -24,6 +27,10 @@ export default function ProfilePage() {
         image: session?.user?.image,
         joinedDate: "January 2026", // Placeholder - could get from session/db
     };
+
+    // Convert Sets to arrays for display
+    const blockedList = [...blockedSenders];
+    const personalList = [...personalSenders];
 
     return (
         <div className="min-h-screen bg-[#09090b] text-[#fafafa] pt-20 pb-12 px-4">
@@ -73,6 +80,80 @@ export default function ProfilePage() {
                         <div className="text-2xl font-heading font-black mb-1">{timeSaved}</div>
                         <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Minutes Saved</div>
                     </div>
+                </motion.div>
+
+                {/* Blocked Senders */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="glass border-zinc-800 rounded-2xl mb-4 overflow-hidden"
+                >
+                    <button
+                        onClick={() => setShowBlocked(!showBlocked)}
+                        className="w-full flex items-center gap-4 p-5 hover:bg-white/2 transition-colors"
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                            <ShieldOff className="w-5 h-5 text-red-400" />
+                        </div>
+                        <div className="flex-1 text-left">
+                            <div className="font-bold text-white">Blocked Senders</div>
+                            <div className="text-xs text-zinc-500">{blockedList.length} sender{blockedList.length !== 1 ? "s" : ""} blocked</div>
+                        </div>
+                        <ChevronRight className={`w-5 h-5 text-zinc-500 transition-transform ${showBlocked ? "rotate-90" : ""}`} />
+                    </button>
+                    {showBlocked && blockedList.length > 0 && (
+                        <div className="border-t border-zinc-800 p-4 space-y-2 max-h-48 overflow-y-auto">
+                            {blockedList.map((email) => (
+                                <div key={email} className="flex items-center justify-between p-2 bg-zinc-900/50 rounded-lg text-sm">
+                                    <span className="text-zinc-300 truncate">{email}</span>
+                                    <span className="text-[10px] text-zinc-600">Filter active</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {showBlocked && blockedList.length === 0 && (
+                        <div className="border-t border-zinc-800 p-6 text-center text-zinc-500 text-sm">
+                            No blocked senders yet
+                        </div>
+                    )}
+                </motion.div>
+
+                {/* Personal Senders */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.18 }}
+                    className="glass border-zinc-800 rounded-2xl mb-6 overflow-hidden"
+                >
+                    <button
+                        onClick={() => setShowPersonal(!showPersonal)}
+                        className="w-full flex items-center gap-4 p-5 hover:bg-white/2 transition-colors"
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                            <Heart className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div className="flex-1 text-left">
+                            <div className="font-bold text-white">Personal Senders</div>
+                            <div className="text-xs text-zinc-500">{personalList.length} sender{personalList.length !== 1 ? "s" : ""} marked as personal</div>
+                        </div>
+                        <ChevronRight className={`w-5 h-5 text-zinc-500 transition-transform ${showPersonal ? "rotate-90" : ""}`} />
+                    </button>
+                    {showPersonal && personalList.length > 0 && (
+                        <div className="border-t border-zinc-800 p-4 space-y-2 max-h-48 overflow-y-auto">
+                            {personalList.map((email) => (
+                                <div key={email} className="flex items-center justify-between p-2 bg-zinc-900/50 rounded-lg text-sm">
+                                    <span className="text-zinc-300 truncate">{email}</span>
+                                    <span className="text-[10px] text-emerald-500">Protected</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {showPersonal && personalList.length === 0 && (
+                        <div className="border-t border-zinc-800 p-6 text-center text-zinc-500 text-sm">
+                            No personal senders marked yet
+                        </div>
+                    )}
                 </motion.div>
 
                 {/* Settings Links */}

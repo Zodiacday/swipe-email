@@ -10,7 +10,7 @@ import {
     AnimatePresence,
 } from "framer-motion";
 import Link from "next/link";
-import { Zap, LayoutDashboard, ArrowRight, Trash2, Mail, RefreshCw, Star, ShieldOff, Check, ArrowLeft, Clock, BellOff } from "lucide-react";
+import { Zap, LayoutDashboard, ArrowRight, Trash2, Mail, RefreshCw, Star, ShieldOff, Check, ArrowLeft, ArrowUp, ArrowDown, Clock, BellOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEmailContext } from "@/contexts/EmailContext";
@@ -105,6 +105,7 @@ export default function SwipePage() {
     const [celebration, setCelebration] = useState<string | null>(null);
     const [bulkPrompt, setBulkPrompt] = useState<{ sender: string, count: number, email: string } | null>(null);
     const [hasSwipedOnce, setHasSwipedOnce] = useState(false);
+    const [showStats, setShowStats] = useState(false); // Hide stats by default (Zen)
 
     // --- Derived: Cards to show (filter out processed) ---
     const cards = useMemo(() => {
@@ -476,48 +477,61 @@ export default function SwipePage() {
     const senderCount = emails.filter(e => e.sender.toLowerCase() === activeCard.originalEmail.sender.toLowerCase()).length;
 
     return (
-        <div className="min-h-screen bg-zinc-950 overflow-hidden flex flex-col relative select-none font-sans touch-none">
+        <div className="min-h-screen bg-black overflow-hidden flex flex-col relative select-none font-sans touch-none">
             {/* Background Tint Overlays (4-way) */}
-            <motion.div style={{ opacity: bgOverlayOpacityTrash }} className="absolute inset-0 bg-red-500 pointer-events-none z-0" />
-            <motion.div style={{ opacity: bgOverlayOpacityKeep }} className="absolute inset-0 bg-emerald-500 pointer-events-none z-0" />
-            <motion.div style={{ opacity: bgOverlayOpacityUnsub }} className="absolute inset-0 bg-amber-500 pointer-events-none z-0" />
-            <motion.div style={{ opacity: bgOverlayOpacitySkip }} className="absolute inset-0 bg-zinc-600 pointer-events-none z-0" />
+            <motion.div style={{ opacity: bgOverlayOpacityTrash }} className="absolute inset-0 bg-red-500/20 pointer-events-none z-0" />
+            <motion.div style={{ opacity: bgOverlayOpacityKeep }} className="absolute inset-0 bg-emerald-500/20 pointer-events-none z-0" />
+            <motion.div style={{ opacity: bgOverlayOpacityUnsub }} className="absolute inset-0 bg-amber-500/20 pointer-events-none z-0" />
+            <motion.div style={{ opacity: bgOverlayOpacitySkip }} className="absolute inset-0 bg-zinc-800/20 pointer-events-none z-0" />
 
-            {/* --- Top Bar --- */}
-            <header className="h-16 px-6 bg-zinc-900/50 backdrop-blur-xl border-b border-zinc-800/50 flex items-center justify-between sticky top-0 z-50">
-                {/* Mode Toggle */}
-                <div className="flex items-center gap-1 bg-zinc-800 rounded-full p-1 relative">
-                    <div className="relative z-10 px-6 py-1.5 rounded-full text-sm font-medium text-zinc-900 bg-emerald-500 shadow-sm">
-                        Swipe
-                    </div>
-                    <Link href="/dashboard" className="relative z-10 px-6 py-1.5 rounded-full text-sm font-medium text-zinc-400 hover:text-zinc-300 transition-colors">
-                        Dashboard
-                    </Link>
+            {/* --- Zen Top Bar --- */}
+            <div className="h-20" /> {/* Spacer for Navbar */}
+            <header className="px-6 py-4 flex items-center justify-between relative z-50">
+                <div className="flex flex-col">
+                    <h1 className="text-xl font-black tracking-tighter uppercase italic text-white flex items-center gap-2">
+                        Swiping <span className="text-emerald-500 not-italic">Queue</span>
+                    </h1>
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-600">
+                        {cards.length} EMAILS REMAINING
+                    </p>
                 </div>
 
-                {/* Progress Counter + Streak */}
-                <div className="flex items-center gap-4">
-                    {/* Streak Indicator */}
-                    {streak >= 3 && (
-                        <motion.div
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="flex items-center gap-1 bg-orange-500/20 border border-orange-500/30 rounded-full px-3 py-1"
+                <div className="flex items-center gap-2">
+                    <AnimatePresence>
+                        {showStats && (
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className="flex items-center gap-4 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-2xl mr-2"
+                            >
+                                <div className="text-center">
+                                    <div className="text-sm font-black text-rose-500 leading-none">{sessionStats.trashed}</div>
+                                    <div className="text-[8px] font-bold text-zinc-600">NUKED</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-sm font-black text-emerald-500 leading-none">{sessionStats.kept}</div>
+                                    <div className="text-[8px] font-bold text-zinc-600">KEPT</div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                    <button
+                        onClick={() => setShowStats(!showStats)}
+                        className={`p-3 rounded-2xl border transition-all ${showStats ? 'bg-emerald-500 border-emerald-400 text-zinc-950' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'}`}
+                        title="Toggle Stats"
+                    >
+                        <Zap className="w-5 h-5" />
+                    </button>
+                    {canUndo && (
+                        <button
+                            onClick={undoLastAction}
+                            className="px-6 py-3 bg-zinc-900 border border-zinc-800 text-zinc-200 font-bold rounded-2xl hover:border-emerald-500/50 transition-all flex items-center gap-2"
                         >
-                            <Zap className="w-4 h-4 text-orange-400" />
-                            <span className="text-orange-400 font-bold text-sm">{streak}x</span>
-                        </motion.div>
+                            <ArrowLeft className="w-4 h-4" />
+                            Undo
+                        </button>
                     )}
-                    <div className="flex items-center gap-2 text-sm font-mono">
-                        <span className="text-emerald-400 font-bold">{sessionStats.reviewed}</span>
-                        <span className="text-zinc-600">/</span>
-                        <span className="text-zinc-400">{initialCount || emails.length}</span>
-                        <span className="text-zinc-600 text-xs">reviewed</span>
-                    </div>
-                    {isRefreshing && <RefreshCw className="w-4 h-4 text-zinc-600 animate-spin" />}
-                    <Link href="/mode-select" className="text-zinc-500 hover:text-zinc-300 transition-colors">
-                        <ArrowLeft className="w-6 h-6" />
-                    </Link>
                 </div>
             </header>
 
@@ -614,65 +628,71 @@ export default function SwipePage() {
                         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                         dragElastic={0.7}
                         onDragEnd={onDragEnd}
-                        className="absolute inset-0 glass rounded-3xl shadow-2xl z-20 flex flex-col cursor-grab active:cursor-grabbing transform-gpu"
+                        className="absolute inset-0 bg-zinc-950 border border-emerald-500/30 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-20 flex flex-col cursor-grab active:cursor-grabbing transform-gpu overflow-hidden"
                     >
-                        {/* Drag Indicators (4-way Stamps) */}
-                        <motion.div style={{ opacity: keepStampOpacity }} className="absolute top-6 left-6 border-4 border-emerald-500 text-emerald-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest -rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
+                        {/* Drag Indicators (4-way Stamps) - Sharpened */}
+                        <motion.div style={{ opacity: keepStampOpacity }} className="absolute top-8 left-8 border border-emerald-500 text-emerald-500 rounded-md px-3 py-1 text-2xl font-black uppercase tracking-widest -rotate-12 z-50 bg-black/90 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                             KEEP
                         </motion.div>
-                        <motion.div style={{ opacity: trashStampOpacity }} className="absolute top-6 right-6 border-4 border-red-500 text-red-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
+                        <motion.div style={{ opacity: trashStampOpacity }} className="absolute top-8 right-8 border border-red-500 text-red-500 rounded-md px-3 py-1 text-2xl font-black uppercase tracking-widest rotate-12 z-50 bg-black/90 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
                             TRASH
                         </motion.div>
-                        <motion.div style={{ opacity: unsubStampOpacity }} className="absolute top-6 left-1/2 -translate-x-1/2 border-4 border-amber-500 text-amber-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest z-50 bg-zinc-900/80 backdrop-blur-sm">
+                        <motion.div style={{ opacity: unsubStampOpacity }} className="absolute top-8 left-1/2 -translate-x-1/2 border border-amber-500 text-amber-500 rounded-md px-3 py-1 text-2xl font-black uppercase tracking-widest z-50 bg-black/90 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
                             UNSUB
                         </motion.div>
-                        <motion.div style={{ opacity: skipStampOpacity }} className="absolute bottom-6 left-1/2 -translate-x-1/2 border-4 border-zinc-500 text-zinc-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest z-50 bg-zinc-900/80 backdrop-blur-sm">
+                        <motion.div style={{ opacity: skipStampOpacity }} className="absolute bottom-8 left-1/2 -translate-x-1/2 border border-zinc-500 text-zinc-500 rounded-md px-3 py-1 text-2xl font-black uppercase tracking-widest z-50 bg-black/90 shadow-[0_0_15px_rgba(161,161,170,0.3)]">
                             SKIP
                         </motion.div>
 
-                        {/* Card Content */}
-                        <div className="p-6 flex-1 flex flex-col overflow-hidden">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className={`w-12 h-12 rounded-full ${activeCard.senderColor} flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0`}>
+                        {/* Card Content area */}
+                        <div className="p-8 flex-1 flex flex-col overflow-hidden bg-zinc-950">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className={`w-14 h-14 rounded-2xl ${activeCard.senderColor} flex items-center justify-center text-white font-black text-xl shadow-lg shrink-0 border border-white/10`}>
                                     {activeCard.senderInitials}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h2 className="text-lg font-black tracking-tight text-zinc-100 truncate">{activeCard.sender}</h2>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-sm text-zinc-500 font-mono">{activeCard.date}</p>
-                                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${activeCard.category === "promo" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
-                                            activeCard.category === "social" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
-                                                activeCard.category === "newsletter" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
-                                                    "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                                    <h2 className="text-xl font-black tracking-tighter text-white truncate uppercase italic leading-none">{activeCard.sender}</h2>
+                                    <div className="flex items-center gap-3 mt-1.5">
+                                        <p className="text-[10px] text-zinc-600 font-mono font-bold tracking-widest uppercase">{activeCard.date}</p>
+                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-md border ${activeCard.category === "promo" ? "bg-orange-500/5 text-orange-400 border-orange-500/20" :
+                                            activeCard.category === "social" ? "bg-blue-500/5 text-blue-400 border-blue-500/20" :
+                                                activeCard.category === "newsletter" ? "bg-purple-500/5 text-purple-400 border-purple-500/20" :
+                                                    "bg-zinc-800 text-zinc-500 border-zinc-700/50"
                                             }`}>
                                             {activeCard.category}
                                         </span>
                                     </div>
-                                    {senderCount > 1 && (
-                                        <p className="text-[10px] uppercase tracking-widest text-emerald-500 mt-1">
-                                            +{senderCount - 1} more from this sender
-                                        </p>
-                                    )}
                                 </div>
                             </div>
 
-                            {/* Body */}
-                            <div className="flex-1 flex flex-col justify-center mb-6">
-                                <h3 className="text-2xl font-black text-white leading-tight mb-6 tracking-tight">
+                            <div className="flex-1 flex flex-col justify-center relative">
+                                <h3 className="text-3xl font-black tracking-tight text-white mb-6 line-clamp-2 leading-[1.1]">
                                     {activeCard.subject}
                                 </h3>
-                                <div className="p-6 glass rounded-3xl">
-                                    <p className="text-zinc-400 leading-relaxed text-base line-clamp-4">
+                                <div className="p-6 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl">
+                                    <p className="text-zinc-400 text-lg leading-relaxed editorial-type line-clamp-4">
                                         {activeCard.preview}
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Footer / Hint (4-way) */}
-                            <div className="grid grid-cols-3 text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">
-                                <span>← Trash</span>
-                                <span className="flex flex-col"><span>↑ Unsub</span><span>↓ Skip</span></span>
-                                <span>Keep →</span>
+                            {/* Mobile Swipe Hints - Editorial Style */}
+                            <div className="mt-8 pt-8 border-t border-zinc-900 grid grid-cols-3 text-[9px] font-black tracking-[0.3em] text-zinc-700 uppercase text-center">
+                                <div className="flex flex-col items-center gap-1">
+                                    <ArrowLeft size={10} />
+                                    <span>TRASH</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="flex gap-2">
+                                        <ArrowUp size={10} />
+                                        <ArrowDown size={10} />
+                                    </div>
+                                    <span>UNSUB/SKIP</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <ArrowRight size={10} />
+                                    <span>KEEP</span>
+                                </div>
                             </div>
                         </div>
                     </motion.div>

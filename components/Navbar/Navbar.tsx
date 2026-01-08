@@ -23,11 +23,12 @@ export function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
-    // Don't show navbar on specific app routes that have their own headers
-    if (pathname === "/onboarding" || pathname === "/swipe" || pathname === "/dashboard" || pathname === "/mode-select") return null;
+    // Persistent across all routes
+
+    const isAppRoute = ["/swipe", "/dashboard", "/mode-select", "/profile", "/providers", "/automation"].includes(pathname);
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-[100] border-b border-zinc-900 glass-emerald">
+        <nav className={`fixed top-0 left-0 right-0 z-[100] border-b ${isAppRoute ? 'bg-zinc-950 border-emerald-500/30' : 'bg-black/50 backdrop-blur-xl border-zinc-900'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group shrink-0">

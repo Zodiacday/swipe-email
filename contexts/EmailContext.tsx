@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo, useEf
 import { NormalizedEmail } from "@/lib/types";
 import { AggregatedSender, DashboardStats, aggregateEmails } from "@/lib/engines/aggregation";
 import { useSession } from "next-auth/react";
+import { updateAnalytics } from "@/lib/analytics";
 
 // --- Types ---
 interface UndoAction {
@@ -210,6 +211,10 @@ export function EmailProvider({ children }: { children: ReactNode }) {
             setEmails(prev => [email, ...prev]);
             throw err;
         }
+
+        // Update analytics
+        updateAnalytics("trash");
+        window.dispatchEvent(new CustomEvent("analytics_updated"));
     }, []);
 
     // --- Trash All From Sender ---
@@ -238,6 +243,10 @@ export function EmailProvider({ children }: { children: ReactNode }) {
             setEmails(prev => [...emailsToTrash, ...prev]);
             throw err;
         }
+
+        // Update analytics
+        updateAnalytics("trash", ids.length);
+        window.dispatchEvent(new CustomEvent("analytics_updated"));
     }, [emails]);
 
     // --- Trash Multiple Senders ---
@@ -338,6 +347,10 @@ export function EmailProvider({ children }: { children: ReactNode }) {
     // --- Mark Personal ---
     const markPersonal = useCallback((senderEmail: string) => {
         setPersonalSenders(prev => new Set([...prev, senderEmail.toLowerCase()]));
+
+        // Update analytics
+        updateAnalytics("keep");
+        window.dispatchEvent(new CustomEvent("analytics_updated"));
     }, []);
 
     // --- Block Sender (Real API call with filter creation) ---
@@ -366,6 +379,10 @@ export function EmailProvider({ children }: { children: ReactNode }) {
                     filterId: data.filterId,
                     timestamp: Date.now()
                 }]);
+
+                // Update analytics
+                updateAnalytics("block", emailsToRemove.length);
+                window.dispatchEvent(new CustomEvent("analytics_updated"));
             }
             return data;
         } catch (err) {
@@ -402,6 +419,10 @@ export function EmailProvider({ children }: { children: ReactNode }) {
                     filterId: data.filterId,
                     timestamp: Date.now()
                 }]);
+
+                // Update analytics
+                updateAnalytics("nuke", emailsToRemove.length);
+                window.dispatchEvent(new CustomEvent("analytics_updated"));
             }
             return data;
         } catch (err) {

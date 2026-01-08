@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { SkeletonRow } from "@/components/Skeleton";
+import { StatsWidget } from "@/components/StatsWidget";
 import { useEmailContext } from "@/contexts/EmailContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
@@ -240,6 +241,9 @@ export default function DashboardPage() {
                     {isRefreshing && <RefreshCw className="w-4 h-4 text-zinc-600 animate-spin" />}
                 </div>
                 <div className="flex items-center gap-6 font-mono text-xs text-zinc-500">
+                    <div className="hidden md:block">
+                        <StatsWidget />
+                    </div>
                     <div>
                         <span className="text-zinc-300 font-bold">{stats?.totalEmails.toLocaleString() || 0}</span> EMAILS
                     </div>

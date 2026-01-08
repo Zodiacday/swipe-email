@@ -7,3 +7,5 @@ export { BossFight } from "./BossFight";
 export { ModeIndicator, useModeDetection } from "./ModeIndicator";
 export { ConfirmModal } from "./ConfirmModal";
 export { SwipeTutorial } from "./SwipeTutorial";
+export { InboxZero } from "./InboxZero";
+export { OnboardingSlides } from "./OnboardingSlides";

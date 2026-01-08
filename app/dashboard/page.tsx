@@ -39,8 +39,26 @@ const rowVariants = {
         opacity: 1,
         x: 0,
         transition: { delay: i * 0.03, type: "spring" as const, stiffness: 300, damping: 30 }
-    })
+    }),
+    exit: {
+        opacity: 0,
+        x: -100,
+        height: 0,
+        marginTop: 0,
+        marginBottom: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
+        transition: { duration: 0.2, ease: "easeIn" as const }
+    }
 };
+
+// Hover animation for rows
+const rowHoverStyle = {
+    y: -2,
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    transition: { type: "spring" as const, stiffness: 400, damping: 30 }
+};
+
 
 export default function DashboardPage() {
     // --- Context ---
@@ -407,8 +425,9 @@ export default function DashboardPage() {
                                         variants={rowVariants}
                                         initial="hidden"
                                         animate="visible"
+                                        whileHover={rowHoverStyle}
                                         className={`
-                                        flex md:grid md:grid-cols-12 gap-3 md:gap-4 p-4 md:px-6 md:h-[84px] items-center group transition-colors duration-200
+                                        flex md:grid md:grid-cols-12 gap-3 md:gap-4 p-4 md:px-6 md:h-[84px] items-center group transition-colors duration-200 relative
                                         ${sender.count > 100 ? "border-l-4 border-l-red-500 bg-red-500/5" : "border-l-2 border-l-transparent"}
                                         ${selectedIds.has(sender.id) ? "bg-emerald-500/5 !border-l-emerald-500" : "hover:bg-zinc-800/30"}
                                     `}

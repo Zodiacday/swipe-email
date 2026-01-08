@@ -5,6 +5,8 @@ import { Navbar } from "@/components/Navbar/Navbar";
 import { AuthProvider } from "@/components/AuthProvider/AuthProvider";
 import { EmailProvider } from "@/contexts/EmailContext";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { ConfirmModalProvider } from "@/hooks/useConfirmModal";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 const inter = Inter({
   variable: "--font-body",
@@ -55,8 +57,11 @@ export default function RootLayout({
         <AuthProvider>
           <EmailProvider>
             <ToastProvider>
-              <Navbar />
-              {children}
+              <ConfirmModalProvider>
+                <Navbar />
+                {children}
+                <ConfirmModal />
+              </ConfirmModalProvider>
             </ToastProvider>
           </EmailProvider>
         </AuthProvider>

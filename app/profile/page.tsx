@@ -33,13 +33,13 @@ export default function ProfilePage() {
     const personalList = [...personalSenders];
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-[#fafafa] pt-20 pb-12 px-4">
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 pt-20 pb-12 px-4 selection:bg-emerald-500/30">
             <div className="max-w-2xl mx-auto">
                 {/* Profile Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass border-zinc-800 p-8 rounded-[2rem] mb-6"
+                    className="glass rounded-3xl p-8 mb-6"
                 >
                     <div className="flex items-center gap-6">
                         <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
@@ -50,7 +50,7 @@ export default function ProfilePage() {
                             )}
                         </div>
                         <div className="flex-1">
-                            <h1 className="text-2xl font-heading font-black mb-1">{user.name}</h1>
+                            <h1 className="text-2xl font-black tracking-tight mb-1">{user.name}</h1>
                             <p className="text-zinc-500 text-sm flex items-center gap-2">
                                 <Mail className="w-4 h-4" />
                                 {user.email}
@@ -70,14 +70,14 @@ export default function ProfilePage() {
                     transition={{ delay: 0.1 }}
                     className="grid grid-cols-2 gap-4 mb-6"
                 >
-                    <div className="glass border-zinc-800 p-5 rounded-2xl text-center">
+                    <div className="glass p-5 rounded-3xl text-center">
                         <Trash2 className="w-5 h-5 text-red-400 mx-auto mb-2" />
-                        <div className="text-2xl font-heading font-black mb-1">{emailsCleared.toLocaleString()}</div>
+                        <div className="text-2xl font-black tracking-tight mb-1">{emailsCleared.toLocaleString()}</div>
                         <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Emails Processed</div>
                     </div>
-                    <div className="glass border-zinc-800 p-5 rounded-2xl text-center">
-                        <Clock className="w-5 h-5 text-blue-400 mx-auto mb-2" />
-                        <div className="text-2xl font-heading font-black mb-1">{timeSaved}</div>
+                    <div className="glass p-5 rounded-3xl text-center">
+                        <Clock className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
+                        <div className="text-2xl font-black tracking-tight mb-1">{timeSaved}</div>
                         <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Minutes Saved</div>
                     </div>
                 </motion.div>
@@ -87,7 +87,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="glass border-zinc-800 rounded-2xl mb-4 overflow-hidden"
+                    className="glass rounded-3xl mb-4 overflow-hidden"
                 >
                     <button
                         onClick={() => setShowBlocked(!showBlocked)}
@@ -97,8 +97,8 @@ export default function ProfilePage() {
                             <ShieldOff className="w-5 h-5 text-red-400" />
                         </div>
                         <div className="flex-1 text-left">
-                            <div className="font-bold text-white">Blocked Senders</div>
-                            <div className="text-xs text-zinc-500">{blockedList.length} sender{blockedList.length !== 1 ? "s" : ""} blocked</div>
+                            <div className="font-black tracking-tight text-zinc-100">Blocked Senders</div>
+                            <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">{blockedList.length} sender{blockedList.length !== 1 ? "s" : ""} blocked</div>
                         </div>
                         <ChevronRight className={`w-5 h-5 text-zinc-500 transition-transform ${showBlocked ? "rotate-90" : ""}`} />
                     </button>
@@ -124,7 +124,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.18 }}
-                    className="glass border-zinc-800 rounded-2xl mb-6 overflow-hidden"
+                    className="glass rounded-3xl mb-6 overflow-hidden"
                 >
                     <button
                         onClick={() => setShowPersonal(!showPersonal)}
@@ -134,8 +134,8 @@ export default function ProfilePage() {
                             <Heart className="w-5 h-5 text-emerald-400" />
                         </div>
                         <div className="flex-1 text-left">
-                            <div className="font-bold text-white">Personal Senders</div>
-                            <div className="text-xs text-zinc-500">{personalList.length} sender{personalList.length !== 1 ? "s" : ""} marked as personal</div>
+                            <div className="font-black tracking-tight text-zinc-100">Personal Senders</div>
+                            <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">{personalList.length} sender{personalList.length !== 1 ? "s" : ""} marked as personal</div>
                         </div>
                         <ChevronRight className={`w-5 h-5 text-zinc-500 transition-transform ${showPersonal ? "rotate-90" : ""}`} />
                     </button>
@@ -161,7 +161,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="glass border-zinc-800 rounded-[2rem] overflow-hidden mb-6"
+                    className="glass rounded-3xl overflow-hidden mb-6"
                 >
                     {[
                         { icon: Mail, label: "Connected Accounts", href: "/providers", desc: "Manage your email providers" },
@@ -177,8 +177,8 @@ export default function ProfilePage() {
                                 <item.icon className="w-5 h-5 text-zinc-400 group-hover:text-emerald-400 transition-colors" />
                             </div>
                             <div className="flex-1">
-                                <div className="font-bold text-white">{item.label}</div>
-                                <div className="text-xs text-zinc-500">{item.desc}</div>
+                                <div className="font-black tracking-tight text-zinc-100">{item.label}</div>
+                                <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">{item.desc}</div>
                             </div>
                             <ChevronRight className="w-5 h-5 text-zinc-700 group-hover:text-zinc-400 transition-colors" />
                         </Link>
@@ -191,7 +191,7 @@ export default function ProfilePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="w-full p-4 rounded-2xl border border-red-500/20 bg-red-500/5 text-red-400 font-bold flex items-center justify-center gap-2 hover:bg-red-500/10 transition-colors"
+                    className="w-full p-4 rounded-3xl border border-red-500/20 bg-red-500/5 text-red-400 font-bold flex items-center justify-center gap-2 hover:bg-red-500/10 transition-colors"
                 >
                     <LogOut className="w-4 h-4" />
                     Logout

@@ -26,7 +26,7 @@ export default function Home() {
     const ctaLabel = session ? "Go to App" : "Start Experience";
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-[#fafafa] overflow-hidden relative font-body">
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 overflow-hidden relative font-sans selection:bg-emerald-500/30">
             {/* Ambient background effects */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px]" />
@@ -51,13 +51,13 @@ export default function Home() {
                         </motion.div>
 
                         <motion.h1
-                            className="text-5xl sm:text-6xl lg:text-8xl font-heading font-black mb-6 tracking-tight leading-[0.9] italic"
+                            className="text-6xl sm:text-7xl lg:text-9xl font-black mb-6 tracking-tighter leading-[0.85] italic uppercase"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
                         >
                             INBOX.<br />
-                            <span className="text-emerald-500 not-italic">REMASTERED.</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600 not-italic">REMASTERED.</span>
                         </motion.h1>
 
                         <motion.p
@@ -77,16 +77,16 @@ export default function Home() {
                         >
                             <Link
                                 href={ctaHref}
-                                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 text-black font-black rounded-full hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)] group"
+                                className="w-full sm:w-auto px-10 py-5 bg-emerald-500 text-zinc-950 font-black tracking-widest text-sm rounded-full hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.2)] group active:scale-95"
                             >
                                 {ctaLabel}
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <Link
                                 href="#demo"
-                                className="w-full sm:w-auto px-8 py-4 border border-zinc-800 text-white font-bold rounded-full hover:bg-zinc-900 transition-all flex items-center justify-center"
+                                className="w-full sm:w-auto px-10 py-5 border border-zinc-800 text-white font-black tracking-widest text-sm rounded-full hover:bg-zinc-900 transition-all flex items-center justify-center active:scale-95"
                             >
-                                Watch Demo
+                                WATCH DEMO
                             </Link>
                         </motion.div>
                     </div>
@@ -126,12 +126,12 @@ export default function Home() {
                                 desc: "Automatically identifies newsletters, social updates, and promo spam.",
                             },
                         ].map((f, i) => (
-                            <div key={i} className="p-8 rounded-3xl glass border-zinc-800 hover:border-emerald-500/20 transition-all group">
-                                <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 group-hover:bg-emerald-500/10 transition-colors">
-                                    <f.icon className="w-6 h-6 text-zinc-400 group-hover:text-emerald-400 transition-colors" />
+                            <div key={i} className="p-10 rounded-3xl glass border-zinc-800/50 hover:border-emerald-500/20 transition-all group">
+                                <div className="w-14 h-14 rounded-2xl bg-zinc-900 flex items-center justify-center mb-8 group-hover:bg-emerald-500/10 transition-colors">
+                                    <f.icon className="w-7 h-7 text-zinc-400 group-hover:text-emerald-400 transition-colors" />
                                 </div>
-                                <h3 className="text-xl font-heading font-bold mb-3">{f.title}</h3>
-                                <p className="text-zinc-400 text-sm leading-relaxed">{f.desc}</p>
+                                <h3 className="text-2xl font-black tracking-tight mb-4">{f.title}</h3>
+                                <p className="text-zinc-400 text-base leading-relaxed">{f.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -139,13 +139,14 @@ export default function Home() {
             </section>
 
             {/* Final CTA */}
-            <section className="py-24 px-6 relative">
-                <div className="max-w-3xl mx-auto text-center glass p-12 md:p-20 rounded-[3rem] border-zinc-800">
-                    <h2 className="text-4xl md:text-5xl font-heading font-black mb-6">Ready to reclaim your time?</h2>
-                    <p className="text-zinc-400 mb-10 text-lg">Join thousands of users who have mastered their inbox.</p>
+            <section className="py-32 px-6 relative">
+                <div className="max-w-3xl mx-auto text-center glass p-16 md:p-24 rounded-[3rem] border-zinc-800/50 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+                    <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-[0.9]">READY TO RECLAIM<br />YOUR TIME?</h2>
+                    <p className="text-zinc-400 mb-12 text-xl font-medium">Join thousands of users who have mastered their inbox.</p>
                     <Link
                         href={ctaHref}
-                        className="inline-flex items-center gap-2 px-10 py-5 bg-white text-black text-xl rounded-full font-bold hover:bg-zinc-200 transition-all"
+                        className="inline-flex items-center gap-2 px-12 py-6 bg-emerald-500 text-zinc-950 text-base rounded-full font-black tracking-widest uppercase hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
                     >
                         {ctaLabel}
                         <ArrowRight className="w-6 h-6" />

@@ -9,12 +9,14 @@ import {
     PanInfo,
     AnimatePresence,
 } from "framer-motion";
-import { ArrowLeft, Check, Trash2, Clock, Loader2, RefreshCw, Flame, Zap, Star, MailX, BellOff } from "lucide-react";
 import Link from "next/link";
+import { Zap, LayoutDashboard, ArrowRight, Trash2, Mail, RefreshCw, Star, ShieldOff, Check, ArrowLeft, Clock, BellOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEmailContext } from "@/contexts/EmailContext";
 import { useToast } from "@/contexts/ToastContext";
+import { useFirstVisit } from "@/hooks/useFirstVisit";
+import { SwipeTutorial } from "@/components/SwipeTutorial";
 import { setLastMode } from "@/lib/userPreferences";
 import { NormalizedEmail } from "@/lib/types";
 import { SkeletonCard } from "@/components/Skeleton";
@@ -86,6 +88,7 @@ export default function SwipePage() {
     // --- Context ---
     const { emails, isLoading, error, fetchEmails, trashEmail, trashSender, canUndo, undoLastAction, isRefreshing } = useEmailContext();
     const { showToast } = useToast();
+    const { isFirstVisit, dismiss: dismissTutorial } = useFirstVisit("swipe_tutorial");
     const { data: session, status } = useSession();
     const router = useRouter();
 
@@ -446,7 +449,7 @@ export default function SwipePage() {
         return (
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4 p-6 text-center">
                 <div className="text-5xl mb-2">😕</div>
-                <h1 className="text-2xl font-bold text-zinc-100">Something went wrong</h1>
+                <h1 className="text-2xl font-black tracking-tight text-zinc-100">Something went wrong</h1>
                 <p className="text-zinc-500 max-w-md">{error}</p>
                 <button
                     onClick={() => fetchEmails()}
@@ -513,10 +516,10 @@ export default function SwipePage() {
                 )}
 
                 <div className="flex gap-4">
-                    <Link href="/dashboard" className="px-8 py-3 bg-cyan-500 text-zinc-900 font-bold rounded-full hover:bg-cyan-400 transition-colors">
+                    <Link href="/dashboard" className="px-8 py-3 bg-emerald-500 text-zinc-900 font-bold rounded-full hover:bg-emerald-400 transition-colors">
                         Go to Dashboard
                     </Link>
-                    <Link href="/mode-select" className="px-8 py-3 bg-zinc-800 text-zinc-300 font-bold rounded-full hover:bg-zinc-700 transition-colors">
+                    <Link href="/mode-select" className="px-8 py-3 btn-secondary">
                         Back to Menu
                     </Link>
                 </div>
@@ -559,7 +562,7 @@ export default function SwipePage() {
                             animate={{ scale: 1, opacity: 1 }}
                             className="flex items-center gap-1 bg-orange-500/20 border border-orange-500/30 rounded-full px-3 py-1"
                         >
-                            <Flame className="w-4 h-4 text-orange-400" />
+                            <Zap className="w-4 h-4 text-orange-400" />
                             <span className="text-orange-400 font-bold text-sm">{streak}x</span>
                         </motion.div>
                     )}
@@ -577,6 +580,9 @@ export default function SwipePage() {
             </header>
 
             {/* Celebration Overlay */}
+            {/* Tutorial Overlay */}
+            <SwipeTutorial isOpen={isFirstVisit} onDismiss={dismissTutorial} />
+
             <AnimatePresence>
                 {celebration && (
                     <motion.div
@@ -585,8 +591,8 @@ export default function SwipePage() {
                         exit={{ scale: 0.5, opacity: 0 }}
                         className="fixed inset-0 flex items-center justify-center z-[60] pointer-events-none"
                     >
-                        <div className="bg-zinc-900/90 backdrop-blur-xl border border-emerald-500/30 rounded-2xl px-8 py-6 shadow-2xl">
-                            <p className="text-3xl font-black text-white">{celebration}</p>
+                        <div className="glass rounded-3xl px-8 py-6 shadow-2xl border-emerald-500/30">
+                            <p className="text-3xl font-black text-white tracking-tight">{celebration}</p>
                         </div>
                     </motion.div>
                 )}
@@ -604,12 +610,12 @@ export default function SwipePage() {
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
-                            className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl"
+                            className="glass rounded-3xl p-8 max-w-sm w-full shadow-2xl"
                         >
                             <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                                 <Trash2 className="w-8 h-8 text-red-400" />
                             </div>
-                            <h2 className="text-xl font-bold text-center mb-2">Trash them all?</h2>
+                            <h2 className="text-xl font-black tracking-tight text-center mb-2">Trash them all?</h2>
                             <p className="text-zinc-400 text-center mb-8">
                                 There are <span className="text-white font-bold">{bulkPrompt.count}</span> more emails from <span className="text-white font-bold">{bulkPrompt.sender}</span>. Want to trash all of them at once?
                             </p>
@@ -626,7 +632,7 @@ export default function SwipePage() {
                                         setBulkPrompt(null);
                                         showToast("Trashed single email ✓", { type: "success" });
                                     }}
-                                    className="w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded-2xl transition-colors"
+                                    className="w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded-3xl transition-colors"
                                 >
                                     NO, JUST THIS ONE
                                 </button>
@@ -665,7 +671,7 @@ export default function SwipePage() {
                         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                         dragElastic={0.7}
                         onDragEnd={onDragEnd}
-                        className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl z-20 flex flex-col cursor-grab active:cursor-grabbing transform-gpu"
+                        className="absolute inset-0 glass rounded-3xl shadow-2xl z-20 flex flex-col cursor-grab active:cursor-grabbing transform-gpu"
                     >
                         {/* Drag Indicators (4-way Stamps) */}
                         <motion.div style={{ opacity: keepStampOpacity }} className="absolute top-6 left-6 border-4 border-emerald-500 text-emerald-500 rounded-lg px-3 py-1 text-2xl font-black uppercase tracking-widest -rotate-12 z-50 bg-zinc-900/80 backdrop-blur-sm">
@@ -688,7 +694,7 @@ export default function SwipePage() {
                                     {activeCard.senderInitials}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h2 className="text-lg font-bold text-zinc-100 truncate">{activeCard.sender}</h2>
+                                    <h2 className="text-lg font-black tracking-tight text-zinc-100 truncate">{activeCard.sender}</h2>
                                     <div className="flex items-center gap-2">
                                         <p className="text-sm text-zinc-500 font-mono">{activeCard.date}</p>
                                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${activeCard.category === "promo" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
@@ -700,7 +706,7 @@ export default function SwipePage() {
                                         </span>
                                     </div>
                                     {senderCount > 1 && (
-                                        <p className="text-xs text-cyan-500 mt-1">
+                                        <p className="text-[10px] uppercase tracking-widest text-emerald-500 mt-1">
                                             +{senderCount - 1} more from this sender
                                         </p>
                                     )}
@@ -712,7 +718,7 @@ export default function SwipePage() {
                                 <h3 className="text-2xl font-black text-white leading-tight mb-6 tracking-tight">
                                     {activeCard.subject}
                                 </h3>
-                                <div className="p-6 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
+                                <div className="p-6 glass rounded-3xl">
                                     <p className="text-zinc-400 leading-relaxed text-base line-clamp-4">
                                         {activeCard.preview}
                                     </p>

@@ -112,7 +112,7 @@ export default function ProvidersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-[#fafafa] font-body pt-20">
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans pt-20 selection:bg-emerald-500/30">
             <div className="max-w-4xl mx-auto px-4 py-8">
                 {/* Header */}
                 <motion.div
@@ -136,7 +136,7 @@ export default function ProvidersPage() {
                     {accounts.map((account, i) => (
                         <motion.div
                             key={account.id}
-                            className="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-sm"
+                            className="p-6 rounded-3xl glass border-zinc-800/50"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.1 }}
@@ -205,15 +205,15 @@ export default function ProvidersPage() {
                 {/* Add Account Button */}
                 <motion.button
                     onClick={() => setShowAddProvider(true)}
-                    className="w-full p-6 rounded-2xl border-2 border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-white"
+                    className="w-full p-8 rounded-3xl border-2 border-dashed border-emerald-500/20 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all flex items-center justify-center gap-3 text-zinc-400 hover:text-emerald-400 group"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                 >
-                    <Plus className="w-6 h-6" />
-                    <span className="font-semibold">Add Email Account</span>
+                    <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform" />
+                    <span className="font-black tracking-widest uppercase text-sm">Add Email Account</span>
                 </motion.button>
 
                 {/* Add Provider Modal */}

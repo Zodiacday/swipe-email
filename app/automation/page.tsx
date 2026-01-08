@@ -86,33 +86,33 @@ export default function AutomationPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-[#fafafa] font-body">
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500/30">
             <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-24">
                 {/* Dashboard Header */}
                 <div className="grid md:grid-cols-2 gap-12 mb-16 items-center">
                     <div>
-                        <h2 className="text-5xl font-heading font-black mb-6 tracking-tighter">
-                            Inbox <span className="text-emerald-500">Autopilot.</span>
+                        <h2 className="text-6xl font-black mb-6 tracking-tighter uppercase italic leading-[0.9]">
+                            INBOX <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600 not-italic">AUTOPILOT.</span>
                         </h2>
                         <p className="text-zinc-500 text-lg leading-relaxed mb-8">
                             Configure rules to automatically handle recurring spam patterns.
                             Your decisions are synced across all your devices.
                         </p>
                         <div className="flex items-center gap-4">
-                            <button className="px-6 py-3 bg-emerald-500 text-black font-bold rounded-full hover:bg-emerald-400 transition-all flex items-center gap-2">
+                            <button className="px-8 py-4 bg-emerald-500 text-zinc-950 font-black tracking-widest uppercase text-xs rounded-full hover:bg-emerald-400 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95">
                                 <Plus className="w-4 h-4" />
                                 New Sentinel Rule
                             </button>
-                            <div className="flex items-center gap-2 px-4 py-3 bg-zinc-950/50 border border-zinc-900 rounded-full">
-                                <div className={`w-3 h-3 rounded-full ${isAutomationEnabled ? 'bg-emerald-500 glow-emerald' : 'bg-zinc-700'}`} />
-                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                            <div className="flex items-center gap-2 px-5 py-4 bg-zinc-900 border border-zinc-800 rounded-full">
+                                <div className={`w-2.5 h-2.5 rounded-full ${isAutomationEnabled ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-zinc-700'}`} />
+                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] leading-none">
                                     {isAutomationEnabled ? 'Active' : 'Paused'}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="glass border-zinc-800 p-8 rounded-[2rem] relative overflow-hidden group">
+                    <div className="glass p-8 rounded-3xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -translate-y-1/2 translate-x-1/2" />
                         <div className="relative z-10">
                             <div className="flex justify-between items-start mb-6">
@@ -155,11 +155,11 @@ export default function AutomationPage() {
                         </div>
                     </div>
 
-                    <div className="grid gap-3">
+                    <div className="grid gap-4">
                         {rules.map((rule) => (
                             <div
                                 key={rule.id}
-                                className={`group p-6 glass border-zinc-900 rounded-3xl flex items-center gap-6 transition-all hover:border-zinc-700 ${!rule.enabled ? 'opacity-50' : ''}`}
+                                className={`group p-6 glass border-zinc-800 rounded-3xl flex items-center gap-6 transition-all hover:border-emerald-500/20 ${!rule.enabled ? 'opacity-50' : ''}`}
                             >
                                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border border-zinc-800 ${rule.action === 'delete' ? 'bg-red-500/5' :
                                     rule.action === 'unsubscribe' ? 'bg-blue-500/5' : 'bg-orange-500/5'

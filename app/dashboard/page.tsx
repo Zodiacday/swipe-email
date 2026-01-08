@@ -26,6 +26,7 @@ import Link from "next/link";
 import { SkeletonRow } from "@/components/Skeleton";
 import { useEmailContext } from "@/contexts/EmailContext";
 import { useToast } from "@/contexts/ToastContext";
+import { useConfirmModal } from "@/hooks/useConfirmModal";
 import { setLastMode } from "@/lib/userPreferences";
 
 // --- Framer Motion Config ---
@@ -53,6 +54,7 @@ export default function DashboardPage() {
         markPersonal
     } = useEmailContext();
     const { showToast } = useToast();
+    const { confirm: confirmModal } = useConfirmModal();
 
     // --- Local State ---
     const [selectedView, setSelectedView] = useState<"senders" | "domains">("senders");
@@ -195,8 +197,8 @@ export default function DashboardPage() {
 
                 {/* Skeleton Table */}
                 <main className="max-w-7xl mx-auto p-8">
-                    <div className="border border-zinc-800 rounded-2xl bg-zinc-900/20">
-                        <div className="h-12 bg-zinc-900 rounded-t-2xl border-b border-zinc-800" />
+                    <div className="glass rounded-3xl">
+                        <div className="h-12 bg-zinc-900 rounded-t-3xl border-b border-zinc-800" />
                         <div className="divide-y divide-zinc-800/50">
                             {[1, 2, 3, 4, 5, 6].map(i => (
                                 <SkeletonRow key={i} />
@@ -213,11 +215,11 @@ export default function DashboardPage() {
         return (
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4 p-6 text-center">
                 <div className="text-5xl mb-2">😕</div>
-                <h1 className="text-2xl font-bold text-zinc-100">Something went wrong</h1>
+                <h1 className="text-2xl font-black tracking-tight text-zinc-100">Something went wrong</h1>
                 <p className="text-zinc-500 max-w-md">{error}</p>
                 <button
                     onClick={() => fetchEmails()}
-                    className="mt-4 px-6 py-3 bg-cyan-500 text-zinc-900 font-bold rounded-full flex items-center gap-2 hover:bg-cyan-400 transition-colors"
+                    className="mt-4 px-6 py-3 bg-emerald-500 text-zinc-900 font-bold rounded-full flex items-center gap-2 hover:bg-emerald-400 transition-colors"
                 >
                     <RefreshCw className="w-4 h-4" /> Try Again
                 </button>
@@ -231,8 +233,8 @@ export default function DashboardPage() {
             {/* --- Sticky Header Row 1: Branding & Stats --- */}
             <header className="h-16 px-6 bg-zinc-900/50 backdrop-blur-xl border-b border-zinc-800/50 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-3">
-                    <LayoutDashboard className="w-5 h-5 text-cyan-400" />
-                    <span className="font-mono text-cyan-400 font-bold tracking-wider uppercase text-base">
+                    <LayoutDashboard className="w-5 h-5 text-emerald-400" />
+                    <span className="font-mono text-emerald-400 font-black tracking-widest uppercase text-base">
                         COMMAND CENTER
                     </span>
                     {isRefreshing && <RefreshCw className="w-4 h-4 text-zinc-600 animate-spin" />}
@@ -243,7 +245,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="w-px h-4 bg-zinc-800" />
                     <div>
-                        <span className="text-cyan-400 font-bold">{stats?.uniqueSenders.toLocaleString() || 0}</span> SENDERS
+                        <span className="text-emerald-400 font-bold">{stats?.uniqueSenders.toLocaleString() || 0}</span> SENDERS
                     </div>
                     <Link href="/mode-select" className="text-zinc-500 hover:text-zinc-300 transition-colors ml-4">
                         <ArrowLeft className="w-5 h-5" />
@@ -258,7 +260,7 @@ export default function DashboardPage() {
                     <Link href="/swipe" className="px-4 py-1.5 rounded-full text-sm font-medium text-zinc-400 hover:text-zinc-300 transition-colors">
                         Swipe
                     </Link>
-                    <div className="px-4 py-1.5 rounded-full text-sm font-medium text-zinc-900 bg-cyan-500 shadow-sm">
+                    <div className="px-4 py-1.5 rounded-full text-sm font-medium text-zinc-900 bg-emerald-500 shadow-sm">
                         Dashboard
                     </div>
                 </div>
@@ -278,13 +280,13 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-1 bg-zinc-800/50 rounded-lg p-1 border border-zinc-700/50">
                         <button
                             onClick={() => setSelectedView("senders")}
-                            className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-colors ${selectedView === "senders" ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"}`}
+                            className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-colors ${selectedView === "senders" ? "bg-emerald-500/10 text-emerald-400" : "text-zinc-500 hover:text-zinc-300"}`}
                         >
                             Senders
                         </button>
                         <button
                             onClick={() => setSelectedView("domains")}
-                            className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-colors ${selectedView === "domains" ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"}`}
+                            className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-colors ${selectedView === "domains" ? "bg-emerald-500/10 text-emerald-400" : "text-zinc-500 hover:text-zinc-300"}`}
                         >
                             Domains
                         </button>
@@ -309,7 +311,7 @@ export default function DashboardPage() {
                         <Filter className="w-3.5 h-3.5 text-zinc-500 ml-1.5" />
                         <button
                             onClick={() => setScoreFilter(scoreFilter === "all" ? "high" : scoreFilter === "high" ? "danger" : "all")}
-                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${scoreFilter !== "all" ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"}`}
+                            className={`px-3 py-1.5 rounded-md text-[10px] uppercase tracking-widest font-bold transition-colors ${scoreFilter !== "all" ? "bg-emerald-500/10 text-emerald-400" : "text-zinc-500 hover:text-zinc-300"}`}
                         >
                             {scoreFilter === "all" ? "All Scores" : scoreFilter === "high" ? "High Score (>50)" : "Danger (>80)"}
                         </button>
@@ -321,7 +323,7 @@ export default function DashboardPage() {
                             <button
                                 key={range}
                                 onClick={() => setTimeRange(range)}
-                                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${timeRange === range ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"}`}
+                                className={`px-3 py-1.5 rounded-md text-[10px] uppercase tracking-widest font-bold transition-colors ${timeRange === range ? "bg-emerald-500/10 text-emerald-400" : "text-zinc-500 hover:text-zinc-300"}`}
                             >
                                 {range === "all" ? "All Time" : range}
                             </button>
@@ -330,13 +332,13 @@ export default function DashboardPage() {
 
                     {/* Search */}
                     <div className="relative w-64 group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-cyan-400 transition-colors" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-emerald-400 transition-colors" />
                         <input
                             type="text"
                             placeholder="Search senders..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-9 bg-zinc-800/50 border border-zinc-700 rounded-lg pl-9 pr-9 text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all font-sans"
+                            className="w-full h-9 bg-zinc-800/50 border border-zinc-700 rounded-lg pl-9 pr-9 text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-sans"
                         />
                         {searchQuery && (
                             <button
@@ -411,13 +413,13 @@ export default function DashboardPage() {
             {/* --- Main Content: Data Table --- */}
             <main className="max-w-7xl mx-auto p-4 md:p-8">
                 {/* Table Header - Hidden on mobile */}
-                <div className="hidden md:grid grid-cols-12 gap-4 px-6 h-12 items-center bg-zinc-900 border border-zinc-800 rounded-t-2xl text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                <div className="hidden md:grid grid-cols-12 gap-4 px-6 h-12 items-center glass rounded-t-3xl text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                     <div className="col-span-1 flex justify-center">
                         <input
                             type="checkbox"
                             checked={selectedIds.size === filteredSenders.length && filteredSenders.length > 0}
                             onChange={toggleAll}
-                            className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-cyan-500 focus:ring-cyan-500/20 cursor-pointer"
+                            className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer"
                         />
                     </div>
                     <div className="col-span-5 pl-2">Sender Identity</div>
@@ -426,21 +428,21 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Mobile Select All */}
-                <div className="md:hidden flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-t-2xl px-4 py-3">
+                <div className="md:hidden flex items-center justify-between glass rounded-t-3xl px-4 py-3">
                     <label className="flex items-center gap-2 text-sm text-zinc-400">
                         <input
                             type="checkbox"
                             checked={selectedIds.size === filteredSenders.length && filteredSenders.length > 0}
                             onChange={toggleAll}
-                            className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-cyan-500"
+                            className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-emerald-500"
                         />
                         Select all
                     </label>
-                    <span className="text-xs text-zinc-500">{filteredSenders.length} senders</span>
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{filteredSenders.length} senders</span>
                 </div>
 
                 {/* Table Body */}
-                <div className="border border-t-0 border-zinc-800 rounded-b-2xl bg-zinc-900/20 backdrop-blur-sm max-h-[calc(100vh-320px)] overflow-y-auto">
+                <div className="glass rounded-b-3xl border-t-0 max-h-[calc(100vh-320px)] overflow-y-auto">
                     {selectedView === "senders" ? (
                         <div className="divide-y divide-zinc-800/50">
                             {filteredSenders.map((sender, i) => (
@@ -454,7 +456,7 @@ export default function DashboardPage() {
                                         className={`
                                         flex md:grid md:grid-cols-12 gap-3 md:gap-4 p-4 md:px-6 md:h-[84px] items-center group transition-colors duration-200
                                         ${sender.count > 100 ? "border-l-4 border-l-red-500 bg-red-500/5" : "border-l-2 border-l-transparent"}
-                                        ${selectedIds.has(sender.id) ? "bg-cyan-500/5 !border-l-cyan-500" : "hover:bg-zinc-800/30"}
+                                        ${selectedIds.has(sender.id) ? "bg-emerald-500/5 !border-l-emerald-500" : "hover:bg-zinc-800/30"}
                                     `}
                                     >
                                         {/* Checkbox */}
@@ -463,7 +465,7 @@ export default function DashboardPage() {
                                                 type="checkbox"
                                                 checked={selectedIds.has(sender.id)}
                                                 onChange={() => toggleSelection(sender.id)}
-                                                className="w-5 h-5 md:w-4 md:h-4 rounded border-zinc-700 bg-zinc-800/50 text-cyan-500 focus:ring-cyan-500/20 cursor-pointer"
+                                                className="w-5 h-5 md:w-4 md:h-4 rounded border-zinc-700 bg-zinc-800/50 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer"
                                             />
                                         </div>
 
@@ -474,9 +476,9 @@ export default function DashboardPage() {
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="font-semibold text-zinc-100 truncate text-sm md:text-base">{sender.name}</div>
+                                                    <div className="font-black tracking-tight text-zinc-100 truncate text-sm md:text-base">{sender.name}</div>
                                                     {sender.category === "Personal" && (
-                                                        <span className="hidden md:inline px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-tighter">
+                                                        <span className="hidden md:inline px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-widest">
                                                             Personal
                                                         </span>
                                                     )}
@@ -488,7 +490,7 @@ export default function DashboardPage() {
                                         {/* Volume - Simplified on mobile */}
                                         <div className="md:col-span-4 flex items-center gap-2 md:gap-4 shrink-0">
                                             <div className={`font-mono font-bold text-base md:text-lg ${sender.count > 100 ? "text-red-400" :
-                                                sender.count > 20 ? "text-cyan-400" : "text-zinc-300"
+                                                sender.count > 20 ? "text-emerald-400" : "text-zinc-300"
                                                 }`}>
                                                 {sender.count}
                                             </div>
@@ -498,7 +500,7 @@ export default function DashboardPage() {
                                                     animate={{ width: `${Math.min((sender.count / 50) * 100, 100)}%` }}
                                                     transition={{ duration: 1, ease: "easeOut" }}
                                                     className={`h-full rounded-full ${sender.count > 100 ? "bg-red-500 premium-pulse-red" :
-                                                        sender.count > 20 ? "bg-cyan-500" : "bg-zinc-600"
+                                                        sender.count > 20 ? "bg-emerald-500" : "bg-zinc-600"
                                                         }`}
                                                 />
                                             </div>
@@ -514,7 +516,7 @@ export default function DashboardPage() {
                                             <button
                                                 onClick={() => setExpandedRow(expandedRow === sender.id ? null : sender.id)}
                                                 className={`hidden md:flex p-2 rounded-lg border transition-colors ${expandedRow === sender.id
-                                                    ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
+                                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                                                     : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
                                                     }`}
                                                 title="View sample subjects"
@@ -549,7 +551,14 @@ export default function DashboardPage() {
                                             <button
                                                 onClick={async (e) => {
                                                     e.stopPropagation();
-                                                    if (confirm(`Block ${sender.name} and trash all emails? Future emails will be auto-trashed.`)) {
+                                                    const confirmed = await confirmModal({
+                                                        title: "Block Sender?",
+                                                        message: `Are you sure you want to block ${sender.name} and trash all existing emails? Future emails from this sender will be automatically trashed.`,
+                                                        confirmLabel: "YES, BLOCK THEM",
+                                                        variant: "danger"
+                                                    });
+
+                                                    if (confirmed) {
                                                         const result = await blockSender(sender.email);
                                                         if (result.success) {
                                                             showToast(`Blocked ${sender.name} - future emails auto-trashed ✓`, {
@@ -582,7 +591,7 @@ export default function DashboardPage() {
                                                 animate={{ height: 'auto', opacity: 1 }}
                                                 exit={{ height: 0, opacity: 0 }}
                                                 transition={{ duration: 0.2 }}
-                                                className="bg-zinc-900/50 border-l-4 border-l-cyan-500/30 overflow-hidden"
+                                                className="glass border-l-4 border-l-emerald-500/30 overflow-hidden"
                                             >
                                                 <div className="px-8 py-4">
                                                     <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -592,7 +601,7 @@ export default function DashboardPage() {
                                                     <ul className="space-y-2">
                                                         {sender.sampleSubjects.map((subject, idx) => (
                                                             <li key={idx} className="text-sm text-zinc-400 flex items-start gap-2">
-                                                                <span className="text-cyan-500/50">•</span>
+                                                                <span className="text-emerald-500/50">•</span>
                                                                 <span className="truncate">{subject}</span>
                                                             </li>
                                                         ))}
@@ -624,16 +633,16 @@ export default function DashboardPage() {
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                                                <span className="text-cyan-400 font-bold text-sm">{group.senders.length}</span>
+                                            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                                <span className="text-emerald-400 font-bold text-sm">{group.senders.length}</span>
                                             </div>
                                             <div>
-                                                <div className="font-semibold text-zinc-100">@{group.domain}</div>
+                                                <div className="font-black tracking-tight text-zinc-100">@{group.domain}</div>
                                                 <div className="text-xs text-zinc-500">{group.senders.length} senders</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            <div className={`font-mono font-bold text-lg ${group.totalCount > 100 ? "text-red-400" : "text-cyan-400"
+                                            <div className={`font-mono font-bold text-lg ${group.totalCount > 100 ? "text-red-400" : "text-emerald-400"
                                                 }`}>
                                                 {group.totalCount} emails
                                             </div>
@@ -644,7 +653,14 @@ export default function DashboardPage() {
 
                                                     if (result.requiresConfirmation) {
                                                         // Domain requires confirmation (caution category)
-                                                        if (confirm(`This domain may send important emails. Are you sure you want to nuke @${group.domain}?`)) {
+                                                        const confirmed = await confirmModal({
+                                                            title: "Nuke Domain?",
+                                                            message: `Wait! @${group.domain} might send important updates. Are you sure you want to nuke all current and future emails from this entire domain?`,
+                                                            confirmLabel: "NUKE EVERYTHING",
+                                                            variant: "danger"
+                                                        });
+
+                                                        if (confirmed) {
                                                             const confirmResult = await nukeDomain(group.domain, true);
                                                             if (confirmResult.success) {
                                                                 showToast(`Nuked @${group.domain} - blocked future emails ✓`, {
@@ -706,7 +722,7 @@ export default function DashboardPage() {
                                 <Trash2 className="w-6 h-6 text-red-400" />
                             </div>
                             <div>
-                                <div className="text-lg font-bold text-zinc-100">
+                                <div className="text-lg font-black tracking-tight text-zinc-100">
                                     {selectedIds.size} sender{selectedIds.size > 1 ? "s" : ""} selected
                                 </div>
                                 <div className="text-sm text-zinc-500">

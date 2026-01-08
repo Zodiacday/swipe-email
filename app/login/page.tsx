@@ -37,7 +37,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-[#fafafa] flex items-center justify-center p-4 pt-20">
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4 pt-20 selection:bg-emerald-500/30">
             {/* Background Effects */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-1/4 left-1/4 w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px]" />
@@ -50,16 +50,16 @@ export default function LoginPage() {
             >
                 {/* Header */}
                 <div className="text-center mb-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase tracking-widest mb-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest mb-6">
                         <Sparkles className="w-3 h-3" />
                         One Click Login
                     </div>
-                    <h1 className="text-4xl font-heading font-black mb-3">Clean Your Inbox</h1>
-                    <p className="text-zinc-500">Connect your email and start swiping in seconds</p>
+                    <h1 className="text-5xl font-black tracking-tighter mb-3 uppercase italic leading-[0.9]">Clean Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600 not-italic">Inbox</span></h1>
+                    <p className="text-zinc-500 text-lg font-medium">Connect your email and start swiping in seconds</p>
                 </div>
 
                 {/* Login Card */}
-                <div className="glass border-zinc-800 p-8 rounded-[2rem]">
+                <div className="glass p-8 rounded-3xl border-zinc-800/50">
                     <button
                         onClick={handleGoogleLogin}
                         className="w-full py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-100 transition-all flex items-center justify-center gap-3 mb-4"

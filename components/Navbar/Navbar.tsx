@@ -13,6 +13,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { StreakBadge } from "@/components/StreakBadge";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 const NAV_LINKS = [
     { href: "/swipe", label: "Swipe", icon: Zap },
@@ -30,165 +31,169 @@ export function Navbar() {
     const isAppRoute = ["/swipe", "/dashboard", "/mode-select", "/profile", "/providers", "/automation"].includes(pathname);
 
     return (
-        <nav className={`fixed top-0 left-0 right-0 z-[100] border-b ${isAppRoute ? 'bg-zinc-950 border-emerald-500/30' : 'bg-black/50 backdrop-blur-xl border-zinc-900'}`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 group shrink-0">
-                    <img
-                        src="/logo.png"
-                        alt="Swipe Logo"
-                        className="w-10 h-10 object-contain group-hover:scale-110 transition-transform"
-                    />
-                    <span className="text-xl font-black tracking-tighter text-white hidden sm:inline uppercase">Swipe</span>
-                </Link>
+        <>
+            <OfflineIndicator />
+            <nav className={`fixed top-0 left-0 right-0 z-[100] border-b ${isAppRoute ? 'bg-zinc-950 border-emerald-500/30' : 'bg-black/50 backdrop-blur-xl border-zinc-900'}`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                    {/* Logo */}
+                    <Link href="/" className="flex items-center gap-2 group shrink-0">
+                        <img
+                            src="/logo.png"
+                            alt="Swipe Logo"
+                            className="w-10 h-10 object-contain group-hover:scale-110 transition-transform"
+                        />
+                        <span className="text-xl font-black tracking-tighter text-white hidden sm:inline uppercase">Swipe</span>
+                    </Link>
 
-                {/* Desktop Nav Links (The Switch) */}
-                <div className="hidden md:flex items-center glass p-1 rounded-2xl border border-zinc-800/50">
-                    {NAV_LINKS.map(link => {
-                        const isActive = pathname === link.href;
-                        const Icon = link.icon;
+                    {/* Desktop Nav Links (The Switch) */}
+                    <div className="hidden md:flex items-center glass p-1 rounded-2xl border border-zinc-800/50">
+                        {NAV_LINKS.map(link => {
+                            const isActive = pathname === link.href;
+                            const Icon = link.icon;
 
-                        return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={`
-                                    flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest font-black transition-all
-                                    ${isActive
-                                        ? 'bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-                                        : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}
-                                `}
-                            >
-                                <Icon className="w-3.5 h-3.5" />
-                                {link.label}
-                            </Link>
-                        );
-                    })}
-                </div>
-
-                {/* Auth Buttons - Desktop */}
-                <div className="hidden md:flex items-center gap-2 lg:gap-3">
-                    {session ? (
-                        <div className="flex items-center gap-3">
-                            {/* Privacy Badge */}
-                            <div
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 cursor-help"
-                                title="We never read your email content — only metadata"
-                            >
-                                <Shield className="w-3 h-3" />
-                                <span className="text-[10px] font-bold tracking-wider">ZERO-READ</span>
-                            </div>
-
-                            {/* Streak Badge */}
-                            <StreakBadge size="sm" />
-
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                                {session.user?.image ? (
-                                    <img src={session.user.image} alt="" className="w-5 h-5 rounded-full" />
-                                ) : (
-                                    <User className="w-4 h-4 text-zinc-400" />
-                                )}
-                                <span className="text-sm font-medium text-zinc-300">{session.user?.name?.split(' ')[0]}</span>
-                            </div>
-                            <button
-                                onClick={() => signOut()}
-                                className="p-2 text-zinc-400 hover:text-red-400 transition-colors"
-                                title="Sign Out"
-                            >
-                                <LogOut className="w-4 h-4" />
-                            </button>
-                        </div>
-
-                    ) : (
-                        <>
-                            <Link
-                                href="/login"
-                                className="flex items-center gap-2 px-3 lg:px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
-                            >
-                                <LogIn className="w-4 h-4" />
-                                <span className="hidden lg:inline">Login</span>
-                            </Link>
-                            <Link
-                                href="/signup"
-                                className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-zinc-950 text-xs font-black tracking-widest uppercase rounded-full hover:bg-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95"
-                            >
-                                <Zap className="w-4 h-4" />
-                                <span className="hidden sm:inline">Get Started</span>
-                            </Link>
-                        </>
-                    )}
-                </div>
-
-                {/* Mobile Menu Button */}
-                <button
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors"
-                    aria-label="Toggle menu"
-                >
-                    {mobileMenuOpen ? (
-                        <X className="w-6 h-6 text-white" />
-                    ) : (
-                        <Menu className="w-6 h-6 text-white" />
-                    )}
-                </button>
-            </div>
-
-            {/* Mobile Menu */}
-            <AnimatePresence>
-                {mobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden border-t border-white/5 bg-black/95 backdrop-blur-xl"
-                    >
-                        <div className="px-4 py-4 space-y-2">
-                            {NAV_LINKS.map(link => (
+                            return (
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${pathname === link.href
-                                        ? 'bg-emerald-500/10 text-emerald-400'
-                                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                                        }`}
+                                    className={`
+                                    flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest font-black transition-all
+                                    ${isActive
+                                            ? 'bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                                            : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}
+                                `}
                                 >
+                                    <Icon className="w-3.5 h-3.5" />
                                     {link.label}
                                 </Link>
-                            ))}
+                            );
+                        })}
+                    </div>
 
-                            <div className="h-[1px] bg-white/5 my-4" />
+                    {/* Auth Buttons - Desktop */}
+                    <div className="hidden md:flex items-center gap-2 lg:gap-3">
+                        {session ? (
+                            <div className="flex items-center gap-3">
+                                {/* Privacy Badge */}
+                                <div
+                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 cursor-help"
+                                    title="We never read your email content — only metadata"
+                                >
+                                    <Shield className="w-3 h-3" />
+                                    <span className="text-[10px] font-bold tracking-wider">ZERO-READ</span>
+                                </div>
 
-                            {session ? (
+                                {/* Streak Badge */}
+                                <StreakBadge size="sm" />
+
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                                    {session.user?.image ? (
+                                        <img src={session.user.image} alt="" className="w-5 h-5 rounded-full" />
+                                    ) : (
+                                        <User className="w-4 h-4 text-zinc-400" />
+                                    )}
+                                    <span className="text-sm font-medium text-zinc-300">{session.user?.name?.split(' ')[0]}</span>
+                                </div>
                                 <button
                                     onClick={() => signOut()}
-                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-zinc-400 hover:text-red-400 bg-white/5"
+                                    className="p-2 text-zinc-400 hover:text-red-400 transition-colors"
+                                    title="Sign Out"
                                 >
-                                    <span>Sign Out</span>
                                     <LogOut className="w-4 h-4" />
                                 </button>
-                            ) : (
-                                <>
+                            </div>
+
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="flex items-center gap-2 px-3 lg:px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                                >
+                                    <LogIn className="w-4 h-4" />
+                                    <span className="hidden lg:inline">Login</span>
+                                </Link>
+                                <Link
+                                    href="/signup"
+                                    className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-zinc-950 text-xs font-black tracking-widest uppercase rounded-full hover:bg-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95"
+                                >
+                                    <Zap className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Get Started</span>
+                                </Link>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors"
+                        aria-label="Toggle menu"
+                    >
+                        {mobileMenuOpen ? (
+                            <X className="w-6 h-6 text-white" />
+                        ) : (
+                            <Menu className="w-6 h-6 text-white" />
+                        )}
+                    </button>
+                </div>
+
+                {/* Mobile Menu */}
+                <AnimatePresence>
+                    {mobileMenuOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="md:hidden border-t border-white/5 bg-black/95 backdrop-blur-xl"
+                        >
+                            <div className="px-4 py-4 space-y-2">
+                                {NAV_LINKS.map(link => (
                                     <Link
-                                        href="/login"
+                                        key={link.href}
+                                        href={link.href}
                                         onClick={() => setMobileMenuOpen(false)}
-                                        className="block px-4 py-3 rounded-xl text-base font-medium text-zinc-400 hover:text-white"
+                                        className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${pathname === link.href
+                                            ? 'bg-emerald-500/10 text-emerald-400'
+                                            : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                            }`}
                                     >
-                                        Login
+                                        {link.label}
                                     </Link>
-                                    <Link
-                                        href="/signup"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block px-4 py-3 rounded-xl text-base font-bold bg-emerald-500 text-black text-center"
+                                ))}
+
+                                <div className="h-[1px] bg-white/5 my-4" />
+
+                                {session ? (
+                                    <button
+                                        onClick={() => signOut()}
+                                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-zinc-400 hover:text-red-400 bg-white/5"
                                     >
-                                        Get Started
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </nav>
+                                        <span>Sign Out</span>
+                                        <LogOut className="w-4 h-4" />
+                                    </button>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href="/login"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="block px-4 py-3 rounded-xl text-base font-medium text-zinc-400 hover:text-white"
+                                        >
+                                            Login
+                                        </Link>
+                                        <Link
+                                            href="/signup"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="block px-4 py-3 rounded-xl text-base font-bold bg-emerald-500 text-black text-center"
+                                        >
+                                            Get Started
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </nav>
+        </>
     );
 }
+

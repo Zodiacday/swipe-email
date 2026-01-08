@@ -5,6 +5,7 @@ import { NormalizedEmail } from "@/lib/types";
 import { AggregatedSender, DashboardStats, aggregateEmails } from "@/lib/engines/aggregation";
 import { useSession } from "next-auth/react";
 import { updateAnalytics } from "@/lib/analytics";
+import { queueAction, isOnline, initOfflineQueue, setupAutoSync } from "@/lib/offlineQueue";
 
 // --- Types ---
 interface UndoAction {
@@ -198,6 +199,15 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         // Optimistic: Remove from local state
         setEmails(prev => prev.filter(e => e.id !== id));
 
+        // Check if offline - queue action if so
+        if (!isOnline()) {
+            console.log("[EmailContext] Offline - queueing trash action");
+            await queueAction({ type: "trash", emailId: id });
+            updateAnalytics("trash");
+            window.dispatchEvent(new CustomEvent("analytics_updated"));
+            return;
+        }
+
         // Fire API (don't await for speed)
         try {
             await fetch("/api/gmail/emails", {
@@ -206,10 +216,9 @@ export function EmailProvider({ children }: { children: ReactNode }) {
                 body: JSON.stringify({ action: "trash", emailId: id })
             });
         } catch (err) {
-            console.error("Trash failed:", err);
-            // Revert on failure
-            setEmails(prev => [email, ...prev]);
-            throw err;
+            console.error("Trash failed, queueing for offline sync:", err);
+            // Queue for later sync instead of reverting
+            await queueAction({ type: "trash", emailId: id });
         }
 
         // Update analytics

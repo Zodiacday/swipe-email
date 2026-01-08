@@ -668,8 +668,8 @@ export default function SwipePage() {
             </AnimatePresence>
 
             {/* --- Swipe Area --- */}
-            <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-0 relative w-full max-w-md mx-auto">
-                <div className="relative w-full aspect-[4/6] max-h-[550px]">
+            <main className="flex-1 flex flex-col items-center justify-start pt-4 pb-0 relative w-full max-w-md mx-auto overflow-hidden">
+                <div className="relative w-full aspect-[4/6] max-h-[480px]">
 
                     {/* Background Stack Layer 2 */}
                     <div className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-3xl transform scale-90 translate-y-8 opacity-20 z-0" />
@@ -772,7 +772,7 @@ export default function SwipePage() {
                 </div>
 
                 {/* --- Bottom Controls (Sticky, 4-way) --- */}
-                <div className="sticky bottom-0 left-0 right-0 py-8 flex items-center justify-center gap-4 z-30 w-full">
+                <div className="sticky bottom-0 left-0 right-0 py-4 flex items-center justify-center gap-4 z-30 w-full">
                     <button
                         onClick={() => handleSwipe("left")}
                         disabled={actionInProgress}

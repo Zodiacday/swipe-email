@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Zap, LayoutDashboard, ArrowRight } from "lucide-react";
+import { Zap, LayoutDashboard, ArrowRight, Settings } from "lucide-react";
+
 
 const springConfig = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -125,10 +126,15 @@ export default function ModeSelectPage() {
 
                 {/* Footer Link */}
                 <div className="mt-16 text-center">
-                    <Link href="/profile" className="text-zinc-500 hover:text-zinc-300 text-sm font-medium underline underline-offset-4 transition-colors">
+                    <Link
+                        href="/profile"
+                        className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-full hover:border-zinc-700 hover:text-zinc-200 transition-all"
+                    >
+                        <Settings className="w-4 h-4" />
                         Manage Account & Connections
                     </Link>
                 </div>
+
             </div>
         </div>
     );

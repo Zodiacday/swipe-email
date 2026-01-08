@@ -82,18 +82,20 @@ export default function LoginPage() {
                 </div>
 
                 {/* Features */}
-                <div className="mt-8 grid grid-cols-3 gap-4 text-center">
+                <div className="mt-8 grid grid-cols-4 gap-3 text-center">
                     {[
-                        { label: "Swipe Left", desc: "Delete" },
-                        { label: "Swipe Right", desc: "Unsubscribe" },
-                        { label: "Swipe Down", desc: "Keep" },
+                        { label: "←", desc: "Trash" },
+                        { label: "→", desc: "Keep" },
+                        { label: "↑", desc: "Unsub" },
+                        { label: "↓", desc: "Skip" },
                     ].map((item, i) => (
                         <div key={i} className="text-zinc-500">
-                            <div className="text-xs font-bold uppercase tracking-wider text-emerald-500">{item.label}</div>
-                            <div className="text-[10px]">{item.desc}</div>
+                            <div className="text-lg font-bold text-emerald-500">{item.label}</div>
+                            <div className="text-[10px] uppercase tracking-wider">{item.desc}</div>
                         </div>
                     ))}
                 </div>
+
                 <div className="mt-8 pt-8 border-t border-zinc-800 w-full">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800">

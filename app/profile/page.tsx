@@ -42,7 +42,7 @@ export default function ProfilePage() {
                     className="glass rounded-3xl p-8 mb-6"
                 >
                     <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
+                        <div className="w-24 h-24 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
                             {user.image ? (
                                 <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
                             ) : (
@@ -163,27 +163,43 @@ export default function ProfilePage() {
                     transition={{ delay: 0.2 }}
                     className="glass rounded-3xl overflow-hidden mb-6"
                 >
-                    {[
-                        { icon: Mail, label: "Connected Accounts", href: "/providers", desc: "Manage your email providers" },
-                        { icon: Settings, label: "Automation Rules", href: "/automation", desc: "Configure auto-cleanup" },
-                        { icon: Shield, label: "Privacy Settings", href: "#", desc: "Control your data" },
-                    ].map((item, i) => (
-                        <Link
-                            key={i}
-                            href={item.href}
-                            className="flex items-center gap-4 p-5 border-b border-zinc-900 last:border-0 hover:bg-white/2 transition-colors group"
-                        >
-                            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-emerald-500/30 transition-colors">
-                                <item.icon className="w-5 h-5 text-zinc-400 group-hover:text-emerald-400 transition-colors" />
-                            </div>
-                            <div className="flex-1">
-                                <div className="font-black tracking-tight text-zinc-100">{item.label}</div>
-                                <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">{item.desc}</div>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-zinc-700 group-hover:text-zinc-400 transition-colors" />
-                        </Link>
-                    ))}
+                    <Link
+                        href="/providers"
+                        className="flex items-center gap-4 p-5 border-b border-zinc-900 hover:bg-white/2 transition-colors group"
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-emerald-500/30 transition-colors">
+                            <Mail className="w-5 h-5 text-zinc-400 group-hover:text-emerald-400 transition-colors" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="font-bold tracking-tight text-zinc-100">Connected Accounts</div>
+                            <div className="text-xs text-zinc-500">Manage your email providers</div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-zinc-700 group-hover:text-zinc-400 transition-colors" />
+                    </Link>
+                    <Link
+                        href="/automation"
+                        className="flex items-center gap-4 p-5 border-b border-zinc-900 hover:bg-white/2 transition-colors group"
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-emerald-500/30 transition-colors">
+                            <Settings className="w-5 h-5 text-zinc-400 group-hover:text-emerald-400 transition-colors" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="font-bold tracking-tight text-zinc-100">Automation Rules</div>
+                            <div className="text-xs text-zinc-500">Configure auto-cleanup</div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-zinc-700 group-hover:text-zinc-400 transition-colors" />
+                    </Link>
+                    <div className="flex items-center gap-4 p-5 opacity-50 cursor-not-allowed">
+                        <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                            <Shield className="w-5 h-5 text-zinc-500" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="font-bold tracking-tight text-zinc-400">Privacy Settings</div>
+                            <div className="text-xs text-zinc-600">Coming soon</div>
+                        </div>
+                    </div>
                 </motion.div>
+
 
                 {/* Logout Button */}
                 <motion.button

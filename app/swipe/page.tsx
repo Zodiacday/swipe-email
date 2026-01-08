@@ -532,8 +532,16 @@ export default function SwipePage() {
                             Undo
                         </button>
                     )}
+                    <Link
+                        href="/mode-select"
+                        className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all"
+                        title="Exit to Mode Select"
+                    >
+                        <LayoutDashboard className="w-5 h-5" />
+                    </Link>
                 </div>
             </header>
+
 
             {/* Celebration Overlay */}
             {/* Tutorial Overlay */}

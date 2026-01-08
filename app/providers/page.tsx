@@ -113,7 +113,8 @@ export default function ProvidersPage() {
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans pt-20 selection:bg-emerald-500/30">
-            <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="max-w-2xl mx-auto px-4 py-8">
+
                 {/* Header */}
                 <motion.div
                     className="text-center mb-8"

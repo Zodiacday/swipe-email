@@ -70,13 +70,13 @@ export default function OnboardingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-[#fafafa] overflow-hidden font-body">
-            {/* Skip button */}
+        <div className="min-h-screen bg-[#09090b] text-[#fafafa] overflow-hidden font-body pt-[var(--navbar-height)]">
+            {/* Skip button - repositioned to avoid navbar */}
             <button
                 onClick={skipToSwipe}
-                className="fixed top-6 right-6 z-50 px-4 py-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-emerald-400 transition-colors"
+                className="fixed top-24 right-6 z-40 px-4 py-2 text-xs font-medium uppercase tracking-widest text-zinc-500 hover:text-emerald-400 transition-colors bg-zinc-950/80 backdrop-blur-sm rounded-full border border-zinc-800"
             >
-                Skip Onboarding
+                Skip
             </button>
 
             <AnimatePresence mode="wait">
@@ -106,15 +106,15 @@ export default function OnboardingPage() {
                 )}
             </AnimatePresence>
 
-            {/* Progress indicator */}
-            <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4">
+            {/* Progress indicator - repositioned with background */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-4 py-2 bg-zinc-950/80 backdrop-blur-sm rounded-full border border-zinc-800">
                 {["welcome", "problem", "promise", "safety", "connect", "tutorial", "first_cleanup"].map(
                     (s, i) => (
                         <div
                             key={s}
-                            className={`h-1 rounded-full transition-all duration-500 ${s === stage
-                                ? "w-8 bg-emerald-500"
-                                : "w-2 bg-zinc-800"
+                            className={`h-1.5 rounded-full transition-all duration-500 ${s === stage
+                                ? "w-6 bg-emerald-500"
+                                : "w-1.5 bg-zinc-700"
                                 }`}
                         />
                     )
@@ -123,6 +123,7 @@ export default function OnboardingPage() {
         </div>
     );
 }
+
 
 // Stage 1: Welcome
 function WelcomeStage({ onNext }: { onNext: () => void }) {

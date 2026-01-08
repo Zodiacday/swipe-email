@@ -125,7 +125,7 @@ export default function OnboardingPage() {
 }
 
 
-// Stage 1: Welcome
+// Stage 1: Welcome - The Feeling
 function WelcomeStage({ onNext }: { onNext: () => void }) {
     return (
         <motion.div
@@ -135,40 +135,84 @@ function WelcomeStage({ onNext }: { onNext: () => void }) {
             exit={{ opacity: 0 }}
         >
             <div className="max-w-2xl">
+                {/* Animated inbox transformation */}
                 <motion.div
-                    className="mb-10 inline-block"
+                    className="mb-10 relative w-32 h-32 mx-auto"
                     initial={{ scale: 0.8 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring" }}
                 >
-                    <div className="w-24 h-24 flex items-center justify-center">
-                        <img src="/logo.png" alt="Swipe Logo" className="w-full h-full object-contain filter drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]" />
-                    </div>
+                    {/* Cluttered state */}
+                    <motion.div
+                        className="absolute inset-0 flex items-center justify-center"
+                        initial={{ opacity: 1 }}
+                        animate={{ opacity: 0 }}
+                        transition={{ delay: 1.5, duration: 0.5 }}
+                    >
+                        <div className="relative">
+                            <Inbox className="w-24 h-24 text-zinc-700" />
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-black text-xs">
+                                99+
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Clean state with whoosh */}
+                    <motion.div
+                        className="absolute inset-0 flex items-center justify-center"
+                        initial={{ opacity: 0, scale: 1.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 2, duration: 0.5, type: "spring" }}
+                    >
+                        <div className="w-24 h-24 bg-emerald-500 rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+                            <Check className="w-12 h-12 text-zinc-950" />
+                        </div>
+                    </motion.div>
                 </motion.div>
 
-                <h1 className="text-6xl md:text-7xl font-heading font-black mb-6 tracking-tighter italic">
-                    SWIPE.<br />
-                    <span className="text-emerald-500 not-italic">THEN ZERO.</span>
-                </h1>
-
-                <p className="text-xl text-zinc-500 mb-12 max-w-lg mx-auto leading-relaxed">
-                    Cleaning your inbox doesn&apos;t have to be a chore.
-                    Experience the satisfying mechanics of a clean inbox.
-                </p>
-
-                <button
-                    onClick={onNext}
-                    className="px-10 py-5 bg-white text-black text-xl font-bold rounded-full hover:bg-zinc-200 transition-all flex items-center gap-3 mx-auto shadow-2xl"
+                <motion.h1
+                    className="text-5xl md:text-6xl font-heading font-black mb-6 tracking-tighter"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 2.5 }}
                 >
-                    Start Experience
+                    That feeling?
+                </motion.h1>
+
+                <motion.p
+                    className="text-2xl text-emerald-400 font-bold mb-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 3 }}
+                >
+                    You can have it in 2 minutes.
+                </motion.p>
+
+                <motion.p
+                    className="text-lg text-zinc-500 mb-12 max-w-lg mx-auto leading-relaxed"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 3.5 }}
+                >
+                    Not someday. Right now.
+                </motion.p>
+
+                <motion.button
+                    onClick={onNext}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 4 }}
+                    className="px-10 py-5 bg-emerald-500 text-zinc-950 text-xl font-black tracking-tight rounded-full hover:bg-emerald-400 transition-all flex items-center gap-3 mx-auto shadow-xl shadow-emerald-500/20 active:scale-95"
+                >
+                    Show Me How
                     <ArrowRight className="w-6 h-6" />
-                </button>
+                </motion.button>
             </div>
         </motion.div>
     );
 }
 
-// Stage 2: The Problem
+// Stage 2: The Problem - Stats Hook
 function ProblemStage({ onNext }: { onNext: () => void }) {
     return (
         <motion.div
@@ -178,32 +222,56 @@ function ProblemStage({ onNext }: { onNext: () => void }) {
             exit={{ opacity: 0, x: -20 }}
         >
             <div className="max-w-2xl">
-                <div className="relative w-40 h-40 mx-auto mb-10">
-                    <Inbox className="w-40 h-40 text-zinc-800" />
-                    <motion.div
-                        className="absolute top-0 right-0 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-black text-xs"
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ repeat: Infinity, duration: 2 }}
-                    >
-                        99+
-                    </motion.div>
-                </div>
-
-                <h2 className="text-5xl font-heading font-black mb-6 tracking-tight">
-                    Inbox <span className="text-red-500">Chaos.</span>
-                </h2>
-
-                <p className="text-xl text-zinc-500 mb-12 leading-relaxed">
-                    The average user wastes <span className="text-white font-bold">15 hours a month</span> deleting spam.
-                    Newsletters, promos, and dark patterns are cluttering your focus.
-                </p>
-
-                <button
-                    onClick={onNext}
-                    className="px-10 py-5 border border-zinc-800 text-white text-lg font-bold rounded-full hover:bg-zinc-900 transition-all uppercase tracking-widest text-xs"
+                {/* Stats counter animation */}
+                <motion.div
+                    className="grid grid-cols-3 gap-6 mb-12"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
                 >
-                    Proceed to Solution
-                </button>
+                    <div className="text-center">
+                        <div className="text-4xl md:text-5xl font-black text-red-400">47</div>
+                        <div className="text-xs text-zinc-500 uppercase tracking-widest">Avg. Newsletters</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-4xl md:text-5xl font-black text-amber-400">23</div>
+                        <div className="text-xs text-zinc-500 uppercase tracking-widest">Promo Emails</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-4xl md:text-5xl font-black text-zinc-400">15h</div>
+                        <div className="text-xs text-zinc-500 uppercase tracking-widest">Wasted/Month</div>
+                    </div>
+                </motion.div>
+
+                <motion.h2
+                    className="text-4xl md:text-5xl font-heading font-black mb-6 tracking-tight"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                >
+                    The average user?
+                </motion.h2>
+
+                <motion.p
+                    className="text-xl text-zinc-400 mb-8 leading-relaxed"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                >
+                    <span className="text-white font-bold">47 emails cleared in first session.</span>
+                    <br />Under 2 minutes.
+                </motion.p>
+
+                <motion.button
+                    onClick={onNext}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                    className="px-10 py-5 bg-white text-zinc-950 text-lg font-black rounded-full hover:bg-zinc-200 transition-all flex items-center gap-3 mx-auto shadow-xl active:scale-95"
+                >
+                    Continue
+                    <ArrowRight className="w-5 h-5" />
+                </motion.button>
             </div>
         </motion.div>
     );

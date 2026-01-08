@@ -1,4 +1,5 @@
 import { NormalizedEmail, DOMAIN_SAFETY } from "@/lib/types";
+import { calculateDangerScore } from "@/lib/dangerScore";
 
 export interface AggregatedSender {
     id: string;      // generated from email/domain
@@ -19,9 +20,19 @@ export interface DashboardStats {
     oldestEmail: number;
 }
 
+interface SenderAccumulator {
+    name: string;
+    email: string;
+    domain: string;
+    count: number;
+    lastActive: number;
+    sampleSubjects: string[];
+    latestEmail: NormalizedEmail;
+}
+
 export function aggregateEmails(emails: NormalizedEmail[]) {
     const start = performance.now();
-    const sendersMap = new Map<string, AggregatedSender>();
+    const sendersMap = new Map<string, SenderAccumulator>();
     const stats: DashboardStats = {
         totalEmails: 0,
         uniqueSenders: 0,
@@ -44,15 +55,13 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
 
         if (!sendersMap.has(senderKey)) {
             sendersMap.set(senderKey, {
-                id: senderKey,
                 name: email.senderName || email.sender.split('@')[0],
                 email: email.sender,
                 domain: email.senderDomain,
                 count: 0,
                 lastActive: 0,
-                category: "Update", // default, would need better classification
-                score: 0,
-                sampleSubjects: []
+                sampleSubjects: [],
+                latestEmail: email
             });
         }
 
@@ -60,37 +69,45 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
         sender.count++;
         if (email.timestamp > sender.lastActive) {
             sender.lastActive = email.timestamp;
+            sender.latestEmail = email; // Keep the most recent email for scoring
         }
 
         // Collect up to 5 sample subjects
         if (sender.sampleSubjects.length < 5 && email.subject) {
             sender.sampleSubjects.push(email.subject);
         }
-
-        // SMART SCORING v2: Incorporate domain safety
-        const domain = email.senderDomain.toLowerCase();
-        let nuisanceBonus = 0;
-
-        // Boost score for known mass-marketing platforms
-        if (DOMAIN_SAFETY.safeToNuke.some(d => domain.includes(d))) {
-            nuisanceBonus = 20;
-        }
-
-        // Drastically reduce score for "Never Nuke" domains
-        let multiplier = 1.0;
-        if (DOMAIN_SAFETY.neverNuke.some(d => domain.includes(d))) {
-            multiplier = 0.2; // 80% discount
-        } else if (DOMAIN_SAFETY.caution.some(d => domain.includes(d))) {
-            multiplier = 0.7; // 30% discount
-        }
-
-        sender.score = Math.min(100, (sender.count * 2 + nuisanceBonus) * multiplier);
     });
 
     stats.uniqueSenders = sendersMap.size;
 
-    // Convert Map to Array and Sort by Count (Desc)
-    const sortedSenders = Array.from(sendersMap.values()).sort((a, b) => b.count - a.count);
+    // Convert to AggregatedSender with smart scoring
+    const senders: AggregatedSender[] = Array.from(sendersMap.entries()).map(([key, acc]) => {
+        // Calculate smart danger score
+        const score = calculateDangerScore({
+            email: acc.latestEmail,
+            count: acc.count,
+            lastActive: acc.lastActive,
+            allSubjects: acc.sampleSubjects
+        });
+
+        return {
+            id: key,
+            name: acc.name,
+            email: acc.email,
+            domain: acc.domain,
+            count: acc.count,
+            lastActive: acc.lastActive,
+            category: "Update" as const, // Would need better classification
+            score,
+            sampleSubjects: acc.sampleSubjects
+        };
+    });
+
+    // Sort by score (highest danger first), then by count
+    const sortedSenders = senders.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return b.count - a.count;
+    });
 
     console.log(`[Aggregation] Processed ${emails.length} emails in ${(performance.now() - start).toFixed(2)}ms`);
 
@@ -99,4 +116,3 @@ export function aggregateEmails(emails: NormalizedEmail[]) {
         senders: sortedSenders
     };
 }
-

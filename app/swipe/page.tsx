@@ -23,6 +23,8 @@ import { OnboardingSlides } from "@/components/OnboardingSlides";
 import { setLastMode } from "@/lib/userPreferences";
 import { NormalizedEmail } from "@/lib/types";
 import { SkeletonCard } from "@/components/Skeleton";
+import { UsageBar, PaywallModal } from "@/components/Paywall";
+import { useFreemium } from "@/hooks/useFreemium";
 
 // --- Card Type ---
 interface SwipeCard {
@@ -96,6 +98,7 @@ export default function SwipePage() {
     const { isFirstVisit: showOnboarding, dismiss: dismissOnboarding } = useFirstVisit("onboarding_concepts");
     const { data: session, status } = useSession();
     const router = useRouter();
+    const { canSwipe: canSwipeMore, remaining: swipesRemaining, doSwipe, tier } = useFreemium();
 
     // --- Local State ---
     const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
@@ -108,6 +111,8 @@ export default function SwipePage() {
     const [bulkPrompt, setBulkPrompt] = useState<{ sender: string, count: number, email: string } | null>(null);
     const [hasSwipedOnce, setHasSwipedOnce] = useState(false);
     const [showStats, setShowStats] = useState(false); // Hide stats by default (Zen)
+    const [showPaywall, setShowPaywall] = useState(false);
+
 
     // --- Derived: Cards to show (filter out processed) ---
     const cards = useMemo(() => {
@@ -786,6 +791,20 @@ export default function SwipePage() {
                     </button>
                 </div>
             </main>
+
+            {/* Freemium usage bar */}
+            <UsageBar />
+
+            {/* Paywall modal */}
+            <PaywallModal
+                isOpen={showPaywall}
+                onClose={() => setShowPaywall(false)}
+                onUpgrade={() => {
+                    // TODO: Integrate with payment provider
+                    setShowPaywall(false);
+                    showToast("Coming soon! Pro subscriptions launching next week.");
+                }}
+            />
         </div>
     );
 }

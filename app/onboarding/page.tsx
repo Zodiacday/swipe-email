@@ -21,6 +21,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { PermissionGuard, PermissionStatus } from "@/lib/security/PermissionGuard";
+import { DemoSwipeCard } from "@/components/DemoSwipeCard";
 
 type OnboardingStage =
     | "welcome"
@@ -450,7 +451,7 @@ function ConnectStage({ onNext }: { onNext: () => void }) {
     );
 }
 
-// Stage 6: Tutorial
+// Stage 6: Tutorial - Interactive Demo Swipe
 function TutorialStage({
     step,
     onStepComplete,
@@ -460,18 +461,11 @@ function TutorialStage({
     onStepComplete: () => void;
     onNext: () => void;
 }) {
-    const [isAdvancing, setIsAdvancing] = useState(false);
+    const [demoComplete, setDemoComplete] = useState(false);
 
-    useEffect(() => {
-        if (step >= 2 && !isAdvancing) {
-            setIsAdvancing(true);
-            onNext();
-        }
-    }, [step, onNext, isAdvancing]);
-
-    if (step >= 2) {
-        return null;
-    }
+    const handleDemoComplete = () => {
+        setDemoComplete(true);
+    };
 
     return (
         <motion.div
@@ -481,28 +475,39 @@ function TutorialStage({
             exit={{ opacity: 0 }}
         >
             <div className="max-w-lg">
-                <div className="mb-10 text-xs font-black uppercase tracking-[0.3em] text-emerald-500">Tutorial {step + 1} / 2</div>
-                <h2 className="text-5xl font-heading font-black mb-12 italic tracking-tighter">
-                    {step === 0 ? "SWIPE RIGHT TO UNSUBSCRIBE" : "SWIPE LEFT TO DELETE"}
-                </h2>
-
-                <div className="relative h-64 border-2 border-dashed border-zinc-800 rounded-3xl mb-12 flex items-center justify-center">
-                    <motion.div
-                        className="w-32 h-48 glass rounded-2xl border-emerald-500"
-                        animate={{
-                            x: step === 0 ? [0, 100, 0] : [0, -100, 0],
-                            rotate: step === 0 ? [0, 10, 0] : [0, -10, 0]
-                        }}
-                        transition={{ repeat: Infinity, duration: 2 }}
-                    />
+                <div className="mb-6 text-xs font-black uppercase tracking-[0.3em] text-emerald-500">
+                    Try it yourself
                 </div>
 
-                <button
-                    onClick={onStepComplete}
-                    className="px-12 py-5 bg-white text-black font-bold rounded-full hover:bg-zinc-200 transition-all uppercase tracking-widest text-sm"
+                <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 tracking-tighter">
+                    Practice Swiping
+                </h2>
+
+                <p className="text-zinc-500 mb-12">
+                    Swipe left to trash, right to keep
+                </p>
+
+                {/* Demo swipe card */}
+                <div className="flex justify-center mb-16">
+                    <DemoSwipeCard onComplete={handleDemoComplete} />
+                </div>
+
+                {/* Continue button - only shows after completing demo */}
+                <motion.button
+                    onClick={onNext}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: demoComplete ? 1 : 0.3 }}
+                    disabled={!demoComplete}
+                    className={`
+                        px-12 py-5 font-bold rounded-full uppercase tracking-widest text-sm transition-all
+                        ${demoComplete
+                            ? "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 cursor-pointer"
+                            : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                        }
+                    `}
                 >
-                    Mastered.
-                </button>
+                    {demoComplete ? "I'm Ready!" : "Complete the demo"}
+                </motion.button>
             </div>
         </motion.div>
     );

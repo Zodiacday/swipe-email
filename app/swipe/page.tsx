@@ -326,14 +326,44 @@ export default function SwipePage() {
         // Mark as processed
         setProcessedIds(prev => new Set([...prev, currentCard.id]));
 
-        // Check for unsubscribe link
+        // Try HTTP unsubscribe via API first
         const unsubLink = currentCard.originalEmail.listUnsubscribe?.http;
-        if (unsubLink) {
-            // Open unsubscribe link in new tab
-            window.open(unsubLink, "_blank");
-            showToast("Unsubscribe page opened ✓", { type: "success" });
-        } else {
-            showToast("No unsubscribe link found - email skipped", { type: "info" });
+
+        try {
+            const res = await fetch("/api/gmail/unsubscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: currentCard.originalEmail })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showToast(`Unsubscribed (${data.method}) ✓`, { type: "success" });
+            } else if (data.requiresConfirmation) {
+                // Link looks suspicious - fall back to opening manually
+                if (unsubLink) {
+                    window.open(unsubLink, "_blank");
+                    showToast("Opened unsubscribe page (verify manually)", { type: "info" });
+                } else {
+                    showToast("Could not unsubscribe - no link found", { type: "error" });
+                }
+            } else {
+                // API failed - fall back to opening link
+                if (unsubLink) {
+                    window.open(unsubLink, "_blank");
+                    showToast("Opened unsubscribe page ✓", { type: "success" });
+                } else {
+                    showToast("No unsubscribe link found - email skipped", { type: "info" });
+                }
+            }
+        } catch {
+            // Network error - fall back to opening link
+            if (unsubLink) {
+                window.open(unsubLink, "_blank");
+                showToast("Opened unsubscribe page ✓", { type: "success" });
+            } else {
+                showToast("No unsubscribe link found - email skipped", { type: "info" });
+            }
         }
 
         // Reset position

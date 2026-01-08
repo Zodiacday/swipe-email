@@ -49,6 +49,7 @@ export default function DashboardPage() {
         undoLastAction,
         canUndo,
         blockSender,
+        nukeDomain,
         markPersonal
     } = useEmailContext();
     const { showToast } = useToast();
@@ -548,9 +549,21 @@ export default function DashboardPage() {
                                             <button
                                                 onClick={async (e) => {
                                                     e.stopPropagation();
-                                                    if (confirm(`Block ${sender.name} and trash all emails?`)) {
-                                                        await blockSender(sender.email);
-                                                        showToast(`Blocked ${sender.name} ✓`, { type: "error" });
+                                                    if (confirm(`Block ${sender.name} and trash all emails? Future emails will be auto-trashed.`)) {
+                                                        const result = await blockSender(sender.email);
+                                                        if (result.success) {
+                                                            showToast(`Blocked ${sender.name} - future emails auto-trashed ✓`, {
+                                                                type: "success",
+                                                                undoAction: async () => {
+                                                                    const success = await undoLastAction();
+                                                                    if (success) {
+                                                                        showToast("Block removed ✓", { type: "info" });
+                                                                    }
+                                                                }
+                                                            });
+                                                        } else {
+                                                            showToast("Failed to block sender", { type: "error" });
+                                                        }
                                                     }
                                                 }}
                                                 className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
@@ -626,16 +639,38 @@ export default function DashboardPage() {
                                             </div>
                                             <button
                                                 onClick={async () => {
-                                                    await trashMultipleSenders(group.senders.map(s => s.email));
-                                                    showToast(`Trashed all emails from @${group.domain} ✓`, {
-                                                        type: "success",
-                                                        undoAction: async () => {
-                                                            const success = await undoLastAction();
-                                                            if (success) {
-                                                                showToast("Restored ✓", { type: "info" });
+                                                    // Use real nukeDomain that creates Gmail filter
+                                                    const result = await nukeDomain(group.domain);
+
+                                                    if (result.requiresConfirmation) {
+                                                        // Domain requires confirmation (caution category)
+                                                        if (confirm(`This domain may send important emails. Are you sure you want to nuke @${group.domain}?`)) {
+                                                            const confirmResult = await nukeDomain(group.domain, true);
+                                                            if (confirmResult.success) {
+                                                                showToast(`Nuked @${group.domain} - blocked future emails ✓`, {
+                                                                    type: "success",
+                                                                    undoAction: async () => {
+                                                                        const success = await undoLastAction();
+                                                                        if (success) {
+                                                                            showToast("Filter removed ✓", { type: "info" });
+                                                                        }
+                                                                    }
+                                                                });
                                                             }
                                                         }
-                                                    });
+                                                    } else if (result.success) {
+                                                        showToast(`Nuked @${group.domain} - blocked future emails ✓`, {
+                                                            type: "success",
+                                                            undoAction: async () => {
+                                                                const success = await undoLastAction();
+                                                                if (success) {
+                                                                    showToast("Filter removed ✓", { type: "info" });
+                                                                }
+                                                            }
+                                                        });
+                                                    } else {
+                                                        showToast(`Cannot nuke @${group.domain}`, { type: "error" });
+                                                    }
                                                 }}
                                                 className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors text-sm font-bold"
                                             >

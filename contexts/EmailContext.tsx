@@ -7,9 +7,11 @@ import { useSession } from "next-auth/react";
 
 // --- Types ---
 interface UndoAction {
-    type: "trash" | "trash_sender";
+    type: "trash" | "trash_sender" | "block" | "nuke";
     emailIds: string[];
     senderEmail?: string;
+    domain?: string;
+    filterId?: string;
     timestamp: number;
 }
 
@@ -39,7 +41,8 @@ interface EmailContextType {
     trashMultipleSenders: (senderEmails: string[]) => Promise<void>;
     undoLastAction: () => Promise<boolean>;
     removeEmailFromLocal: (id: string) => void;
-    blockSender: (senderEmail: string) => Promise<void>;
+    blockSender: (senderEmail: string) => Promise<{ success: boolean; filterId?: string; emailsDeleted?: number }>;
+    nukeDomain: (domain: string, confirm?: boolean) => Promise<{ success: boolean; requiresConfirmation?: boolean; filterId?: string; emailsDeleted?: number }>;
     markPersonal: (senderEmail: string) => void;
     personalSenders: Set<string>;
     blockedSenders: Set<string>;
@@ -239,7 +242,35 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         setUndoStack(prev => prev.slice(0, -1));
 
         try {
-            // Process in batches of 20 to avoid rate limits
+            // For block/nuke: Call undo API to delete the filter
+            if ((lastAction.type === "block" || lastAction.type === "nuke") && lastAction.filterId) {
+                const res = await fetch("/api/gmail/undo", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        type: lastAction.type,
+                        filterId: lastAction.filterId,
+                        emailIds: lastAction.emailIds
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Remove from blocked senders set
+                    if (lastAction.type === "block" && lastAction.senderEmail) {
+                        setBlockedSenders(prev => {
+                            const next = new Set(prev);
+                            next.delete(lastAction.senderEmail!.toLowerCase());
+                            return next;
+                        });
+                    }
+                    await refreshSilently();
+                    return true;
+                }
+                return false;
+            }
+
+            // For trash actions: Untrash emails in batches
             const batchSize = 20;
             for (let i = 0; i < lastAction.emailIds.length; i += batchSize) {
                 const chunk = lastAction.emailIds.slice(i, i + batchSize);
@@ -268,12 +299,75 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         setPersonalSenders(prev => new Set([...prev, senderEmail.toLowerCase()]));
     }, []);
 
-    // --- Block Sender ---
-    const blockSender = useCallback(async (senderEmail: string) => {
-        setBlockedSenders(prev => new Set([...prev, senderEmail.toLowerCase()]));
-        // Also trash their current emails
-        await trashSender(senderEmail);
-    }, [trashSender]);
+    // --- Block Sender (Real API call with filter creation) ---
+    const blockSender = useCallback(async (senderEmail: string): Promise<{ success: boolean; filterId?: string; emailsDeleted?: number }> => {
+        try {
+            const res = await fetch("/api/gmail/block", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ senderEmail })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                // Update local state
+                setBlockedSenders(prev => new Set([...prev, senderEmail.toLowerCase()]));
+
+                // Remove emails from local state
+                const emailsToRemove = emails.filter(e => e.sender.toLowerCase() === senderEmail.toLowerCase());
+                setEmails(prev => prev.filter(e => e.sender.toLowerCase() !== senderEmail.toLowerCase()));
+
+                // Add to undo stack with filterId
+                setUndoStack(prev => [...prev.slice(-9), {
+                    type: "block",
+                    emailIds: emailsToRemove.map(e => e.id),
+                    senderEmail,
+                    filterId: data.filterId,
+                    timestamp: Date.now()
+                }]);
+            }
+            return data;
+        } catch (err) {
+            console.error("Block sender failed:", err);
+            return { success: false };
+        }
+    }, [emails]);
+
+    // --- Nuke Domain (Real API call with filter creation) ---
+    const nukeDomain = useCallback(async (domain: string, confirm = false): Promise<{ success: boolean; requiresConfirmation?: boolean; filterId?: string; emailsDeleted?: number }> => {
+        try {
+            const res = await fetch("/api/gmail/nuke", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ domain, confirm })
+            });
+            const data = await res.json();
+
+            // If requires confirmation, return early
+            if (data.requiresConfirmation) {
+                return data;
+            }
+
+            if (data.success) {
+                // Remove all emails from this domain locally
+                const emailsToRemove = emails.filter(e => e.senderDomain.toLowerCase() === domain.toLowerCase());
+                setEmails(prev => prev.filter(e => e.senderDomain.toLowerCase() !== domain.toLowerCase()));
+
+                // Add to undo stack with filterId
+                setUndoStack(prev => [...prev.slice(-9), {
+                    type: "nuke",
+                    emailIds: emailsToRemove.map(e => e.id),
+                    domain,
+                    filterId: data.filterId,
+                    timestamp: Date.now()
+                }]);
+            }
+            return data;
+        } catch (err) {
+            console.error("Nuke domain failed:", err);
+            return { success: false };
+        }
+    }, [emails]);
 
     // --- Remove email locally ---
     const removeEmailFromLocal = useCallback((id: string) => {
@@ -298,6 +392,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         undoLastAction,
         removeEmailFromLocal,
         blockSender,
+        nukeDomain,
         markPersonal,
         personalSenders,
         blockedSenders,

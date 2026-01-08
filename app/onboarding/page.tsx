@@ -131,9 +131,10 @@ function WelcomeStage({ onNext }: { onNext: () => void }) {
     return (
         <motion.div
             className="min-h-screen flex items-center justify-center p-6 text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
             <div className="max-w-2xl">
                 {/* Animated inbox transformation */}
@@ -221,6 +222,7 @@ function ProblemStage({ onNext }: { onNext: () => void }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
             <div className="max-w-2xl">
                 {/* Stats counter animation */}
@@ -286,6 +288,7 @@ function PromiseStage({ onNext }: { onNext: () => void }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
             <div className="max-w-4xl">
                 <div className="w-20 h-20 rounded-2xl bg-emerald-500 flex items-center justify-center mx-auto mb-10 shadow-[0_0_30px_rgba(16,185,129,0.3)]">

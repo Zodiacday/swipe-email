@@ -31,7 +31,8 @@ export function PaywallModal({ isOpen, onClose, onUpgrade }: PaywallModalProps) 
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-zinc-900 border border-zinc-800 rounded-3xl p-8 z-50"
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-zinc-950 border border-emerald-500/20 rounded-[32px] p-10 z-50 shadow-[0_0_50px_rgba(0,0,0,0.8)]"
                     >
                         {/* Close button */}
                         <button
@@ -91,10 +92,10 @@ export function PaywallModal({ isOpen, onClose, onUpgrade }: PaywallModalProps) 
                         </div>
 
                         {/* CTA buttons */}
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <button
                                 onClick={onUpgrade}
-                                className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-black rounded-full hover:from-amber-300 hover:to-amber-400 transition-all active:scale-95 shadow-lg"
+                                className="w-full py-5 bg-emerald-500 text-zinc-950 font-black rounded-2xl hover:bg-emerald-400 transition-all active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.3)] uppercase tracking-widest text-xs"
                             >
                                 Upgrade to Pro — $4.99/mo
                             </button>

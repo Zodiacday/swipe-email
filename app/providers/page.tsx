@@ -117,36 +117,36 @@ export default function ProvidersPage() {
 
                 {/* Header */}
                 <motion.div
-                    className="text-center mb-8"
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center mb-12"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 >
-                    <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-purple-500/50">
-                        <Mail className="w-10 h-10 text-white" />
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                        <Mail className="w-10 h-10 text-emerald-400" />
                     </div>
-                    <h2 className="text-3xl font-black text-white mb-2">
-                        Connected Accounts
+                    <h2 className="text-4xl font-black text-white mb-2 tracking-tighter italic uppercase">
+                        Connected <span className="text-emerald-500 not-italic">Accounts</span>
                     </h2>
-                    <p className="text-gray-400">
-                        Manage all your email accounts in one place
+                    <p className="text-zinc-500 font-medium">
+                        Manage all your email command sources in one place
                     </p>
                 </motion.div>
 
                 {/* Connected Accounts */}
-                <div className="space-y-4 mb-8">
+                <div className="space-y-4 mb-12">
                     {accounts.map((account, i) => (
                         <motion.div
                             key={account.id}
-                            className="p-6 rounded-3xl glass border-zinc-800/50"
+                            className="p-6 rounded-[32px] glass border-emerald-500/10 hover:border-emerald-500/30 transition-colors"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.1 }}
+                            transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                         >
-                            <div className="flex items-start gap-4">
+                            <div className="flex items-start gap-5">
                                 {/* Provider Icon */}
                                 <div
-                                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${PROVIDER_INFO[account.provider].color
-                                        } flex items-center justify-center text-2xl shadow-lg`}
+                                    className={`w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-2xl shadow-lg`}
                                 >
                                     {PROVIDER_INFO[account.provider].icon}
                                 </div>

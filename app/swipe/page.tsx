@@ -187,7 +187,7 @@ export default function SwipePage() {
                 type: "spring",
                 stiffness: 300,
                 damping: 25,
-                mass: 1.2
+                mass: 1.5 // Heavier, more premium feel
             }
         });
 
@@ -527,16 +527,7 @@ export default function SwipePage() {
 
             {/* --- Zen Top Bar --- */}
             <div className="h-20" /> {/* Spacer for Navbar */}
-            <header className="px-6 py-4 flex items-center justify-between relative z-50">
-                <div className="flex flex-col">
-                    <h1 className="text-xl font-black tracking-tighter uppercase italic text-white flex items-center gap-2">
-                        Swiping <span className="text-emerald-500 not-italic">Queue</span>
-                    </h1>
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-600">
-                        {cards.length} EMAILS REMAINING
-                    </p>
-                </div>
-
+            <header className="px-6 py-4 flex items-center justify-end relative z-50">
                 <div className="flex items-center gap-2">
                     <AnimatePresence>
                         {showStats && (
@@ -582,6 +573,34 @@ export default function SwipePage() {
                     </Link>
                 </div>
             </header>
+
+            {/* Floating Emails Remaining HUD (Left) */}
+            <div className="fixed left-6 top-1/2 -translate-y-1/2 z-[100] hidden lg:flex flex-col items-center gap-4">
+                <div className="h-32 w-[2px] bg-zinc-800 rounded-full relative overflow-hidden">
+                    <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${(cards.length / (initialCount || 1)) * 100}%` }}
+                        className="absolute bottom-0 left-0 right-0 bg-emerald-500"
+                    />
+                </div>
+                <div className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black tracking-[0.3em] text-zinc-600 uppercase">
+                    {cards.length} Remaining
+                </div>
+            </div>
+
+            {/* Mobile Counter Bar (Top) */}
+            <div className="lg:hidden absolute top-[80px] left-0 right-0 z-40 px-6">
+                <div className="flex items-center justify-between text-[10px] font-black tracking-widest text-zinc-500 uppercase">
+                    <span>Inbox Queue</span>
+                    <span className="text-emerald-500">{cards.length} Left</span>
+                </div>
+                <div className="mt-2 h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                    <motion.div
+                        animate={{ width: `${(cards.length / (initialCount || 1)) * 100}%` }}
+                        className="h-full bg-emerald-500"
+                    />
+                </div>
+            </div>
 
 
             {/* Celebration Overlay */}

@@ -33,8 +33,9 @@ export function StreakBadge({ size = "md", showLabel = true }: StreakBadgeProps)
 
     return (
         <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
+            initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className={`flex items-center ${sizeClasses[size]}`}
         >
             <motion.span

@@ -6,6 +6,7 @@ import { Zap, LayoutDashboard, ArrowRight, Settings, TrendingUp, Clock } from "l
 import { useEffect, useState } from "react";
 import { loadStats, UserStats, getStreakLabel, formatTime } from "@/lib/userStats";
 import { StreakBadge } from "@/components/StreakBadge";
+import { NotificationPrompt } from "@/components/NotificationSettings";
 
 const springConfig = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -170,6 +171,16 @@ export default function ModeSelectPage() {
                         </div>
                     </motion.div>
                 )}
+
+                {/* Notification Prompt */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ ...springConfig, delay: 0.3 }}
+                    className="mt-8 mx-auto max-w-2xl"
+                >
+                    <NotificationPrompt />
+                </motion.div>
 
                 {/* Footer Link */}
                 <div className="mt-10 text-center">

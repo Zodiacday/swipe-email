@@ -453,8 +453,12 @@ export default function SwipePage() {
         const absVelX = Math.abs(info.velocity.x);
         const absVelY = Math.abs(info.velocity.y);
 
-        // Determine primary direction
-        if (absX > absY) {
+        // Determine primary direction based on BOTH distance and velocity
+        // Use velocity as tiebreaker when distances are similar
+        const isHorizontal = (absX > absY * 1.2) || (absX > 20 && absVelX > absVelY * 1.5);
+        const isVertical = (absY > absX * 1.2) || (absY > 20 && absVelY > absVelX * 1.5);
+
+        if (isHorizontal && !isVertical) {
             // Horizontal swipe - trigger if distance OR velocity exceeds threshold
             if (info.offset.x < -distanceThreshold || info.velocity.x < -velocityThreshold) {
                 handleSwipe("left");
@@ -463,7 +467,7 @@ export default function SwipePage() {
             } else {
                 controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 600, damping: 25 } });
             }
-        } else {
+        } else if (isVertical) {
             // Vertical swipe
             if (info.offset.y < -distanceThreshold || info.velocity.y < -velocityThreshold) {
                 handleUnsubscribe();
@@ -472,6 +476,9 @@ export default function SwipePage() {
             } else {
                 controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 600, damping: 25 } });
             }
+        } else {
+            // Ambiguous - snap back
+            controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 600, damping: 25 } });
         }
     }, [handleSwipe, handleUnsubscribe, handleSkip, controls]);
 

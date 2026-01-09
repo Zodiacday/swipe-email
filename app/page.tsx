@@ -138,6 +138,124 @@ export default function Home() {
                 </div>
             </section>
 
+            {/* Pricing Section */}
+            <section id="pricing" className="py-24 px-6 border-t border-zinc-900">
+                <div className="max-w-5xl mx-auto">
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">
+                            Simple Pricing. <span className="text-emerald-500">No BS.</span>
+                        </h2>
+                        <p className="text-zinc-400 text-lg max-w-xl mx-auto">
+                            Other tools charge $10/mo and sell your data. We don't.
+                        </p>
+                    </div>
+
+                    {/* Pricing Cards */}
+                    <div className="grid md:grid-cols-2 gap-8 mb-16">
+                        {/* Free Tier */}
+                        <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 relative">
+                            <div className="mb-6">
+                                <h3 className="text-2xl font-black mb-2">Free</h3>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-5xl font-black">$0</span>
+                                    <span className="text-zinc-500">/forever</span>
+                                </div>
+                            </div>
+                            <p className="text-zinc-400 mb-8">Perfect for casual inbox cleaners</p>
+                            <ul className="space-y-4 mb-8">
+                                {[
+                                    "50 swipes per day",
+                                    "1 email account",
+                                    "Basic email categories",
+                                    "Gmail support",
+                                ].map((f, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
+                                            <span className="text-emerald-400 text-xs">✓</span>
+                                        </div>
+                                        {f}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link
+                                href="/login"
+                                className="block w-full py-4 text-center bg-zinc-800 text-white font-bold rounded-2xl hover:bg-zinc-700 transition-colors"
+                            >
+                                Get Started Free
+                            </Link>
+                        </div>
+
+                        {/* Pro Tier */}
+                        <div className="p-8 rounded-3xl bg-zinc-950 border-2 border-emerald-500/50 relative overflow-hidden">
+                            {/* Popular Badge */}
+                            <div className="absolute top-4 right-4 px-3 py-1 bg-emerald-500 text-zinc-950 text-[10px] font-black uppercase tracking-widest rounded-full">
+                                Most Popular
+                            </div>
+                            <div className="mb-6">
+                                <h3 className="text-2xl font-black text-emerald-400 mb-2">Pro</h3>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-5xl font-black text-white">$5.99</span>
+                                    <span className="text-zinc-500">/month</span>
+                                </div>
+                                <p className="text-emerald-400/80 text-sm mt-2">or $39/year (save 45%)</p>
+                            </div>
+                            <p className="text-zinc-400 mb-8">For inbox power users</p>
+                            <ul className="space-y-4 mb-8">
+                                {[
+                                    "Unlimited swipes",
+                                    "All email providers",
+                                    "Autopilot rules",
+                                    "Priority support",
+                                    "Bulk operations",
+                                ].map((f, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                                            <span className="text-emerald-400 text-xs">✓</span>
+                                        </div>
+                                        {f}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link
+                                href="/login"
+                                className="block w-full py-4 text-center bg-emerald-500 text-zinc-950 font-bold rounded-2xl hover:bg-emerald-400 transition-colors shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+                            >
+                                Upgrade to Pro
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Competitor Callouts */}
+                    <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                        <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/20 flex items-start gap-3">
+                            <span className="text-red-400 text-lg">⚠️</span>
+                            <p className="text-zinc-400">
+                                <span className="text-red-400 font-bold">Unlike Unroll.me</span>, we don't sell your inbox to advertisers. Your data stays yours.
+                            </p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex items-start gap-3">
+                            <span className="text-emerald-400 text-lg">💸</span>
+                            <p className="text-zinc-400">
+                                <span className="text-emerald-400 font-bold">Clean Email charges $9.99/mo.</span> We're $5.99. Same result, half the price.
+                            </p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-3">
+                            <span className="text-blue-400 text-lg">🎯</span>
+                            <p className="text-zinc-400">
+                                <span className="text-blue-400 font-bold">No confusing tiers like SaneBox.</span> Just Free or Pro. That's it.
+                            </p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-purple-500/5 border border-purple-500/20 flex items-start gap-3">
+                            <span className="text-purple-400 text-lg">♾️</span>
+                            <p className="text-zinc-400">
+                                <span className="text-purple-400 font-bold">Mailstrom charges extra per account.</span> We don't. Unlimited accounts in Pro.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Final CTA */}
             <section className="py-32 px-6 relative">
                 <div className="max-w-3xl mx-auto text-center glass p-16 md:p-24 rounded-[3rem] border-zinc-800/50 relative overflow-hidden">

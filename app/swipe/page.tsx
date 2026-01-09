@@ -742,7 +742,7 @@ export default function SwipePage() {
                                 <h3 className="text-3xl font-black tracking-tight text-white mb-6 line-clamp-2 leading-[1.1]">
                                     {activeCard.subject}
                                 </h3>
-                                <div className="p-6 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl">
+                                <div className="p-6 border border-zinc-900/50 rounded-2xl">
                                     <p className="text-zinc-400 text-lg leading-relaxed editorial-type line-clamp-4">
                                         {activeCard.preview}
                                     </p>

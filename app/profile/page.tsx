@@ -39,7 +39,7 @@ export default function ProfilePage() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass rounded-3xl p-8 mb-6"
+                    className="bg-zinc-950 border border-zinc-900 rounded-[32px] p-8 mb-6 shadow-xl"
                 >
                     <div className="flex items-center gap-6">
                         <div className="w-24 h-24 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
@@ -70,12 +70,12 @@ export default function ProfilePage() {
                     transition={{ delay: 0.1 }}
                     className="grid grid-cols-2 gap-4 mb-6"
                 >
-                    <div className="glass p-5 rounded-3xl text-center">
+                    <div className="bg-zinc-950 border border-zinc-900 p-5 rounded-[32px] text-center shadow-lg">
                         <Trash2 className="w-5 h-5 text-red-400 mx-auto mb-2" />
                         <div className="text-2xl font-black tracking-tight mb-1">{emailsCleared.toLocaleString()}</div>
                         <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Emails Processed</div>
                     </div>
-                    <div className="glass p-5 rounded-3xl text-center">
+                    <div className="bg-zinc-950 border border-zinc-900 p-5 rounded-[32px] text-center shadow-lg">
                         <Clock className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
                         <div className="text-2xl font-black tracking-tight mb-1">{timeSaved}</div>
                         <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Minutes Saved</div>
@@ -87,7 +87,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="glass rounded-3xl mb-4 overflow-hidden"
+                    className="bg-zinc-950 border border-zinc-900 rounded-[32px] mb-4 overflow-hidden shadow-lg"
                 >
                     <button
                         onClick={() => setShowBlocked(!showBlocked)}
@@ -124,7 +124,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.18 }}
-                    className="glass rounded-3xl mb-6 overflow-hidden"
+                    className="bg-zinc-950 border border-zinc-900 rounded-[32px] mb-6 overflow-hidden shadow-lg"
                 >
                     <button
                         onClick={() => setShowPersonal(!showPersonal)}
@@ -161,7 +161,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="glass rounded-3xl overflow-hidden mb-6"
+                    className="bg-zinc-950 border border-zinc-900 rounded-[32px] overflow-hidden mb-6 shadow-lg"
                 >
                     <Link
                         href="/providers"

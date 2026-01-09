@@ -216,7 +216,7 @@ export default function DashboardPage() {
 
                 {/* Skeleton Table */}
                 <main className="max-w-7xl mx-auto p-8">
-                    <div className="glass rounded-3xl">
+                    <div className="bg-zinc-950 border border-zinc-900 rounded-3xl">
                         <div className="h-12 bg-zinc-900 rounded-t-3xl border-b border-zinc-800" />
                         <div className="divide-y divide-zinc-800/50">
                             {[1, 2, 3, 4, 5, 6].map(i => (
@@ -400,7 +400,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Mobile Select All */}
-                <div className="md:hidden flex items-center justify-between glass rounded-t-3xl px-4 py-3">
+                <div className="md:hidden flex items-center justify-between bg-zinc-950 border border-emerald-500/10 rounded-t-3xl px-4 py-3">
                     <label className="flex items-center gap-2 text-sm text-zinc-400">
                         <input
                             type="checkbox"
@@ -414,7 +414,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Table Body */}
-                <div className="glass rounded-b-3xl border-t-0 max-h-[calc(100vh-320px)] overflow-y-auto">
+                <div className="bg-black border border-emerald-500/10 border-t-0 rounded-b-3xl max-h-[calc(100vh-320px)] overflow-y-auto">
                     {selectedView === "senders" ? (
                         <div className="divide-y divide-zinc-800/50">
                             {filteredSenders.map((sender, i) => (

@@ -348,7 +348,7 @@ function SafetyStage({ onNext }: { onNext: () => void }) {
                         { title: "End-to-End Control", desc: "Every action is stored locally and synced via secure OAuth tokens." },
                         { title: "Immediate Undo", desc: "Change your mind? Swipe back or click undo within 30 seconds." },
                     ].map((item, i) => (
-                        <div key={i} className="p-6 rounded-2xl glass border-zinc-800 flex items-start gap-4">
+                        <div key={i} className="p-6 rounded-[32px] bg-zinc-950 border border-zinc-900 flex items-start gap-4">
                             <div className="mt-1 w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                                 <Check className="w-3 h-3 text-emerald-500" />
                             </div>
@@ -401,7 +401,7 @@ function ConnectStage({ onNext }: { onNext: () => void }) {
             <div className="max-w-md w-full">
                 <h2 className="text-4xl font-heading font-black mb-8">Establish Connection.</h2>
 
-                <div className="glass border-zinc-800 p-8 rounded-3xl mb-8">
+                <div className="bg-zinc-950 border border-zinc-900 p-8 rounded-[32px] mb-8 shadow-xl">
                     {!session ? (
                         <>
                             <div className="flex justify-center gap-6 mb-8">

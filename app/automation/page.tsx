@@ -112,7 +112,7 @@ export default function AutomationPage() {
                         </div>
                     </div>
 
-                    <div className="glass p-8 rounded-3xl relative overflow-hidden group">
+                    <div className="bg-zinc-950 border border-zinc-900 p-8 rounded-[32px] relative overflow-hidden group shadow-xl">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -translate-y-1/2 translate-x-1/2" />
                         <div className="relative z-10">
                             <div className="flex justify-between items-start mb-6">
@@ -159,7 +159,7 @@ export default function AutomationPage() {
                         {rules.map((rule) => (
                             <div
                                 key={rule.id}
-                                className={`group p-6 glass border-zinc-800 rounded-3xl flex items-center gap-6 transition-all hover:border-emerald-500/20 ${!rule.enabled ? 'opacity-50' : ''}`}
+                                className={`group p-6 bg-zinc-950 border border-zinc-900 rounded-[32px] flex items-center gap-6 transition-all hover:border-emerald-500/20 shadow-lg ${!rule.enabled ? 'opacity-50' : ''}`}
                             >
                                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border border-zinc-800 ${rule.action === 'delete' ? 'bg-red-500/5' :
                                     rule.action === 'unsubscribe' ? 'bg-blue-500/5' : 'bg-orange-500/5'

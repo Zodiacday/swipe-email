@@ -138,7 +138,7 @@ export default function ProvidersPage() {
                     {accounts.map((account, i) => (
                         <motion.div
                             key={account.id}
-                            className="p-6 rounded-[32px] glass border-emerald-500/10 hover:border-emerald-500/30 transition-colors"
+                            className="p-6 rounded-[32px] bg-zinc-950 border border-zinc-900 hover:border-emerald-500/30 transition-colors shadow-lg"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}

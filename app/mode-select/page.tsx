@@ -70,7 +70,7 @@ export default function ModeSelectPage() {
                                     boxShadow: "0 0 32px rgba(16, 185, 129, 0.5)",
                                 }}
                                 transition={cardHoverTransition}
-                                className="h-[500px] rounded-3xl glass p-8 flex flex-col items-center justify-center relative overflow-hidden transform-style-3d transition-colors duration-500"
+                                className="h-[500px] rounded-[40px] bg-zinc-950 border border-zinc-900 p-8 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 hover:border-emerald-500/30"
                             >
                                 {/* 3D Stack Visual */}
                                 <div className="relative w-32 h-40 mb-12">
@@ -113,11 +113,11 @@ export default function ModeSelectPage() {
                                     boxShadow: "0 0 32px rgba(16, 185, 129, 0.5)",
                                 }}
                                 transition={cardHoverTransition}
-                                className="h-[500px] rounded-3xl glass p-8 flex flex-col items-center justify-center relative overflow-hidden transform-style-3d transition-colors duration-500"
+                                className="h-[500px] rounded-[40px] bg-zinc-950 border border-zinc-900 p-8 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 hover:border-emerald-500/30"
                             >
                                 {/* Mini Dashboard Wireframe */}
                                 <div className="relative w-40 h-40 mb-12 flex items-center justify-center">
-                                    <div className="relative w-36 h-36 border-2 border-emerald-600/50 rounded-lg glass overflow-hidden group-hover:bg-zinc-800 transition-colors duration-500">
+                                    <div className="relative w-36 h-36 border-2 border-emerald-600/50 rounded-lg bg-zinc-900 overflow-hidden group-hover:bg-zinc-800 transition-colors duration-500">
                                         {/* Header Bar */}
                                         <div className="h-8 bg-emerald-600/20 flex items-center px-2 gap-2 group-hover:bg-emerald-600/40 transition-colors duration-500">
                                             <div className="w-2 h-2 bg-emerald-500 rounded-full" />

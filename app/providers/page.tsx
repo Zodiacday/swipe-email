@@ -14,7 +14,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useEffect } from "react";
 import {
     Mail,
@@ -52,26 +52,31 @@ const PROVIDER_INFO = {
         name: "Gmail",
         color: "from-red-500 to-orange-500",
         icon: "📧",
+        authProvider: "google",
     },
     outlook: {
         name: "Outlook",
         color: "from-blue-500 to-cyan-500",
         icon: "📨",
+        authProvider: "azure-ad",
     },
     yahoo: {
         name: "Yahoo",
         color: "from-purple-500 to-pink-500",
         icon: "💌",
+        authProvider: null, // Coming soon
     },
     icloud: {
         name: "iCloud",
         color: "from-blue-400 to-blue-600",
         icon: "☁️",
+        authProvider: null, // Coming soon
     },
     imap: {
         name: "IMAP",
         color: "from-gray-500 to-gray-700",
         icon: "⚙️",
+        authProvider: null, // Coming soon
     },
 };
 
@@ -98,8 +103,14 @@ export default function ProvidersPage() {
     }, [session]);
 
     const handleConnect = (provider: EmailAccount["provider"]) => {
-        // In production, this would trigger OAuth flow
-        console.log(`Connecting ${provider}...`);
+        const providerInfo = PROVIDER_INFO[provider];
+        if (providerInfo.authProvider) {
+            // Trigger real OAuth flow
+            signIn(providerInfo.authProvider, { callbackUrl: "/providers" });
+        } else {
+            // Coming soon - show message
+            alert(`${providerInfo.name} support is coming soon!`);
+        }
         setShowAddProvider(false);
     };
 

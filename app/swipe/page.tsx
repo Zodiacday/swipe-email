@@ -199,7 +199,7 @@ export default function SwipePage() {
         // Play sound
         playSound("whoosh");
 
-        // Animate off screen with spring physics
+        // Animate off screen with spring physics - SNAPPY like Tinder
         await controls.start({
             x: direction === "left" ? -600 : 600,
             opacity: 0,
@@ -207,9 +207,9 @@ export default function SwipePage() {
             scale: 0.9,
             transition: {
                 type: "spring",
-                stiffness: 300,
-                damping: 25,
-                mass: 1.5 // Heavier, more premium feel
+                stiffness: 600,
+                damping: 30,
+                mass: 0.5 // Light and snappy
             }
         });
 
@@ -443,30 +443,34 @@ export default function SwipePage() {
         setActionInProgress(false);
     }, [cards, actionInProgress, controls, x, y, showToast]);
 
-    // --- Drag End (4-way) ---
+    // --- Drag End (4-way) - Tinder-style with velocity detection ---
     const onDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        const threshold = 80;
+        const distanceThreshold = 50; // Lower threshold for easier swipes
+        const velocityThreshold = 300; // Fast flick triggers even with less distance
+
         const absX = Math.abs(info.offset.x);
         const absY = Math.abs(info.offset.y);
+        const absVelX = Math.abs(info.velocity.x);
+        const absVelY = Math.abs(info.velocity.y);
 
         // Determine primary direction
         if (absX > absY) {
-            // Horizontal swipe
-            if (info.offset.x < -threshold) {
+            // Horizontal swipe - trigger if distance OR velocity exceeds threshold
+            if (info.offset.x < -distanceThreshold || info.velocity.x < -velocityThreshold) {
                 handleSwipe("left");
-            } else if (info.offset.x > threshold) {
+            } else if (info.offset.x > distanceThreshold || info.velocity.x > velocityThreshold) {
                 handleSwipe("right");
             } else {
-                controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 500, damping: 30 } });
+                controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 600, damping: 25 } });
             }
         } else {
             // Vertical swipe
-            if (info.offset.y < -threshold) {
+            if (info.offset.y < -distanceThreshold || info.velocity.y < -velocityThreshold) {
                 handleUnsubscribe();
-            } else if (info.offset.y > threshold) {
+            } else if (info.offset.y > distanceThreshold || info.velocity.y > velocityThreshold) {
                 handleSkip();
             } else {
-                controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 500, damping: 30 } });
+                controls.start({ x: 0, y: 0, opacity: 1, rotate: 0, transition: { type: "spring", stiffness: 600, damping: 25 } });
             }
         }
     }, [handleSwipe, handleUnsubscribe, handleSkip, controls]);
@@ -716,7 +720,7 @@ export default function SwipePage() {
                         animate={controls}
                         drag
                         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                        dragElastic={0.7}
+                        dragElastic={0.9}
                         onDragEnd={onDragEnd}
                         whileDrag={{
                             boxShadow: "0 25px 60px rgba(0,0,0,0.6)",

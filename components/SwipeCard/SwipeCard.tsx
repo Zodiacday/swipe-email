@@ -161,7 +161,7 @@ export function SwipeCard({
                     rotate,
                     opacity: isActive ? 1 : 0.6,
                 }}
-                className={`relative w-80 h-[460px] glass border-zinc-800 rounded-[2rem] p-6 shadow-2xl flex flex-col justify-between transition-all duration-300 ${isActive ? 'cursor-grab active:cursor-grabbing border-zinc-700' : ''}`}
+                className={`relative w-[90vw] max-w-80 h-[60vh] max-h-[460px] min-h-[380px] glass border-zinc-800 rounded-[2rem] p-6 shadow-2xl flex flex-col justify-between transition-all duration-300 touch-manipulation ${isActive ? 'cursor-grab active:cursor-grabbing border-zinc-700' : ''}`}
             >
                 {/* Dynamic Background Bleed */}
                 <motion.div

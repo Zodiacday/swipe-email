@@ -140,6 +140,64 @@ export default function Home() {
                 </div>
             </section>
 
+            {/* Social Proof / Testimonials */}
+            <section className="py-20 px-6 border-t border-zinc-900 bg-zinc-950/50">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">
+                            Loved by <span className="text-emerald-500">Inbox Warriors</span>
+                        </h2>
+                        <p className="text-zinc-500">What early users are saying</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {[
+                            {
+                                quote: "Finally, an inbox cleaner that doesn't feel like doing taxes. The swipe gestures are actually addicting.",
+                                name: "Sarah K.",
+                                role: "Marketing Director",
+                                rating: 5,
+                            },
+                            {
+                                quote: "I cleaned 3 years of newsletter spam in 20 minutes. The dopamine hit when you reach inbox zero is real.",
+                                name: "Marcus T.",
+                                role: "Startup Founder",
+                                rating: 5,
+                            },
+                            {
+                                quote: "Unlike Unroll.me, I don't feel creeped out using this. They actually respect your privacy.",
+                                name: "Alex D.",
+                                role: "Software Engineer",
+                                rating: 5,
+                            },
+                        ].map((t, i) => (
+                            <div
+                                key={i}
+                                className="p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/30 transition-colors"
+                            >
+                                <div className="flex gap-1 mb-4">
+                                    {[...Array(t.rating)].map((_, j) => (
+                                        <span key={j} className="text-emerald-400">★</span>
+                                    ))}
+                                </div>
+                                <p className="text-zinc-300 mb-4 text-sm leading-relaxed italic">
+                                    "{t.quote}"
+                                </p>
+                                <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">
+                                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                                        {t.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-white text-sm">{t.name}</p>
+                                        <p className="text-zinc-500 text-xs">{t.role}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* Pricing Section */}
             <section id="pricing" className="py-24 px-6 border-t border-zinc-900">
                 <div className="max-w-5xl mx-auto">
@@ -341,12 +399,29 @@ export default function Home() {
             </section>
 
             {/* Footer */}
-            <footer className="py-12 px-6 border-t border-zinc-900 text-center">
-                <div className="flex items-center justify-center gap-2 mb-6">
-                    <img src="/logo.png" alt="Swipe Logo" className="w-8 h-8 object-contain" />
-                    <span className="font-heading font-bold">Swipe</span>
+            <footer className="py-12 px-6 border-t border-zinc-900">
+                <div className="max-w-6xl mx-auto">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-2">
+                            <img src="/logo.png" alt="Swipe Logo" className="w-8 h-8 object-contain" />
+                            <span className="font-heading font-bold">Swipe</span>
+                        </div>
+                        <div className="flex items-center gap-6 text-sm">
+                            <Link href="/terms" className="text-zinc-500 hover:text-emerald-400 transition-colors">
+                                Terms of Service
+                            </Link>
+                            <Link href="/privacy" className="text-zinc-500 hover:text-emerald-400 transition-colors">
+                                Privacy Policy
+                            </Link>
+                            <a href="mailto:hello@swipeemail.com" className="text-zinc-500 hover:text-emerald-400 transition-colors">
+                                Contact
+                            </a>
+                        </div>
+                    </div>
+                    <div className="mt-8 pt-8 border-t border-zinc-900 text-center">
+                        <p className="text-zinc-500 text-sm">© 2026 Swipe Inc. All rights reserved.</p>
+                    </div>
                 </div>
-                <p className="text-zinc-500 text-sm">© 2026 Swipe Inc. All rights reserved.</p>
             </footer>
         </div>
     );

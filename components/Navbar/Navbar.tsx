@@ -135,8 +135,9 @@ export function Navbar() {
                                 onClick={() => signOut()}
                                 className="p-2 text-zinc-400 hover:text-red-400 transition-colors"
                                 title="Sign Out"
+                                aria-label="Sign out of your account"
                             >
-                                <LogOut className="w-4 h-4" />
+                                <LogOut className="w-4 h-4" aria-hidden="true" />
                             </button>
                         </div>
                     ) : (

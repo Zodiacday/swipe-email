@@ -19,8 +19,49 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Swipe - Clean Your Inbox with Style",
-  description: "Dopamine-driven email cleanup with gestures and gamification.",
+  title: {
+    default: "Swipe - The Privacy-First Inbox Cleaner",
+    template: "%s | Swipe",
+  },
+  description: "The privacy-first inbox cleaner that's actually fun to use. Clean thousands of emails in minutes with satisfying swipe gestures. Unlike others, we don't sell your data.",
+  keywords: ["email cleaner", "inbox zero", "unsubscribe", "email management", "privacy", "gmail cleaner", "outlook cleaner"],
+  authors: [{ name: "Swipe Inc." }],
+  creator: "Swipe Inc.",
+  publisher: "Swipe Inc.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://swipeemail.com",
+    siteName: "Swipe",
+    title: "Swipe - Inbox. Remastered.",
+    description: "The privacy-first inbox cleaner that's actually fun to use. Unlike others, we don't sell your data.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Swipe - Clean Your Inbox with Style",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Swipe - The Privacy-First Inbox Cleaner",
+    description: "Clean thousands of emails in minutes with satisfying swipe gestures. We don't sell your data.",
+    images: ["/og-image.png"],
+    creator: "@swipeemail",
+  },
   icons: {
     icon: "/icon.png",
     apple: "/apple-icon.png",
@@ -33,6 +74,10 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  metadataBase: new URL("https://swipeemail.com"),
+  alternates: {
+    canonical: "/",
   },
 };
 
@@ -58,8 +103,17 @@ export default function RootLayout({
           <EmailProvider>
             <ToastProvider>
               <ConfirmModalProvider>
+                {/* Skip to content link for keyboard/screen reader users */}
+                <a
+                  href="#main-content"
+                  className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-emerald-500 focus:text-black focus:rounded-lg focus:font-bold"
+                >
+                  Skip to main content
+                </a>
                 <Navbar />
-                {children}
+                <main id="main-content" tabIndex={-1}>
+                  {children}
+                </main>
                 <ConfirmModal />
               </ConfirmModalProvider>
             </ToastProvider>

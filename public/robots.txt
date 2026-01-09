@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /login
+Disallow: /mode-select
+Disallow: /swipe
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /providers
+Disallow: /automation
+
+Sitemap: https://swipeemail.com/sitemap.xml

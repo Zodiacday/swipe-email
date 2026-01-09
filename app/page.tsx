@@ -154,7 +154,7 @@ export default function Home() {
                     </div>
 
                     {/* Pricing Cards */}
-                    <div className="grid md:grid-cols-2 gap-8 mb-16">
+                    <div className="grid md:grid-cols-3 gap-6 mb-16">
                         {/* Free Tier */}
                         <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 relative">
                             <div className="mb-6">
@@ -259,6 +259,39 @@ export default function Home() {
                                 Upgrade to Pro
                             </Link>
                         </div>
+
+                        {/* Teams/Agency Tier */}
+                        <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 relative">
+                            <div className="mb-6">
+                                <h3 className="text-2xl font-black mb-2">Teams</h3>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-4xl font-black">Custom</span>
+                                </div>
+                            </div>
+                            <p className="text-zinc-400 mb-8">For agencies & larger teams</p>
+                            <ul className="space-y-4 mb-8">
+                                {[
+                                    "Everything in Pro",
+                                    "Shared team inboxes",
+                                    "Admin dashboard",
+                                    "Priority onboarding",
+                                    "Dedicated support",
+                                ].map((f, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
+                                            <span className="text-emerald-400 text-xs">✓</span>
+                                        </div>
+                                        {f}
+                                    </li>
+                                ))}
+                            </ul>
+                            <a
+                                href="mailto:hello@swipeemail.com"
+                                className="block w-full py-4 text-center bg-zinc-800 text-white font-bold rounded-2xl hover:bg-zinc-700 transition-colors"
+                            >
+                                Contact Us
+                            </a>
+                        </div>
                     </div>
 
                     {/* Competitor Callouts */}
@@ -287,17 +320,6 @@ export default function Home() {
                                 <span className="text-purple-400 font-bold">Some tools charge extra per account.</span> We don't. Unlimited accounts in Pro.
                             </p>
                         </div>
-                    </div>
-
-                    {/* Contact Link for Teams */}
-                    <div className="text-center">
-                        <p className="text-zinc-500 mb-2">Need more for your team or agency?</p>
-                        <a
-                            href="mailto:hello@swipeemail.com"
-                            className="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4"
-                        >
-                            Contact us for custom pricing →
-                        </a>
                     </div>
                 </div>
             </section>

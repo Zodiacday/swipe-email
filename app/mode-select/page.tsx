@@ -110,13 +110,13 @@ export default function ModeSelectPage() {
             >
                 <motion.div
                     variants={itemVariants}
-                    className="text-center mb-10"
+                    className="text-center mb-8"
                 >
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600 italic">
-                        CHOOSE YOUR WEAPON
+                    <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-2 text-zinc-300">
+                        Choose Your Mode
                     </h1>
-                    <p className="text-xl text-zinc-500 font-medium tracking-tight">
-                        How do you want to clean your inbox today?
+                    <p className="text-base text-zinc-600 font-medium">
+                        How do you want to clean your inbox?
                     </p>
                 </motion.div>
 

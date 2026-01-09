@@ -16,7 +16,6 @@ import { StreakBadge } from "@/components/StreakBadge";
 const NAV_LINKS = [
     { href: "/swipe", label: "Swipe", icon: Zap, tooltip: "The Game" },
     { href: "/dashboard", label: "Command Center", icon: LayoutDashboard, tooltip: "Bulk Nuke" },
-    { href: "/providers", label: "Connections", icon: Settings, tooltip: "Inbox Source" },
 ];
 
 function OozeTooltip({ text, children, active = true }: { text: string, children: React.ReactNode, active?: boolean }) {
@@ -68,17 +67,15 @@ export function Navbar() {
     return (
         <nav className={`fixed top-0 left-0 right-0 z-[100] ${isAppRoute && session ? 'bg-transparent border-transparent' : isAppRoute ? 'bg-zinc-950 border-b border-emerald-500/30' : 'bg-black/50 backdrop-blur-xl border-b border-zinc-900'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-                {/* Logo - Hide for authenticated app routes */}
-                {!(isAppRoute && session) && (
-                    <Link href="/" className="flex items-center gap-2 group shrink-0">
-                        <img
-                            src="/logo.png"
-                            alt="Swipe Logo"
-                            className="w-10 h-10 object-contain group-hover:scale-110 transition-transform"
-                        />
-                        <span className="text-xl font-black tracking-tighter text-white hidden sm:inline uppercase">Swipe</span>
-                    </Link>
-                )}
+                {/* Logo */}
+                <Link href="/" className="flex items-center gap-2 group shrink-0">
+                    <img
+                        src="/logo.png"
+                        alt="Swipe Logo"
+                        className="w-8 h-8 object-contain group-hover:scale-110 transition-transform"
+                    />
+                    <span className="text-lg font-black tracking-tighter text-white hidden sm:inline uppercase">Swipe</span>
+                </Link>
 
                 {/* Desktop Nav Links (The Switch) */}
                 <div className={`hidden md:flex items-center p-1 rounded-2xl ${isAppRoute && session ? 'bg-zinc-900/80 backdrop-blur-xl border border-zinc-800' : 'glass border border-zinc-800/50'}`}>
@@ -144,22 +141,13 @@ export function Navbar() {
                             </button>
                         </div>
                     ) : (
-                        <>
-                            <Link
-                                href="/login"
-                                className="flex items-center gap-2 px-3 lg:px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
-                            >
-                                <LogIn className="w-4 h-4" />
-                                <span className="hidden lg:inline">Login</span>
-                            </Link>
-                            <Link
-                                href="/signup"
-                                className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-zinc-950 text-xs font-black tracking-widest uppercase rounded-full hover:bg-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95"
-                            >
-                                <Zap className="w-4 h-4" />
-                                <span className="hidden sm:inline">Get Started</span>
-                            </Link>
-                        </>
+                        <Link
+                            href="/login"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-zinc-950 text-xs font-black tracking-widest uppercase rounded-full hover:bg-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95"
+                        >
+                            <Zap className="w-4 h-4" />
+                            <span className="hidden sm:inline">Get Started</span>
+                        </Link>
                     )}
                 </div>
 
@@ -212,22 +200,13 @@ export function Navbar() {
                                     <LogOut className="w-4 h-4" />
                                 </button>
                             ) : (
-                                <>
-                                    <Link
-                                        href="/login"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block px-4 py-3 rounded-xl text-base font-medium text-zinc-400 hover:text-white"
-                                    >
-                                        Login
-                                    </Link>
-                                    <Link
-                                        href="/signup"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block px-4 py-3 rounded-xl text-base font-bold bg-emerald-500 text-black text-center"
-                                    >
-                                        Get Started
-                                    </Link>
-                                </>
+                                <Link
+                                    href="/login"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-4 py-3 rounded-xl text-base font-bold bg-emerald-500 text-black text-center"
+                                >
+                                    Get Started
+                                </Link>
                             )}
                         </div>
                     </motion.div>

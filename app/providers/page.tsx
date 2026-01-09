@@ -64,19 +64,19 @@ const PROVIDER_INFO = {
         name: "Yahoo",
         color: "from-purple-500 to-pink-500",
         icon: "💌",
-        authProvider: null, // Coming soon
+        authProvider: "yahoo",
     },
     icloud: {
         name: "iCloud",
         color: "from-blue-400 to-blue-600",
         icon: "☁️",
-        authProvider: null, // Coming soon
+        authProvider: "apple",
     },
     imap: {
         name: "IMAP",
         color: "from-gray-500 to-gray-700",
         icon: "⚙️",
-        authProvider: null, // Coming soon
+        authProvider: null, // Requires custom credentials flow
     },
 };
 

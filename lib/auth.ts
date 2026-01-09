@@ -1,9 +1,11 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AzureADProvider from "next-auth/providers/azure-ad";
+import AppleProvider from "next-auth/providers/apple";
 
 export const authOptions: NextAuthOptions = {
     providers: [
+        // Gmail
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -15,6 +17,7 @@ export const authOptions: NextAuthOptions = {
                 },
             },
         }),
+        // Outlook / Microsoft 365
         AzureADProvider({
             clientId: process.env.AZURE_AD_CLIENT_ID!,
             clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
@@ -24,6 +27,35 @@ export const authOptions: NextAuthOptions = {
                     scope: "openid email profile offline_access https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite",
                 },
             },
+        }),
+        // Yahoo Mail (uses OAuth 2.0)
+        {
+            id: "yahoo",
+            name: "Yahoo",
+            type: "oauth",
+            wellKnown: "https://api.login.yahoo.com/.well-known/openid-configuration",
+            clientId: process.env.YAHOO_CLIENT_ID!,
+            clientSecret: process.env.YAHOO_CLIENT_SECRET!,
+            authorization: {
+                params: {
+                    scope: "openid email profile mail-r mail-w",
+                },
+            },
+            idToken: true,
+            checks: ["state"],
+            profile(profile) {
+                return {
+                    id: profile.sub,
+                    name: profile.name,
+                    email: profile.email,
+                    image: profile.picture,
+                };
+            },
+        },
+        // Apple (for iCloud Mail)
+        AppleProvider({
+            clientId: process.env.APPLE_ID!,
+            clientSecret: process.env.APPLE_SECRET!,
         }),
     ],
     callbacks: {
@@ -61,6 +93,23 @@ export const authOptions: NextAuthOptions = {
                             scope: "openid email profile offline_access https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite",
                         }),
                     });
+                } else if (token.provider === "yahoo") {
+                    // Yahoo token refresh
+                    response = await fetch("https://api.login.yahoo.com/oauth2/get_token", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: new URLSearchParams({
+                            client_id: process.env.YAHOO_CLIENT_ID!,
+                            client_secret: process.env.YAHOO_CLIENT_SECRET!,
+                            grant_type: "refresh_token",
+                            refresh_token: token.refreshToken as string,
+                        }),
+                    });
+                } else if (token.provider === "apple") {
+                    // Apple tokens don't refresh the same way - they use long-lived tokens
+                    // For now, return the token as-is (Apple tokens last a long time)
+                    console.log("[Auth] Apple tokens use long-lived refresh - skipping standard refresh");
+                    return token;
                 } else {
                     // Google token refresh (default)
                     response = await fetch("https://oauth2.googleapis.com/token", {

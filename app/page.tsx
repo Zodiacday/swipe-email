@@ -5,6 +5,7 @@
  * Focus: High-end, minimal, professional
  */
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -20,6 +21,7 @@ import { useSession } from "next-auth/react";
 
 export default function Home() {
     const { data: session } = useSession();
+    const [isYearly, setIsYearly] = useState(false);
 
     // Determine where CTA should go
     const ctaHref = session ? "/mode-select" : "/login";
@@ -66,7 +68,7 @@ export default function Home() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
                         >
-                            Clean your inbox with satisfying gestures. No complex AI, no magic—just pure, high-performance email management.
+                            The privacy-first inbox cleaner that's actually fun to use.
                         </motion.p>
 
                         <motion.div
@@ -194,11 +196,44 @@ export default function Home() {
                             </div>
                             <div className="mb-6">
                                 <h3 className="text-2xl font-black text-emerald-400 mb-2">Pro</h3>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-5xl font-black text-white">$5.99</span>
-                                    <span className="text-zinc-500">/month</span>
+
+                                {/* Billing Toggle */}
+                                <div className="flex items-center gap-3 mb-4">
+                                    <button
+                                        onClick={() => setIsYearly(false)}
+                                        className={`text-sm font-bold ${!isYearly ? 'text-white' : 'text-zinc-500'}`}
+                                    >
+                                        Monthly
+                                    </button>
+                                    <button
+                                        onClick={() => setIsYearly(!isYearly)}
+                                        className={`w-12 h-6 rounded-full relative transition-colors ${isYearly ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                                    >
+                                        <div
+                                            className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isYearly ? 'left-7' : 'left-1'}`}
+                                        />
+                                    </button>
+                                    <button
+                                        onClick={() => setIsYearly(true)}
+                                        className={`text-sm font-bold ${isYearly ? 'text-white' : 'text-zinc-500'}`}
+                                    >
+                                        Yearly
+                                    </button>
+                                    {isYearly && (
+                                        <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full">
+                                            Save 45%
+                                        </span>
+                                    )}
                                 </div>
-                                <p className="text-emerald-400/80 text-sm mt-2">or $39/year (save 45%)</p>
+
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-5xl font-black text-white">
+                                        {isYearly ? '$39' : '$5.99'}
+                                    </span>
+                                    <span className="text-zinc-500">
+                                        {isYearly ? '/year' : '/month'}
+                                    </span>
+                                </div>
                             </div>
                             <p className="text-zinc-400 mb-8">For inbox power users</p>
                             <ul className="space-y-4 mb-8">
@@ -227,31 +262,42 @@ export default function Home() {
                     </div>
 
                     {/* Competitor Callouts */}
-                    <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                    <div className="grid sm:grid-cols-2 gap-4 text-sm mb-12">
                         <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/20 flex items-start gap-3">
                             <span className="text-red-400 text-lg">⚠️</span>
                             <p className="text-zinc-400">
-                                <span className="text-red-400 font-bold">Unlike Unroll.me</span>, we don't sell your inbox to advertisers. Your data stays yours.
+                                <span className="text-red-400 font-bold">Unlike some competitors</span>, we don't sell your inbox to advertisers. Your data stays yours.
                             </p>
                         </div>
                         <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex items-start gap-3">
                             <span className="text-emerald-400 text-lg">💸</span>
                             <p className="text-zinc-400">
-                                <span className="text-emerald-400 font-bold">Clean Email charges $9.99/mo.</span> We're $5.99. Same result, half the price.
+                                <span className="text-emerald-400 font-bold">Other tools charge $9.99/mo.</span> We're $5.99. Same result, half the price.
                             </p>
                         </div>
                         <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-3">
                             <span className="text-blue-400 text-lg">🎯</span>
                             <p className="text-zinc-400">
-                                <span className="text-blue-400 font-bold">No confusing tiers like SaneBox.</span> Just Free or Pro. That's it.
+                                <span className="text-blue-400 font-bold">No confusing tier structures.</span> Just Free or Pro. That's it.
                             </p>
                         </div>
                         <div className="p-4 rounded-2xl bg-purple-500/5 border border-purple-500/20 flex items-start gap-3">
                             <span className="text-purple-400 text-lg">♾️</span>
                             <p className="text-zinc-400">
-                                <span className="text-purple-400 font-bold">Mailstrom charges extra per account.</span> We don't. Unlimited accounts in Pro.
+                                <span className="text-purple-400 font-bold">Some tools charge extra per account.</span> We don't. Unlimited accounts in Pro.
                             </p>
                         </div>
+                    </div>
+
+                    {/* Contact Link for Teams */}
+                    <div className="text-center">
+                        <p className="text-zinc-500 mb-2">Need more for your team or agency?</p>
+                        <a
+                            href="mailto:hello@swipeemail.com"
+                            className="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4"
+                        >
+                            Contact us for custom pricing →
+                        </a>
                     </div>
                 </div>
             </section>

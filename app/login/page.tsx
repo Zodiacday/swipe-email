@@ -29,13 +29,9 @@ export default function LoginPage() {
         signIn("google", { callbackUrl: redirectPath });
     };
 
-    if (status === "loading") {
-        return (
-            <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-                <div className="animate-pulse text-emerald-500 text-lg font-bold">Loading...</div>
-            </div>
-        );
-    }
+    // Show login form even if session is loading (prevents blank page)
+    // The MagneticButton will be disabled if still loading
+    const isAuthLoading = status === "loading";
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4 pt-20 selection:bg-emerald-500/30">

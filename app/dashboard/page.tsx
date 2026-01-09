@@ -29,6 +29,7 @@ import { useEmailContext } from "@/contexts/EmailContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
 import { setLastMode } from "@/lib/userPreferences";
+import { NukeSpectacle } from "@/components/Effects/NukeSpectacle";
 
 // --- Framer Motion Config ---
 const bounceConfig = { type: "spring" as const, stiffness: 300, damping: 20, mass: 0.8 };
@@ -69,6 +70,7 @@ export default function DashboardPage() {
     const [sortField, setSortField] = useState<"count" | "score" | "newest">("count");
     const [scoreFilter, setScoreFilter] = useState<"all" | "high" | "danger">("all");
     const [showMobileFilters, setShowMobileFilters] = useState(false);
+    const [nukeTarget, setNukeTarget] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
 
     const { senders, stats } = aggregates;
 
@@ -522,7 +524,7 @@ export default function DashboardPage() {
                                     variants={rowVariants}
                                     initial="hidden"
                                     animate="visible"
-                                    className="px-6 py-4"
+                                    className="px-6 py-4 domain-row"
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-3">
@@ -540,7 +542,19 @@ export default function DashboardPage() {
                                                 {group.totalCount} emails
                                             </div>
                                             <button
-                                                onClick={async () => {
+                                                onClick={async (e) => {
+                                                    const rect = e.currentTarget.closest('.domain-row')?.getBoundingClientRect();
+
+                                                    // Trigger spectacle if we have a rect
+                                                    if (rect) {
+                                                        setNukeTarget({
+                                                            x: rect.left,
+                                                            y: rect.top,
+                                                            width: rect.width,
+                                                            height: rect.height
+                                                        });
+                                                    }
+
                                                     // Use real nukeDomain that creates Gmail filter
                                                     const result = await nukeDomain(group.domain);
 
@@ -566,6 +580,9 @@ export default function DashboardPage() {
                                                                     }
                                                                 });
                                                             }
+                                                        } else {
+                                                            // If not confirmed, clear spectacle
+                                                            setNukeTarget(null);
                                                         }
                                                     } else if (result.success) {
                                                         showToast(`Nuked @${group.domain} - blocked future emails ✓`, {
@@ -579,6 +596,7 @@ export default function DashboardPage() {
                                                         });
                                                     } else {
                                                         showToast(`Cannot nuke @${group.domain}`, { type: "error" });
+                                                        setNukeTarget(null);
                                                     }
                                                 }}
                                                 className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors text-sm font-bold"
@@ -667,6 +685,15 @@ export default function DashboardPage() {
                     </div>
                 )
             }
+            {/* Nuke Spectacle Overlay */}
+            <AnimatePresence>
+                {nukeTarget && (
+                    <NukeSpectacle
+                        {...nukeTarget}
+                        onComplete={() => setNukeTarget(null)}
+                    />
+                )}
+            </AnimatePresence>
         </div >
     );
 }

@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Turbopack config (empty, but present to silence warning)
+  turbopack: {},
+
   // Ensure Next.js uses webpack bundler for build
   webpack: (config, { isServer }) => {
     // Custom webpack config if needed

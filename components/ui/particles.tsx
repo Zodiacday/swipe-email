@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 
 interface Particle {
@@ -39,7 +39,11 @@ export function Particles({
     varyColor = 20,
     className = "",
 }: ParticlesProps) {
-    const particles = useMemo(() => {
+    const [particles, setParticles] = React.useState<Particle[]>([]);
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
         const particleArray: Particle[] = [];
 
         for (let i = 0; i < quantity; i++) {
@@ -57,8 +61,10 @@ export function Particles({
             });
         }
 
-        return particleArray;
+        setParticles(particleArray);
     }, [quantity, color, varyColor, refresh]);
+
+    if (!mounted) return null;
 
     return (
         <div className={`absolute inset-0 overflow-hidden ${className}`}>
@@ -114,14 +120,22 @@ interface MeteorsProps {
 }
 
 export function Meteors({ number = 20, className = "" }: MeteorsProps) {
-    const meteors = useMemo(() => {
-        return Array.from({ length: number }, (_, i) => ({
-            id: i,
-            left: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 2}s`,
-            animationDuration: `${Math.random() * 2 + 2}s`,
-        }));
+    const [meteors, setMeteors] = React.useState<{ id: number; left: string; animationDelay: string; animationDuration: string }[]>([]);
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+        setMeteors(
+            Array.from({ length: number }, (_, i) => ({
+                id: i,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${Math.random() * 2 + 2}s`,
+            }))
+        );
     }, [number]);
+
+    if (!mounted) return null;
 
     return (
         <div className={className}>

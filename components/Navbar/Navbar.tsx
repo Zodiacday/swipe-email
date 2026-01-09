@@ -16,6 +16,7 @@ import { StreakBadge } from "@/components/StreakBadge";
 const NAV_LINKS = [
     { href: "/swipe", label: "Swipe", icon: Zap, tooltip: "The Game" },
     { href: "/dashboard", label: "Command Center", icon: LayoutDashboard, tooltip: "Bulk Nuke" },
+    { href: "/providers", label: "Connections", icon: Settings, tooltip: "Inbox Source" },
 ];
 
 function OozeTooltip({ text, children, active = true }: { text: string, children: React.ReactNode, active?: boolean }) {
@@ -105,17 +106,15 @@ export function Navbar() {
                 <div className="hidden md:flex items-center gap-2 lg:gap-3">
                     {session ? (
                         <div className="flex items-center gap-4">
-                            {/* Humorous Privacy Badge */}
-                            <OozeTooltip text="End-to-end respect">
-                                <div
-                                    className="hidden lg:flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-help group/privacy"
-                                >
-                                    <Shield className="w-3.5 h-3.5 text-emerald-400 group-hover/privacy:rotate-12 transition-transform" />
-                                    <span className="text-[10px] font-black text-emerald-400 tracking-widest uppercase">
-                                        Data = Yours
-                                    </span>
-                                </div>
-                            </OozeTooltip>
+                            {/* Privacy Badge */}
+                            <div
+                                className="hidden lg:flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full"
+                            >
+                                <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                                <span className="text-[9px] font-bold text-emerald-400 tracking-wide">
+                                    We don't read or store your data
+                                </span>
+                            </div>
 
                             {/* Streak with Live Ping */}
                             <div className="relative">

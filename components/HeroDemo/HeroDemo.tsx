@@ -6,7 +6,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { NormalizedEmail, SwipeAction } from "@/lib/types";
 import { Zap, Trophy, Mail, Trash2, MailX, Ban, Check } from "lucide-react";
 
@@ -90,7 +90,7 @@ function HeroCard({
     const blockOpacity = useTransform(y, [-100, -50], [1, 0]);
     const keepOpacity = useTransform(y, [50, 100], [0, 1]);
 
-    const handleDragEnd = (_: any, info: any) => {
+    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         const threshold = 80;
         const { offset } = info;
 

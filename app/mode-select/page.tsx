@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useTransform, MotionValue } from "framer-motion";
 import Link from "next/link";
 import { Zap, LayoutDashboard, ArrowRight } from "lucide-react";
 
@@ -95,7 +95,7 @@ export default function ModeSelectPage() {
         mouseY2.set(e.clientY - (rect.top + rect.height / 2));
     };
 
-    const handleMouseLeave = (mvX: any, mvY: any) => {
+    const handleMouseLeave = (mvX: MotionValue<number>, mvY: MotionValue<number>) => {
         mvX.set(0);
         mvY.set(0);
     };

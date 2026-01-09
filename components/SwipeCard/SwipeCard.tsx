@@ -5,7 +5,7 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from "react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { Trash2, MailX, Ban, Check, Bomb, Mail, Skull } from "lucide-react";
 import { NormalizedEmail, SwipeAction } from "@/lib/types";
 
@@ -56,7 +56,8 @@ export function SwipeCard({
     // Dynamic background bleed based on direction
     const cardBgOverlay = useTransform(
         [x, y],
-        ([latestX, latestY]: any[]) => {
+        (latest: number[]) => {
+            const [latestX, latestY] = latest;
             const absX = Math.abs(latestX);
             const absY = Math.abs(latestY);
             if (absX < 20 && absY < 20) return "rgba(0,0,0,0)";
@@ -86,7 +87,7 @@ export function SwipeCard({
         }
     };
 
-    const handleDragEnd = (_: any, info: any) => {
+    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         setIsDragging(false);
         const { offset, velocity } = info;
 

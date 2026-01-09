@@ -53,7 +53,7 @@ class RateLimiter {
                 this.lastRequestTime = Date.now();
                 const result = await request.fn();
                 request.resolve(result);
-            } catch (error: any) {
+            } catch (error: unknown) {
                 if (this.isRateLimitError(error) && request.retryCount < this.maxRetries) {
                     // Exponential backoff
                     const delay = this.baseDelay * Math.pow(this.backoffMultiplier, request.retryCount);
@@ -65,7 +65,7 @@ class RateLimiter {
                     request.retryCount++;
                     this.queue.unshift(request);
                 } else {
-                    request.reject(error);
+                    request.reject(error instanceof Error ? error : new Error(String(error)));
                 }
             }
         }
@@ -73,14 +73,18 @@ class RateLimiter {
         this.isProcessing = false;
     }
 
-    private isRateLimitError(error: any): boolean {
-        return (
-            error?.status === 429 ||
-            error?.code === 429 ||
-            error?.message?.includes("429") ||
-            error?.message?.includes("rate limit") ||
-            error?.message?.includes("Too Many Requests")
-        );
+    private isRateLimitError(error: unknown): boolean {
+        if (error && typeof error === 'object') {
+            const err = error as { status?: number; code?: number; message?: string };
+            return (
+                err.status === 429 ||
+                err.code === 429 ||
+                (err.message?.includes("429") ?? false) ||
+                (err.message?.includes("rate limit") ?? false) ||
+                (err.message?.includes("Too Many Requests") ?? false)
+            );
+        }
+        return false;
     }
 
     private sleep(ms: number): Promise<void> {

@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { PermissionGuard, PermissionStatus } from "@/lib/security/PermissionGuard";
 import { DemoSwipeCard } from "@/components/DemoSwipeCard";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 type OnboardingStage =
     | "welcome"
@@ -199,16 +200,13 @@ function WelcomeStage({ onNext }: { onNext: () => void }) {
                     Not someday. Right now.
                 </motion.p>
 
-                <motion.button
+                <MagneticButton
                     onClick={onNext}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 4 }}
                     className="px-10 py-5 bg-emerald-500 text-zinc-950 text-xl font-black tracking-tight rounded-full hover:bg-emerald-400 transition-all flex items-center gap-3 mx-auto shadow-xl shadow-emerald-500/20 active:scale-95"
                 >
                     Show Me How
                     <ArrowRight className="w-6 h-6" />
-                </motion.button>
+                </MagneticButton>
             </div>
         </motion.div>
     );
@@ -265,16 +263,13 @@ function ProblemStage({ onNext }: { onNext: () => void }) {
                     <br />Under 2 minutes.
                 </motion.p>
 
-                <motion.button
+                <MagneticButton
                     onClick={onNext}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1 }}
                     className="px-10 py-5 bg-white text-zinc-950 text-lg font-black rounded-full hover:bg-zinc-200 transition-all flex items-center gap-3 mx-auto shadow-xl active:scale-95"
                 >
                     Continue
                     <ArrowRight className="w-5 h-5" />
-                </motion.button>
+                </MagneticButton>
             </div>
         </motion.div>
     );
@@ -313,12 +308,12 @@ function PromiseStage({ onNext }: { onNext: () => void }) {
                     ))}
                 </div>
 
-                <button
+                <MagneticButton
                     onClick={onNext}
-                    className="px-12 py-5 bg-emerald-500 text-black text-xl font-bold rounded-full hover:bg-emerald-400 transition-all"
+                    className="px-12 py-5 bg-emerald-500 text-zinc-950 text-xl font-black tracking-tighter uppercase italic rounded-full hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20"
                 >
                     Experience The UI
-                </button>
+                </MagneticButton>
             </div>
         </motion.div>
     );
@@ -360,12 +355,12 @@ function SafetyStage({ onNext }: { onNext: () => void }) {
                     ))}
                 </div>
 
-                <button
+                <MagneticButton
                     onClick={onNext}
-                    className="w-full py-5 bg-white text-black text-xl font-bold rounded-full hover:bg-zinc-200 transition-all"
+                    className="w-full py-5 bg-white text-zinc-950 text-xl font-black tracking-tighter uppercase italic rounded-full hover:bg-zinc-200 transition-all shadow-xl"
                 >
                     I Authorize Access
-                </button>
+                </MagneticButton>
             </div>
         </motion.div>
     );

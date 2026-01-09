@@ -14,10 +14,46 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { StreakBadge } from "@/components/StreakBadge";
 const NAV_LINKS = [
-    { href: "/swipe", label: "Swipe", icon: Zap },
-    { href: "/dashboard", label: "Command Center", icon: LayoutDashboard },
-    { href: "/providers", label: "Connections", icon: Settings },
+    { href: "/swipe", label: "Swipe", icon: Zap, tooltip: "The Game" },
+    { href: "/dashboard", label: "Command Center", icon: LayoutDashboard, tooltip: "Bulk Nuke" },
+    { href: "/providers", label: "Connections", icon: Settings, tooltip: "Inbox Source" },
 ];
+
+function OozeTooltip({ text, children, active = true }: { text: string, children: React.ReactNode, active?: boolean }) {
+    const [hovered, setHovered] = useState(false);
+
+    return (
+        <div
+            className="relative"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+        >
+            {children}
+            <AnimatePresence>
+                {hovered && active && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5, y: 10, filter: "blur(10px)" }}
+                        animate={{
+                            opacity: 1,
+                            scale: 1,
+                            y: 0,
+                            filter: "blur(0px)",
+                            transition: { type: "spring", stiffness: 400, damping: 15, mass: 0.6 }
+                        }}
+                        exit={{ opacity: 0, scale: 0.8, y: 10, filter: "blur(5px)", transition: { duration: 0.2 } }}
+                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-[110] pointer-events-none"
+                    >
+                        <div className="bg-emerald-500 text-zinc-950 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest whitespace-nowrap shadow-[0_0_20px_rgba(16,185,129,0.4)] relative">
+                            {text}
+                            {/* Liquid Tip */}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-4 h-4 bg-emerald-500 rotate-45 rounded-sm -z-10" />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
 
 export function Navbar() {
     const { data: session } = useSession();
@@ -49,19 +85,20 @@ export function Navbar() {
                         const Icon = link.icon;
 
                         return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={`
-                                    flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest font-black transition-all
-                                    ${isActive
-                                        ? 'bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-                                        : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}
-                                `}
-                            >
-                                <Icon className="w-3.5 h-3.5" />
-                                {link.label}
-                            </Link>
+                            <OozeTooltip key={link.href} text={link.tooltip} active={!isActive}>
+                                <Link
+                                    href={link.href}
+                                    className={`
+                                        flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest font-black transition-all
+                                        ${isActive
+                                            ? 'bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                                            : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}
+                                    `}
+                                >
+                                    <Icon className="w-3.5 h-3.5" />
+                                    {link.label}
+                                </Link>
+                            </OozeTooltip>
                         );
                     })}
                 </div>
@@ -71,15 +108,16 @@ export function Navbar() {
                     {session ? (
                         <div className="flex items-center gap-4">
                             {/* Humorous Privacy Badge */}
-                            <div
-                                className="hidden lg:flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-help group/privacy"
-                                title="Your data is your data, we don't touch it"
-                            >
-                                <Shield className="w-3.5 h-3.5 text-emerald-400 group-hover/privacy:rotate-12 transition-transform" />
-                                <span className="text-[10px] font-black text-emerald-400 tracking-widest uppercase">
-                                    Data = Yours
-                                </span>
-                            </div>
+                            <OozeTooltip text="End-to-end respect">
+                                <div
+                                    className="hidden lg:flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-help group/privacy"
+                                >
+                                    <Shield className="w-3.5 h-3.5 text-emerald-400 group-hover/privacy:rotate-12 transition-transform" />
+                                    <span className="text-[10px] font-black text-emerald-400 tracking-widest uppercase">
+                                        Data = Yours
+                                    </span>
+                                </div>
+                            </OozeTooltip>
 
                             {/* Streak with Live Ping */}
                             <div className="relative">

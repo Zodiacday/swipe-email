@@ -32,6 +32,8 @@ import { setLastMode } from "@/lib/userPreferences";
 
 // --- Framer Motion Config ---
 const bounceConfig = { type: "spring" as const, stiffness: 300, damping: 20, mass: 0.8 };
+const LIQUID_EASE = [0.6, 0.01, -0.05, 0.95] as [number, number, number, number];
+const liquidTransition = { duration: 0.8, ease: LIQUID_EASE };
 
 const rowVariants = {
     hidden: { opacity: 0, x: -20 },
@@ -39,26 +41,8 @@ const rowVariants = {
         opacity: 1,
         x: 0,
         transition: { delay: i * 0.03, type: "spring" as const, stiffness: 300, damping: 30 }
-    }),
-    exit: {
-        opacity: 0,
-        x: -100,
-        height: 0,
-        marginTop: 0,
-        marginBottom: 0,
-        paddingTop: 0,
-        paddingBottom: 0,
-        transition: { duration: 0.2, ease: "easeIn" as const }
-    }
+    })
 };
-
-// Hover animation for rows
-const rowHoverStyle = {
-    y: -2,
-    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-    transition: { type: "spring" as const, stiffness: 400, damping: 30 }
-};
-
 
 export default function DashboardPage() {
     // --- Context ---
@@ -216,7 +200,7 @@ export default function DashboardPage() {
 
                 {/* Skeleton Table */}
                 <main className="max-w-7xl mx-auto p-8">
-                    <div className="bg-zinc-950 border border-zinc-900 rounded-3xl">
+                    <div className="glass rounded-3xl">
                         <div className="h-12 bg-zinc-900 rounded-t-3xl border-b border-zinc-800" />
                         <div className="divide-y divide-zinc-800/50">
                             {[1, 2, 3, 4, 5, 6].map(i => (
@@ -271,13 +255,6 @@ export default function DashboardPage() {
                         <StatsWidget />
                     </div>
                     <button
-                        onClick={() => setShowMobileFilters(!showMobileFilters)}
-                        className={`p-3 bg-zinc-900 border border-zinc-800 rounded-2xl transition-all active:scale-95 ${showMobileFilters ? 'text-emerald-400 border-emerald-500/30' : 'text-zinc-400 hover:text-zinc-200'}`}
-                        title="Toggle Filters"
-                    >
-                        <Filter className="w-5 h-5" />
-                    </button>
-                    <button
                         onClick={() => fetchEmails()}
                         disabled={isRefreshing}
                         className="p-3 bg-zinc-900 border border-zinc-800 rounded-2xl text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all active:scale-95"
@@ -296,91 +273,33 @@ export default function DashboardPage() {
             </header>
 
             {/* --- Action Bar & Filters --- */}
-            <div className="px-6 mb-6">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 bg-zinc-950 p-1 border border-zinc-800 rounded-2xl">
-                        <button
-                            onClick={() => setSelectedView("senders")}
-                            className={`px-6 py-2 rounded-xl text-xs font-bold tracking-widest uppercase transition-all ${selectedView === "senders" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-400"}`}
-                        >
-                            Senders
-                        </button>
-                        <button
-                            onClick={() => setSelectedView("domains")}
-                            className={`px-6 py-2 rounded-xl text-xs font-bold tracking-widest uppercase transition-all ${selectedView === "domains" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-400"}`}
-                        >
-                            Domains
-                        </button>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="flex-1 min-w-[200px] max-w-md relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-2.5 pl-11 pr-4 text-sm focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 outline-none transition-all"
-                            />
-                        </div>
-                        <button
-                            onClick={() => setShowMobileFilters(!showMobileFilters)}
-                            className={`p-2.5 rounded-xl border transition-all ${showMobileFilters ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}
-                            title="Toggle Filters"
-                        >
-                            <Filter className="w-4 h-4" />
-                        </button>
-                    </div>
+            <div className="px-6 mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-2 bg-zinc-950 p-1 border border-zinc-800 rounded-2xl">
+                    <button
+                        onClick={() => setSelectedView("senders")}
+                        className={`px-6 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-all ${selectedView === "senders" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-400"}`}
+                    >
+                        Senders
+                    </button>
+                    <button
+                        onClick={() => setSelectedView("domains")}
+                        className={`px-6 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-all ${selectedView === "domains" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-400"}`}
+                    >
+                        Domains
+                    </button>
                 </div>
 
-                <AnimatePresence>
-                    {showMobileFilters && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
-                        >
-                            <div className="flex flex-wrap items-center gap-4 pt-4 mt-4 border-t border-zinc-900">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-label mr-1">Time:</span>
-                                    {(['all', '7d', '30d'] as const).map((t) => (
-                                        <button
-                                            key={t}
-                                            onClick={() => setTimeRange(t)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${timeRange === t ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}`}
-                                        >
-                                            {t === 'all' ? 'All' : t}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-label mr-1">Impact:</span>
-                                    {(['all', 'high', 'danger'] as const).map((s) => (
-                                        <button
-                                            key={s}
-                                            onClick={() => setScoreFilter(s)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${scoreFilter === s ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}`}
-                                        >
-                                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-                                {(timeRange !== 'all' || scoreFilter !== 'all') && (
-                                    <button
-                                        onClick={() => { setTimeRange('all'); setScoreFilter('all'); }}
-                                        className="ml-auto text-xs text-zinc-500 hover:text-emerald-400 transition-colors"
-                                    >
-                                        Reset filters
-                                    </button>
-                                )}
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                <div className="flex-1 max-w-md relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                    <input
+                        type="text"
+                        placeholder="Search your inbox..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 pl-12 pr-4 text-sm focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 outline-none transition-all"
+                    />
+                </div>
             </div>
-
 
             {/* --- Main Content: Cyber Editorial List --- */}
             <main className="max-w-7xl mx-auto px-6">
@@ -420,14 +339,15 @@ export default function DashboardPage() {
                             {filteredSenders.map((sender, i) => (
                                 <React.Fragment key={sender.id}>
                                     <motion.div
+                                        layout
                                         key={sender.id}
                                         custom={i}
                                         variants={rowVariants}
                                         initial="hidden"
                                         animate="visible"
-                                        whileHover={rowHoverStyle}
+                                        transition={{ ...rowVariants.visible(i).transition, layout: liquidTransition }}
                                         className={`
-                                        flex md:grid md:grid-cols-12 gap-3 md:gap-4 p-4 md:px-6 md:h-[84px] items-center group transition-colors duration-200 relative
+                                        flex md:grid md:grid-cols-12 gap-3 md:gap-4 p-4 md:px-6 md:h-[84px] items-center group transition-colors duration-200
                                         ${sender.count > 100 ? "border-l-4 border-l-red-500 bg-red-500/5" : "border-l-2 border-l-transparent"}
                                         ${selectedIds.has(sender.id) ? "bg-emerald-500/5 !border-l-emerald-500" : "hover:bg-zinc-800/30"}
                                     `}

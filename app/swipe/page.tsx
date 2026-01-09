@@ -26,6 +26,10 @@ import { SkeletonCard } from "@/components/Skeleton";
 import { PaywallModal } from "@/components/Paywall";
 import { useFreemium } from "@/hooks/useFreemium";
 
+import { MagneticButton } from "@/components/ui/magnetic-button";
+
+const LIQUID_EASE = [0.6, 0.01, -0.05, 0.95] as [number, number, number, number];
+
 // --- Card Type ---
 interface SwipeCard {
     id: string;
@@ -112,6 +116,24 @@ export default function SwipePage() {
     const [hasSwipedOnce, setHasSwipedOnce] = useState(false);
     const [showStats, setShowStats] = useState(false); // Hide stats by default (Zen)
     const [showPaywall, setShowPaywall] = useState(false);
+
+    // --- Liquid Mouse Tracking (for parallax) ---
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const { clientX, clientY } = e;
+        const moveX = (clientX - window.innerWidth / 2) / 20;
+        const moveY = (clientY - window.innerHeight / 2) / 20;
+        mouseX.set(moveX);
+        mouseY.set(moveY);
+    };
+
+    // Parallax transforms for card internals
+    const parallaxX = useTransform(mouseX, (v) => v * 0.5);
+    const parallaxY = useTransform(mouseY, (v) => v * 0.5);
+    const deepParallaxX = useTransform(mouseX, (v) => v * 0.8);
+    const deepParallaxY = useTransform(mouseY, (v) => v * 0.8);
 
 
     // --- Derived: Cards to show (filter out processed) ---
@@ -718,8 +740,11 @@ export default function SwipePage() {
                         </motion.div>
 
                         {/* Card Content area */}
-                        <div className="p-8 flex-1 flex flex-col overflow-hidden bg-zinc-950">
-                            <div className="flex items-center gap-4 mb-8">
+                        <motion.div
+                            onMouseMove={handleMouseMove}
+                            className="p-8 flex-1 flex flex-col overflow-hidden bg-zinc-950"
+                        >
+                            <motion.div style={{ x: parallaxX, y: parallaxY }} className="flex items-center gap-4 mb-8">
                                 <div className={`w-14 h-14 rounded-2xl ${activeCard.senderColor} flex items-center justify-center text-white font-black text-xl shadow-lg shrink-0 border border-white/10`}>
                                     {activeCard.senderInitials}
                                 </div>
@@ -736,9 +761,9 @@ export default function SwipePage() {
                                         </span>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
 
-                            <div className="flex-1 flex flex-col justify-center relative">
+                            <motion.div style={{ x: deepParallaxX, y: deepParallaxY }} className="flex-1 flex flex-col justify-center relative">
                                 <h3 className="text-3xl font-black tracking-tight text-white mb-6 line-clamp-2 leading-[1.1]">
                                     {activeCard.subject}
                                 </h3>
@@ -747,7 +772,7 @@ export default function SwipePage() {
                                         {activeCard.preview}
                                     </p>
                                 </div>
-                            </div>
+                            </motion.div>
 
                             {/* Mobile Swipe Hints - Editorial Style */}
                             <div className="mt-8 pt-8 border-t border-zinc-900 grid grid-cols-3 text-[9px] font-black tracking-[0.3em] text-zinc-700 uppercase text-center">
@@ -767,52 +792,45 @@ export default function SwipePage() {
                                     <span>KEEP</span>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     </motion.div>
                 </div>
 
                 {/* --- Bottom Controls (Sticky, 4-way) --- */}
                 <div className="sticky bottom-0 left-0 right-0 py-4 flex items-center justify-center gap-4 z-30 w-full">
-                    <button
+                    <MagneticButton
                         onClick={() => handleSwipe("left")}
-                        disabled={actionInProgress}
-                        className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-red-500 hover:border-red-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
+                        className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-red-500 hover:border-red-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all"
                         title="Trash"
                     >
                         <Trash2 className="w-6 h-6" />
-                    </button>
+                    </MagneticButton>
 
-                    <button
+                    <MagneticButton
                         onClick={handleUnsubscribe}
-                        disabled={actionInProgress}
-                        className="w-12 h-12 rounded-full bg-zinc-900/50 border border-zinc-800 hover:bg-amber-500 hover:border-amber-500 text-zinc-500 hover:text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                        className="w-12 h-12 rounded-full bg-zinc-900/50 border border-zinc-800 hover:bg-amber-500 hover:border-amber-500 text-zinc-500 hover:text-white flex items-center justify-center transition-all"
                         title="Unsubscribe"
                     >
                         <BellOff className="w-5 h-5" />
-                    </button>
+                    </MagneticButton>
 
-                    <button
+                    <MagneticButton
                         onClick={handleSkip}
-                        disabled={actionInProgress}
-                        className="w-12 h-12 rounded-full bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-600 hover:border-zinc-600 text-zinc-500 hover:text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                        className="w-12 h-12 rounded-full bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-600 hover:border-zinc-600 text-zinc-500 hover:text-white flex items-center justify-center transition-all"
                         title="Skip for later"
                     >
                         <Clock className="w-5 h-5" />
-                    </button>
+                    </MagneticButton>
 
-                    <button
+                    <MagneticButton
                         onClick={() => handleSwipe("right")}
-                        disabled={actionInProgress}
-                        className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-emerald-500 hover:border-emerald-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
+                        className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-emerald-500 hover:border-emerald-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all"
                         title="Keep"
                     >
                         <Check className="w-7 h-7" />
-                    </button>
+                    </MagneticButton>
                 </div>
             </main>
-
-            {/* Freemium usage bar */}
-
 
             {/* Paywall modal */}
             <PaywallModal

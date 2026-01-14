@@ -33,7 +33,8 @@ export async function GET(request: Request) {
 
     try {
         // Fetch list of messages
-        const listUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${limit}&q=category:promotions OR category:social OR is:unread${pageToken ? `&pageToken=${pageToken}` : ""}`;
+        // IMPORTANT: Query must match /api/gmail/aggregates for consistent stats
+        const listUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${limit}&q=category:promotions OR category:updates OR category:social${pageToken ? `&pageToken=${pageToken}` : ""}`;
 
         const listResponse = await fetch(listUrl, {
             headers: {

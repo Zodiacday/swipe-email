@@ -25,6 +25,7 @@ import {
 import Link from "next/link";
 import { SkeletonRow } from "@/components/Skeleton";
 import { StatsWidget } from "@/components/StatsWidget";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { useEmailContext } from "@/contexts/EmailContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
@@ -247,7 +248,7 @@ export default function DashboardPage() {
                             Command <span className="text-emerald-500 not-italic">Center</span>
                         </h1>
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mt-1">
-                            {stats?.uniqueSenders || 0} SENDERS DETECTED • {stats?.totalEmails.toLocaleString()} TOTAL EMAILS
+                            <AnimatedNumber value={stats?.uniqueSenders || 0} className="tabular-nums" /> SENDERS DETECTED • <AnimatedNumber value={stats?.totalEmails || 0} className="tabular-nums" /> TOTAL EMAILS
                         </p>
                     </div>
                 </div>

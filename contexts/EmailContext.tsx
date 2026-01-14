@@ -66,14 +66,28 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         removeBlockedSender: senderManagement.removeBlockedSender,
     });
 
+    // Track last known aggregates to prevent flicker during refresh
+    const lastAggregatesRef = React.useRef<{
+        senders: AggregatedSender[];
+        stats: DashboardStats;
+    } | null>(null);
+
     // Derived: Aggregates (recomputed when emails change)
+    // IMPORTANT: Preserves previous values during refresh to prevent UI flicker
     const aggregates = useMemo(() => {
+        // During refresh (isRefreshing=true but emails still exist), don't reset
+        // Only show empty state on true initial load (no previous data)
         if (emailData.emails.length === 0) {
+            // Return last known values if available (prevents flicker)
+            if (lastAggregatesRef.current && emailData.isRefreshing) {
+                return lastAggregatesRef.current;
+            }
             return {
                 senders: [],
                 stats: { totalEmails: 0, uniqueSenders: 0, storageEstimate: 0, oldestEmail: Date.now() }
             };
         }
+
         // Filter out blocked senders before aggregating
         const visibleEmails = emailData.emails.filter(
             e => !senderManagement.blockedSenders.has(e.sender.toLowerCase())
@@ -88,8 +102,11 @@ export function EmailProvider({ children }: { children: ReactNode }) {
             }
         });
 
+        // Cache for next refresh
+        lastAggregatesRef.current = agg;
+
         return agg;
-    }, [emailData.emails, senderManagement.personalSenders, senderManagement.blockedSenders]);
+    }, [emailData.emails, emailData.isRefreshing, senderManagement.personalSenders, senderManagement.blockedSenders]);
 
     // Wrap markPersonal to also update analytics
     const markPersonal = (senderEmail: string) => {

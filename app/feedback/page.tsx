@@ -42,9 +42,8 @@ export default function FeedbackPage() {
         if (!message.trim() || !selectedType) return;
 
         setIsSubmitting(true);
-        setSubmitError(null);
-
         try {
+            setSubmitError(null);
             const response = await fetch("/api/feedback", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -157,7 +156,7 @@ export default function FeedbackPage() {
                                     return (
                                         <motion.button
                                             key={type.id}
-                                            onClick={() => setSelectedType(type.id)}
+                                            onClick={() => setSelectedType(prev => prev === type.id ? null : type.id)}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
                                             className={`px-5 py-2.5 rounded-full border text-sm font-medium transition-all inline-flex items-center gap-2 ${isActive ? type.activeColors : type.colors
@@ -202,8 +201,8 @@ export default function FeedbackPage() {
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         className={`px-8 py-3.5 rounded-full text-sm font-semibold transition-all inline-flex items-center gap-2 ${selectedType && message.trim()
-                                                ? "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.15)]"
-                                                : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                                            ? "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.15)]"
+                                            : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                                             }`}
                                     >
                                         {isSubmitting ? (

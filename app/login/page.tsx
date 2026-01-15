@@ -84,13 +84,10 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                {/* Features */}
-                <div className="mt-8 grid grid-cols-4 gap-3 text-center">
+                <div className="mt-8 grid grid-cols-2 gap-3 text-center">
                     {[
                         { label: "←", desc: "Trash" },
                         { label: "→", desc: "Keep" },
-                        { label: "↑", desc: "Unsub" },
-                        { label: "↓", desc: "Skip" },
                     ].map((item, i) => (
                         <div key={i} className="text-zinc-500">
                             <div className="text-lg font-bold text-emerald-500">{item.label}</div>

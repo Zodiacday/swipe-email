@@ -11,7 +11,7 @@
 
 "use client";
 
-import { Menu, X, Zap, User, LogOut, LayoutDashboard, Settings, Shield, ChevronDown, Sparkles, Bot, Crown } from "lucide-react";
+import { Menu, X, Zap, User, LogOut, LayoutDashboard, Settings, Shield, ChevronDown, Sparkles, Bot, Crown, MessageSquare } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -29,6 +29,7 @@ const NAV_LINKS = [
 const USER_MENU_LINKS = [
     { href: "/profile", label: "Profile", icon: User },
     { href: "/automation", label: "Automation", icon: Bot },
+    { href: "/feedback", label: "Feedback", icon: MessageSquare },
 ];
 
 export function Navbar() {

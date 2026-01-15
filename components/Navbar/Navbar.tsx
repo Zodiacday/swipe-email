@@ -21,7 +21,7 @@ import { StreakBadge } from "@/components/StreakBadge";
 
 const NAV_LINKS = [
     { href: "/swipe", label: "Swipe", icon: Zap, tooltip: "The Game" },
-    { href: "/dashboard", label: "Command Center", icon: LayoutDashboard, tooltip: "Bulk Nuke" },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, tooltip: "Manage Senders" },
     { href: "/providers", label: "Connections", icon: Settings, tooltip: "Inbox Source" },
 ];
 
@@ -151,8 +151,8 @@ export function Navbar() {
                                                             href={link.href}
                                                             onClick={() => setUserMenuOpen(false)}
                                                             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${isActive
-                                                                    ? 'bg-emerald-500/10 text-emerald-400'
-                                                                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                                                                ? 'bg-emerald-500/10 text-emerald-400'
+                                                                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                                                                 }`}
                                                         >
                                                             <Icon className="w-4 h-4" />

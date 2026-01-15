@@ -229,7 +229,7 @@ export default function Home() {
                             </div>
                         </motion.div>
 
-                        {/* Command Center */}
+                        {/* Dashboard */}
                         <motion.div
                             whileHover={{ y: -4 }}
                             className="p-6 rounded-3xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/30 transition-colors"
@@ -237,8 +237,8 @@ export default function Home() {
                             <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4">
                                 <LayoutDashboard className="w-6 h-6 text-emerald-400" />
                             </div>
-                            <h3 className="text-xl font-black mb-2">Command Center</h3>
-                            <p className="text-zinc-400 text-sm mb-4">Dashboard management. Manage all senders in one place.</p>
+                            <h3 className="text-xl font-black mb-2">Dashboard</h3>
+                            <p className="text-zinc-400 text-sm mb-4">Manage all senders in one place. Bulk actions made easy.</p>
                             <div className="bg-zinc-900 rounded-xl p-3 space-y-1.5">
                                 {[
                                     { name: "spam@newsletter.co", count: 127, hot: true },

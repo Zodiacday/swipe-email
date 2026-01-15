@@ -180,7 +180,7 @@ export default function ModeSelectPage() {
                         </div>
                     </motion.div>
 
-                    {/* Card 2: Command Center */}
+                    {/* Card 2: Dashboard */}
                     <motion.div variants={itemVariants}>
                         <div
                             onMouseMove={handleMouseMove2}
@@ -230,9 +230,9 @@ export default function ModeSelectPage() {
                                         }}
                                         className="text-center relative z-20"
                                     >
-                                        <h2 className="text-3xl font-black text-emerald-400 mb-4 tracking-tight uppercase italic">Command Center</h2>
+                                        <h2 className="text-3xl font-black text-emerald-400 mb-4 tracking-tight uppercase italic">Dashboard</h2>
                                         <p className="text-zinc-300 text-center leading-relaxed max-w-xs mx-auto">
-                                            Bulk operations. Group by Sender or Domain. Nuke thousands of emails in seconds.
+                                            Manage all senders in one place. Bulk actions made easy.
                                         </p>
 
                                         {/* Floating CTA */}

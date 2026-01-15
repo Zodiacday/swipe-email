@@ -166,7 +166,7 @@ export function InboxZero({ stats, sessionStartTime, onRefresh }: InboxZeroProps
                         className="flex-1 py-5 bg-zinc-900 border border-zinc-800 text-zinc-100 font-black tracking-widest uppercase text-sm rounded-full hover:bg-zinc-800 transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
                         <LayoutDashboard className="w-5 h-5 text-emerald-500" />
-                        Command Center
+                        Dashboard
                     </Link>
                 </div>
             </motion.div>

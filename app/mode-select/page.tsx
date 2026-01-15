@@ -135,7 +135,7 @@ export default function ModeSelectPage() {
                                         rotateX: useTransform(mouseY1, [-250, 250], [5, -5]),
                                         rotateY: useTransform(mouseX1, [-250, 250], [-5, 5]),
                                     }}
-                                    className="h-[440px] rounded-[40px] bg-zinc-950 border border-zinc-900 p-8 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 hover:border-emerald-500/30 shadow-2xl group-hover:shadow-emerald-500/10"
+                                    className="h-[340px] sm:h-[380px] md:h-[440px] rounded-[32px] sm:rounded-[40px] bg-zinc-950 border border-zinc-900 p-6 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 hover:border-emerald-500/30 shadow-2xl group-hover:shadow-emerald-500/10"
                                 >
                                     {/* 3D Stack Visual - High Parallax */}
                                     <motion.div
@@ -193,7 +193,7 @@ export default function ModeSelectPage() {
                                         rotateX: useTransform(mouseY2, [-250, 250], [5, -5]),
                                         rotateY: useTransform(mouseX2, [-250, 250], [5, -5]),
                                     }}
-                                    className="h-[440px] rounded-[40px] bg-zinc-950 border border-zinc-900 p-8 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 hover:border-emerald-500/30 shadow-2xl group-hover:shadow-emerald-500/10"
+                                    className="h-[340px] sm:h-[380px] md:h-[440px] rounded-[32px] sm:rounded-[40px] bg-zinc-950 border border-zinc-900 p-6 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 hover:border-emerald-500/30 shadow-2xl group-hover:shadow-emerald-500/10"
                                 >
                                     {/* Mini Dashboard Visual - High Parallax */}
                                     <motion.div

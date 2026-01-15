@@ -323,12 +323,12 @@ export default function DashboardPage() {
 
                 {/* Mobile Select All */}
                 <div className="md:hidden flex items-center justify-between bg-zinc-950 border border-emerald-500/10 rounded-t-3xl px-4 py-3">
-                    <label className="flex items-center gap-2 text-sm text-zinc-400">
+                    <label className="flex items-center gap-3 text-sm text-zinc-400 min-h-[44px] cursor-pointer">
                         <input
                             type="checkbox"
                             checked={selectedIds.size === filteredSenders.length && filteredSenders.length > 0}
                             onChange={toggleAll}
-                            className="w-4 h-4 rounded border-zinc-700 bg-zinc-800/50 text-emerald-500"
+                            className="w-5 h-5 rounded border-zinc-700 bg-zinc-800/50 text-emerald-500"
                         />
                         Select all
                     </label>
@@ -355,15 +355,15 @@ export default function DashboardPage() {
                                         ${selectedIds.has(sender.id) ? "bg-emerald-500/5 !border-l-emerald-500" : "hover:bg-zinc-800/30"}
                                     `}
                                     >
-                                        {/* Checkbox */}
-                                        <div className="md:col-span-1 flex justify-center shrink-0">
+                                        {/* Checkbox - Large tap area for mobile */}
+                                        <label className="md:col-span-1 flex justify-center shrink-0 w-11 h-11 items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
                                                 checked={selectedIds.has(sender.id)}
                                                 onChange={() => toggleSelection(sender.id)}
-                                                className="w-5 h-5 md:w-4 md:h-4 rounded border-zinc-700 bg-zinc-800/50 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer"
+                                                className="w-5 h-5 rounded border-zinc-700 bg-zinc-800/50 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer"
                                             />
-                                        </div>
+                                        </label>
 
                                         {/* Identity */}
                                         <div className="md:col-span-5 flex items-center gap-3 md:gap-4 min-w-0 flex-1">
@@ -407,7 +407,7 @@ export default function DashboardPage() {
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="md:col-span-2 flex justify-center gap-1 md:gap-2 shrink-0">
+                                        <div className="md:col-span-2 flex justify-center gap-2 shrink-0">
                                             {/* Expand Toggle - Hidden on mobile */}
                                             <button
                                                 onClick={() => setExpandedRow(expandedRow === sender.id ? null : sender.id)}
@@ -425,13 +425,13 @@ export default function DashboardPage() {
                                                     markPersonal(sender.email);
                                                     showToast(`Marked ${sender.name} as Personal ✓`, { type: "info" });
                                                 }}
-                                                className={`p-2 rounded-lg border transition-colors ${sender.category === "Personal"
+                                                className={`p-2.5 md:p-2 rounded-xl md:rounded-lg border transition-colors ${sender.category === "Personal"
                                                     ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
                                                     : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700"
                                                     }`}
                                                 title="Mark as Personal"
                                             >
-                                                <Star className={`w-4 h-4 ${sender.category === "Personal" ? "fill-amber-500" : ""}`} />
+                                                <Star className={`w-5 h-5 md:w-4 md:h-4 ${sender.category === "Personal" ? "fill-amber-500" : ""}`} />
                                             </button>
                                             <button
                                                 onClick={async (e) => {
@@ -439,10 +439,10 @@ export default function DashboardPage() {
                                                     await trashSender(sender.email);
                                                     showToast(`Trashed ${sender.count} emails from ${sender.name} ✓`, { type: "success" });
                                                 }}
-                                                className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+                                                className="p-2.5 md:p-2 rounded-xl md:rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
                                                 title="Trash all from sender"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
                                             </button>
                                             <button
                                                 onClick={async (e) => {
@@ -471,10 +471,10 @@ export default function DashboardPage() {
                                                         }
                                                     }
                                                 }}
-                                                className="p-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                                                className="p-2.5 md:p-2 rounded-xl md:rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
                                                 title="Block sender"
                                             >
-                                                <ShieldOff className="w-4 h-4" />
+                                                <ShieldOff className="w-5 h-5 md:w-4 md:h-4" />
                                             </button>
                                         </div>
                                     </motion.div>

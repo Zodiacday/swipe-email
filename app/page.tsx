@@ -1,20 +1,15 @@
 "use client";
 
 /**
- * Obsidian Mint Redesigned Landing Page
- * Focus: High-end, minimal, professional
+ * Obsidian Mint Landing Page - Streamlined Version
+ * 9 sections, optimized for conversion
+ * Order: Hero → Stats+Trust → How → Modes → Pricing → Testimonials → FAQ → CTA → Footer
  */
 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-    Shield,
-    Zap,
-    Sparkles,
-    Target,
-    ArrowRight,
-} from "lucide-react";
+import { Sparkles, ArrowRight, Zap, LayoutDashboard, Target } from "lucide-react";
 import { Particles, Meteors } from "@/components/ui";
 import { HeroDemo } from "@/components/HeroDemo/HeroDemo";
 import { useSession } from "next-auth/react";
@@ -23,25 +18,24 @@ export default function Home() {
     const { data: session } = useSession();
     const [isYearly, setIsYearly] = useState(false);
 
-    // Determine where CTA should go
     const ctaHref = session ? "/mode-select" : "/login";
-    const ctaLabel = session ? "Go to App" : "Start Experience";
+    const ctaLabel = session ? "Go to App" : "Start Free";
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 overflow-hidden relative font-sans selection:bg-emerald-500/30">
-            {/* Ambient background effects */}
+            {/* Ambient background */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px]" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/5 rounded-full blur-[120px]" />
             </div>
-
             <Particles quantity={40} className="pointer-events-none opacity-30" color="#10b981" />
             <Meteors number={10} className="pointer-events-none opacity-20" />
 
-            {/* Hero Section - padding-top accounts for fixed navbar */}
-            <section className="relative pt-24 pb-12 lg:pt-32 lg:pb-24 px-4 sm:px-6 overflow-hidden">
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 1: HERO
+            ═══════════════════════════════════════════════════════════════ */}
+            <section className="relative pt-24 pb-12 lg:pt-32 lg:pb-20 px-4 sm:px-6 overflow-hidden">
                 <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-20">
-                    {/* Left Content */}
                     <div className="flex-1 text-center lg:text-left z-10 w-full">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -85,15 +79,14 @@ export default function Home() {
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <Link
-                                href="#demo"
+                                href="#pricing"
                                 className="w-full sm:w-auto px-10 py-5 border border-zinc-800 text-white font-black tracking-widest text-sm rounded-full hover:bg-zinc-900 transition-all flex items-center justify-center active:scale-95"
                             >
-                                WATCH DEMO
+                                SEE PRICING
                             </Link>
                         </motion.div>
                     </div>
 
-                    {/* Right Demo Content */}
                     <div id="demo" className="flex-1 relative z-10 w-full mt-8 lg:mt-0 flex justify-center lg:justify-end">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
@@ -107,10 +100,13 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Live Stats Counter */}
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 2: STATS + TRUST BADGES (merged)
+            ═══════════════════════════════════════════════════════════════ */}
             <section className="py-12 px-6 border-t border-zinc-900">
                 <div className="max-w-5xl mx-auto">
-                    <div className="grid grid-cols-3 gap-4 md:gap-8">
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-4 md:gap-8 mb-8">
                         {[
                             { value: "1.2M+", label: "Emails Cleaned", icon: "📧" },
                             { value: "12K+", label: "Happy Users", icon: "👥" },
@@ -122,314 +118,236 @@ export default function Home() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="text-center p-4 md:p-6"
+                                className="text-center p-4"
                             >
-                                <div className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter text-white mb-1">
+                                <div className="text-2xl md:text-4xl font-black tracking-tighter text-white mb-1">
                                     {stat.value}
                                 </div>
-                                <div className="text-xs md:text-sm text-zinc-500 uppercase tracking-wider font-medium flex items-center justify-center gap-2">
+                                <div className="text-xs text-zinc-500 uppercase tracking-wider font-medium flex items-center justify-center gap-2">
                                     <span>{stat.icon}</span>
                                     {stat.label}
                                 </div>
                             </motion.div>
                         ))}
                     </div>
-                </div>
-            </section>
 
-            {/* Trust Badges */}
-            <section className="py-8 px-6 border-t border-zinc-900/50">
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0 }}
-                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/5 border border-emerald-500/20"
-                        >
-                            <span className="text-lg">🔒</span>
-                            <span className="text-xs font-bold text-emerald-400 tracking-wide">No Data Sold Ever</span>
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.05 }}
-                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/5 border border-blue-500/20"
-                        >
-                            <span className="text-lg">🛡️</span>
-                            <span className="text-xs font-bold text-blue-400 tracking-wide">Metadata Only</span>
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 }}
-                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/5 border border-purple-500/20"
-                        >
-                            <span className="text-lg">🇪🇺</span>
-                            <span className="text-xs font-bold text-purple-400 tracking-wide">GDPR Compliant</span>
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.15 }}
-                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/5 border border-amber-500/20"
-                        >
-                            <span className="text-lg">⚡</span>
-                            <span className="text-xs font-bold text-amber-400 tracking-wide">OAuth 2.0 Only</span>
-                        </motion.div>
+                    {/* Trust Badges */}
+                    <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/20">
+                            <span className="text-sm">🔒</span>
+                            <span className="text-[10px] font-bold text-emerald-400 tracking-wide">No Data Sold</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/5 border border-blue-500/20">
+                            <span className="text-sm">🛡️</span>
+                            <span className="text-[10px] font-bold text-blue-400 tracking-wide">Metadata Only</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/5 border border-purple-500/20">
+                            <span className="text-sm">🇪🇺</span>
+                            <span className="text-[10px] font-bold text-purple-400 tracking-wide">GDPR</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/5 border border-amber-500/20">
+                            <span className="text-sm">⚡</span>
+                            <span className="text-[10px] font-bold text-amber-400 tracking-wide">OAuth 2.0</span>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* How It Works - 3 Steps */}
-            <section className="py-20 px-6 border-t border-zinc-900 bg-zinc-950/50">
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 3: HOW IT WORKS
+            ═══════════════════════════════════════════════════════════════ */}
+            <section className="py-16 px-6 border-t border-zinc-900 bg-zinc-950/50">
                 <div className="max-w-5xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-3">
                             3 Steps to <span className="text-emerald-500">Freedom</span>
                         </h2>
-                        <p className="text-zinc-500 text-lg">From cluttered to clean in under 2 minutes</p>
+                        <p className="text-zinc-500">From cluttered to clean in under 2 minutes</p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8 relative">
-                        {/* Connecting line (desktop only) */}
-                        <div className="hidden md:block absolute top-16 left-[16.66%] right-[16.66%] h-[2px] bg-gradient-to-r from-emerald-500/0 via-emerald-500/30 to-emerald-500/0" />
+                    <div className="grid md:grid-cols-3 gap-6 relative">
+                        <div className="hidden md:block absolute top-12 left-[16.66%] right-[16.66%] h-[2px] bg-gradient-to-r from-emerald-500/0 via-emerald-500/30 to-emerald-500/0" />
 
                         {[
-                            {
-                                step: "01",
-                                title: "Connect",
-                                desc: "Link your Gmail in 30 seconds with secure OAuth. We never see your password.",
-                                icon: "🔗",
-                            },
-                            {
-                                step: "02",
-                                title: "Swipe or Nuke",
-                                desc: "Tinder-like swipes for fun, or bulk nuke for speed. Your choice.",
-                                icon: "⚡",
-                            },
-                            {
-                                step: "03",
-                                title: "Enjoy Peace",
-                                desc: "Watch your inbox shrink. Feel the dopamine. Never look back.",
-                                icon: "🧘",
-                            },
+                            { step: "01", title: "Connect", desc: "Link Gmail in 30 seconds. We never see your password.", icon: "🔗" },
+                            { step: "02", title: "Swipe or Nuke", desc: "Tinder-like swipes for fun, or bulk nuke for speed.", icon: "⚡" },
+                            { step: "03", title: "Enjoy Peace", desc: "Watch your inbox shrink. Feel the dopamine.", icon: "🧘" },
                         ].map((step, i) => (
                             <motion.div
                                 key={i}
-                                initial={{ opacity: 0, y: 30 }}
+                                initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: i * 0.15 }}
-                                className="relative text-center p-8"
+                                transition={{ delay: i * 0.1 }}
+                                className="relative text-center p-6"
                             >
-                                {/* Step Number Circle */}
-                                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-zinc-900 border-2 border-emerald-500/30 flex items-center justify-center relative z-10">
-                                    <span className="text-2xl">{step.icon}</span>
+                                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-zinc-900 border-2 border-emerald-500/30 flex items-center justify-center relative z-10">
+                                    <span className="text-xl">{step.icon}</span>
                                 </div>
-
-                                <div className="text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-2">
-                                    Step {step.step}
-                                </div>
-                                <h3 className="text-2xl font-black tracking-tight mb-3">{step.title}</h3>
-                                <p className="text-zinc-400 text-sm leading-relaxed">{step.desc}</p>
+                                <div className="text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-1">Step {step.step}</div>
+                                <h3 className="text-xl font-black tracking-tight mb-2">{step.title}</h3>
+                                <p className="text-zinc-400 text-sm">{step.desc}</p>
                             </motion.div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Features Grid */}
-            <section className="py-24 px-6 border-t border-zinc-900 bg-zinc-950/30">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {[
-                            {
-                                icon: Shield,
-                                title: "Privacy First",
-                                desc: "We never read your email content. Metadata stays on your device.",
-                            },
-                            {
-                                icon: Zap,
-                                title: "Effortless Flow",
-                                desc: "Clean thousands of emails in minutes, not hours.",
-                            },
-                            {
-                                icon: Target,
-                                title: "Smart Detection",
-                                desc: "Automatically identifies newsletters, social updates, and promo spam.",
-                            },
-                        ].map((f, i) => (
-                            <div key={i} className="p-10 rounded-3xl glass border-zinc-800/50 hover:border-emerald-500/20 transition-all group">
-                                <div className="w-14 h-14 rounded-2xl bg-zinc-900 flex items-center justify-center mb-8 group-hover:bg-emerald-500/10 transition-colors">
-                                    <f.icon className="w-7 h-7 text-zinc-400 group-hover:text-emerald-400 transition-colors" />
-                                </div>
-                                <h3 className="text-2xl font-black tracking-tight mb-4">{f.title}</h3>
-                                <p className="text-zinc-400 text-base leading-relaxed">{f.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Two Modes Section */}
-            <section className="py-24 px-6 border-t border-zinc-900">
-                <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 4: TWO MODES
+            ═══════════════════════════════════════════════════════════════ */}
+            <section className="py-16 px-6 border-t border-zinc-900">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-3">
                             Two Ways to <span className="text-emerald-500">Dominate</span>
                         </h2>
-                        <p className="text-zinc-400 text-lg max-w-xl mx-auto">
-                            Choose your cleaning style. Gamified swipes for fun, or bulk nukes for power users.
-                        </p>
+                        <p className="text-zinc-500">Gamified swipes for fun, or bulk nukes for power users.</p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {/* Swipe Mode Card */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                        {/* Swipe Mode */}
                         <motion.div
-                            whileHover={{ y: -8, scale: 1.02 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                            className="relative p-8 rounded-[32px] bg-zinc-950 border border-zinc-800 hover:border-emerald-500/30 transition-colors group overflow-hidden"
+                            whileHover={{ y: -4 }}
+                            className="p-6 rounded-3xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/30 transition-colors"
                         >
-                            {/* Glow effect */}
-                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-colors" />
-
-                            <div className="relative z-10">
-                                {/* Icon */}
-                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-6">
-                                    <Zap className="w-8 h-8 text-emerald-400" />
+                            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4">
+                                <Zap className="w-6 h-6 text-emerald-400" />
+                            </div>
+                            <h3 className="text-xl font-black mb-2">The Swipe</h3>
+                            <p className="text-zinc-400 text-sm mb-4">Tinder for your inbox. Swipe left to trash, right to keep.</p>
+                            <div className="bg-zinc-900 rounded-xl p-3 flex items-center justify-center gap-6">
+                                <div className="text-center">
+                                    <div className="text-xl text-red-400">←</div>
+                                    <div className="text-[9px] text-zinc-500">TRASH</div>
                                 </div>
-
-                                <h3 className="text-2xl font-black tracking-tight mb-3 text-white">
-                                    The Swipe
-                                </h3>
-                                <p className="text-zinc-400 mb-6 leading-relaxed">
-                                    Tinder for your inbox. Swipe left to trash, right to keep.
-                                    Satisfying gestures, one email at a time.
-                                </p>
-
-                                {/* Mini preview */}
-                                <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800">
-                                    <div className="flex items-center justify-center gap-8">
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-red-400">←</div>
-                                            <div className="text-[10px] uppercase text-zinc-500 tracking-wider">Trash</div>
-                                        </div>
-                                        <div className="w-16 h-20 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                                            <div className="w-8 h-8 rounded-full bg-emerald-500/20" />
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-emerald-400">→</div>
-                                            <div className="text-[10px] uppercase text-zinc-500 tracking-wider">Keep</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-6 flex items-center gap-2 text-sm text-emerald-400">
-                                    <span className="font-bold">Perfect for:</span>
-                                    <span className="text-zinc-400">New users, daily cleanups, satisfying dopamine hits</span>
+                                <div className="w-10 h-12 rounded-lg bg-zinc-800 border border-zinc-700" />
+                                <div className="text-center">
+                                    <div className="text-xl text-emerald-400">→</div>
+                                    <div className="text-[9px] text-zinc-500">KEEP</div>
                                 </div>
                             </div>
                         </motion.div>
 
-                        {/* Command Center Card */}
+                        {/* Command Center */}
                         <motion.div
-                            whileHover={{ y: -8, scale: 1.02 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                            className="relative p-8 rounded-[32px] bg-zinc-950 border border-zinc-800 hover:border-emerald-500/30 transition-colors group overflow-hidden"
+                            whileHover={{ y: -4 }}
+                            className="p-6 rounded-3xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/30 transition-colors"
                         >
-                            {/* Glow effect */}
-                            <div className="absolute -top-20 -left-20 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-colors" />
-
-                            <div className="relative z-10">
-                                {/* Icon */}
-                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-6">
-                                    <Target className="w-8 h-8 text-emerald-400" />
-                                </div>
-
-                                <h3 className="text-2xl font-black tracking-tight mb-3 text-white">
-                                    Command Center
-                                </h3>
-                                <p className="text-zinc-400 mb-6 leading-relaxed">
-                                    Bulk operations dashboard. See all senders ranked by danger score.
-                                    Nuke entire domains in one click.
-                                </p>
-
-                                {/* Mini dashboard preview */}
-                                <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800">
-                                    <div className="space-y-2">
-                                        {[
-                                            { name: "newsletter@spam.com", count: 127, danger: true },
-                                            { name: "promo@deals.co", count: 56, danger: false },
-                                            { name: "social@updates.io", count: 34, danger: false },
-                                        ].map((s, i) => (
-                                            <div key={i} className="flex items-center justify-between text-xs">
-                                                <span className="text-zinc-400 truncate">{s.name}</span>
-                                                <span className={`font-mono ${s.danger ? "text-red-400" : "text-zinc-500"}`}>
-                                                    {s.count}
-                                                </span>
-                                            </div>
-                                        ))}
+                            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4">
+                                <LayoutDashboard className="w-6 h-6 text-emerald-400" />
+                            </div>
+                            <h3 className="text-xl font-black mb-2">Command Center</h3>
+                            <p className="text-zinc-400 text-sm mb-4">Bulk operations. See senders ranked by danger score.</p>
+                            <div className="bg-zinc-900 rounded-xl p-3 space-y-1.5">
+                                {[
+                                    { name: "spam@newsletter.co", count: 127, hot: true },
+                                    { name: "promo@deals.io", count: 56, hot: false },
+                                ].map((s, i) => (
+                                    <div key={i} className="flex justify-between text-xs">
+                                        <span className="text-zinc-400 truncate">{s.name}</span>
+                                        <span className={s.hot ? "text-red-400" : "text-zinc-500"}>{s.count}</span>
                                     </div>
-                                </div>
-
-                                <div className="mt-6 flex items-center gap-2 text-sm text-emerald-400">
-                                    <span className="font-bold">Perfect for:</span>
-                                    <span className="text-zinc-400">Power users, mass cleanups, surgical strikes</span>
-                                </div>
+                                ))}
                             </div>
                         </motion.div>
                     </div>
                 </div>
             </section>
-            <section className="py-20 px-6 border-t border-zinc-900 bg-zinc-950/50">
-                <div className="max-w-6xl mx-auto">
+
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 5: PRICING (moved up!)
+            ═══════════════════════════════════════════════════════════════ */}
+            <section id="pricing" className="py-16 px-6 border-t border-zinc-900 bg-zinc-950/50">
+                <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">
-                            Loved by <span className="text-emerald-500">Inbox Warriors</span>
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-3">
+                            Simple Pricing. <span className="text-emerald-500">No BS.</span>
                         </h2>
-                        <p className="text-zinc-500">What early users are saying</p>
+                        <p className="text-zinc-500">Other tools charge $10/mo and sell your data. We don't.</p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                        {/* Free */}
+                        <div className="p-6 rounded-3xl bg-zinc-900/50 border border-zinc-800">
+                            <h3 className="text-xl font-black mb-1">Free</h3>
+                            <div className="flex items-baseline gap-1 mb-4">
+                                <span className="text-4xl font-black">$0</span>
+                                <span className="text-zinc-500 text-sm">/forever</span>
+                            </div>
+                            <ul className="space-y-2 mb-6">
+                                {["50 swipes/day", "1 email account", "Gmail support"].map((f, i) => (
+                                    <li key={i} className="flex items-center gap-2 text-sm text-zinc-300">
+                                        <span className="text-emerald-400">✓</span>
+                                        {f}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link href="/login" className="block w-full py-3 text-center bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition-colors">
+                                Start Free
+                            </Link>
+                        </div>
+
+                        {/* Pro */}
+                        <div className="p-6 rounded-3xl bg-zinc-950 border-2 border-emerald-500/50 relative">
+                            <div className="absolute top-4 right-4 px-2 py-0.5 bg-emerald-500 text-zinc-950 text-[9px] font-black uppercase rounded-full">Popular</div>
+                            <h3 className="text-xl font-black text-emerald-400 mb-1">Pro</h3>
+
+                            {/* Toggle */}
+                            <div className="flex items-center gap-2 mb-2">
+                                <button onClick={() => setIsYearly(false)} className={`text-xs font-bold ${!isYearly ? 'text-white' : 'text-zinc-500'}`}>Monthly</button>
+                                <button
+                                    onClick={() => setIsYearly(!isYearly)}
+                                    className={`w-10 h-5 rounded-full relative transition-colors ${isYearly ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                                >
+                                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${isYearly ? 'left-5' : 'left-0.5'}`} />
+                                </button>
+                                <button onClick={() => setIsYearly(true)} className={`text-xs font-bold ${isYearly ? 'text-white' : 'text-zinc-500'}`}>Yearly</button>
+                                {isYearly && <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full">-45%</span>}
+                            </div>
+
+                            <div className="flex items-baseline gap-1 mb-4">
+                                <span className="text-4xl font-black">{isYearly ? '$39' : '$5.99'}</span>
+                                <span className="text-zinc-500 text-sm">{isYearly ? '/year' : '/mo'}</span>
+                            </div>
+                            <ul className="space-y-2 mb-6">
+                                {["Unlimited swipes", "All providers", "Bulk operations", "Priority support"].map((f, i) => (
+                                    <li key={i} className="flex items-center gap-2 text-sm text-zinc-300">
+                                        <span className="text-emerald-400">✓</span>
+                                        {f}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link href="/login" className="block w-full py-3 text-center bg-emerald-500 text-zinc-950 font-bold rounded-xl hover:bg-emerald-400 transition-colors">
+                                Upgrade to Pro
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 6: TESTIMONIALS
+            ═══════════════════════════════════════════════════════════════ */}
+            <section className="py-16 px-6 border-t border-zinc-900">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-3">
+                            Loved by <span className="text-emerald-500">Inbox Warriors</span>
+                        </h2>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-4">
                         {[
-                            {
-                                quote: "Finally, an inbox cleaner that doesn't feel like doing taxes. The swipe gestures are actually addicting.",
-                                name: "Sarah K.",
-                                role: "Marketing Director",
-                                rating: 5,
-                            },
-                            {
-                                quote: "I cleaned 3 years of newsletter spam in 20 minutes. The dopamine hit when you reach inbox zero is real.",
-                                name: "Marcus T.",
-                                role: "Startup Founder",
-                                rating: 5,
-                            },
-                            {
-                                quote: "Unlike Unroll.me, I don't feel creeped out using this. They actually respect your privacy.",
-                                name: "Alex D.",
-                                role: "Software Engineer",
-                                rating: 5,
-                            },
+                            { quote: "The swipe gestures are actually addicting.", name: "Sarah K.", role: "Marketing Director" },
+                            { quote: "Cleaned 3 years of spam in 20 minutes.", name: "Marcus T.", role: "Startup Founder" },
+                            { quote: "Unlike Unroll.me, they actually respect privacy.", name: "Alex D.", role: "Engineer" },
                         ].map((t, i) => (
-                            <div
-                                key={i}
-                                className="p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/30 transition-colors"
-                            >
-                                <div className="flex gap-1 mb-4">
-                                    {[...Array(t.rating)].map((_, j) => (
-                                        <span key={j} className="text-emerald-400">★</span>
-                                    ))}
-                                </div>
-                                <p className="text-zinc-300 mb-4 text-sm leading-relaxed italic">
-                                    "{t.quote}"
-                                </p>
-                                <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">
-                                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                            <div key={i} className="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800">
+                                <div className="flex gap-0.5 mb-3 text-emerald-400 text-sm">★★★★★</div>
+                                <p className="text-zinc-300 text-sm mb-4 italic">"{t.quote}"</p>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">
                                         {t.name.charAt(0)}
                                     </div>
                                     <div>
@@ -443,286 +361,74 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* FAQ Section */}
-            <section className="py-24 px-6 border-t border-zinc-900 bg-zinc-950/30">
-                <div className="max-w-3xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 7: FAQ (collapsed by default)
+            ═══════════════════════════════════════════════════════════════ */}
+            <section className="py-16 px-6 border-t border-zinc-900 bg-zinc-950/50">
+                <div className="max-w-2xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl font-black tracking-tighter mb-2">
                             Got <span className="text-emerald-500">Questions?</span>
                         </h2>
-                        <p className="text-zinc-500 text-lg">We've got answers. The honest ones.</p>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         {[
-                            {
-                                q: "Do you read my emails?",
-                                a: "No. We only read metadata (sender, subject, timestamps). We never access email body content. This is enforced at the OAuth permission level.",
-                            },
-                            {
-                                q: "Is my data sold to advertisers?",
-                                a: "Absolutely not. Unlike some competitors (cough, Unroll.me), we don't sell your data. Ever. Our business model is simple: you pay for Pro, we provide the service.",
-                            },
-                            {
-                                q: "What happens if I go over the free limit?",
-                                a: "You can still use the app in read-only mode. To perform more actions, just wait for the monthly reset or upgrade to Pro for unlimited swipes.",
-                            },
-                            {
-                                q: "Can I cancel anytime?",
-                                a: "Yes. Cancel in 2 clicks from your profile. No emails to customer service, no retention tricks. We hate those too.",
-                            },
-                            {
-                                q: "What permissions do you need?",
-                                a: "We request gmail.readonly (to see metadata) and gmail.modify (to move emails to trash). We cannot delete emails permanently or access your password.",
-                            },
-                            {
-                                q: "Does it work with Outlook/Yahoo?",
-                                a: "Coming soon! We're currently focused on making the Gmail experience perfect. Outlook support is on our roadmap.",
-                            },
+                            { q: "Do you read my emails?", a: "No. We only access metadata (sender, subject). Never email content." },
+                            { q: "Is my data sold?", a: "Never. We don't sell your data. Our revenue comes from Pro subscriptions." },
+                            { q: "Can I cancel anytime?", a: "Yes. Cancel in 2 clicks. No retention tricks." },
+                            { q: "What permissions do you need?", a: "gmail.readonly and gmail.modify (to trash emails). We can't delete permanently." },
                         ].map((faq, i) => (
-                            <motion.details
-                                key={i}
-                                initial={{ opacity: 0, y: 10 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.05 }}
-                                className="group p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
-                            >
-                                <summary className="flex items-center justify-between font-bold text-white list-none">
+                            <details key={i} className="group p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 cursor-pointer">
+                                <summary className="flex items-center justify-between font-bold text-white text-sm list-none">
                                     <span>{faq.q}</span>
-                                    <span className="text-emerald-500 group-open:rotate-45 transition-transform text-xl">+</span>
+                                    <span className="text-emerald-500 group-open:rotate-45 transition-transform">+</span>
                                 </summary>
-                                <p className="mt-4 text-zinc-400 text-sm leading-relaxed">
-                                    {faq.a}
-                                </p>
-                            </motion.details>
+                                <p className="mt-3 text-zinc-400 text-sm">{faq.a}</p>
+                            </details>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Pricing Section */}
-            <section id="pricing" className="py-24 px-6 border-t border-zinc-900">
-                <div className="max-w-5xl mx-auto">
-                    {/* Header */}
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">
-                            Simple Pricing. <span className="text-emerald-500">No BS.</span>
-                        </h2>
-                        <p className="text-zinc-400 text-lg max-w-xl mx-auto">
-                            Other tools charge $10/mo and sell your data. We don't.
-                        </p>
-                    </div>
-
-                    {/* Pricing Cards */}
-                    <div className="grid md:grid-cols-3 gap-6 mb-16">
-                        {/* Free Tier */}
-                        <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 relative">
-                            <div className="mb-6">
-                                <h3 className="text-2xl font-black mb-2">Free</h3>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-5xl font-black">$0</span>
-                                    <span className="text-zinc-500">/forever</span>
-                                </div>
-                            </div>
-                            <p className="text-zinc-400 mb-8">Perfect for casual inbox cleaners</p>
-                            <ul className="space-y-4 mb-8">
-                                {[
-                                    "50 swipes per day",
-                                    "1 email account",
-                                    "Basic email categories",
-                                    "Gmail support",
-                                ].map((f, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
-                                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
-                                            <span className="text-emerald-400 text-xs">✓</span>
-                                        </div>
-                                        {f}
-                                    </li>
-                                ))}
-                            </ul>
-                            <Link
-                                href="/login"
-                                className="block w-full py-4 text-center bg-zinc-800 text-white font-bold rounded-2xl hover:bg-zinc-700 transition-colors"
-                            >
-                                Get Started Free
-                            </Link>
-                        </div>
-
-                        {/* Pro Tier */}
-                        <div className="p-8 rounded-3xl bg-zinc-950 border-2 border-emerald-500/50 relative overflow-hidden">
-                            {/* Popular Badge */}
-                            <div className="absolute top-4 right-4 px-3 py-1 bg-emerald-500 text-zinc-950 text-[10px] font-black uppercase tracking-widest rounded-full">
-                                Most Popular
-                            </div>
-                            <div className="mb-6">
-                                <h3 className="text-2xl font-black text-emerald-400 mb-2">Pro</h3>
-
-                                {/* Billing Toggle */}
-                                <div className="flex items-center gap-3 mb-4">
-                                    <button
-                                        onClick={() => setIsYearly(false)}
-                                        className={`text-sm font-bold ${!isYearly ? 'text-white' : 'text-zinc-500'}`}
-                                    >
-                                        Monthly
-                                    </button>
-                                    <button
-                                        onClick={() => setIsYearly(!isYearly)}
-                                        className={`w-12 h-6 rounded-full relative transition-colors ${isYearly ? 'bg-emerald-500' : 'bg-zinc-700'}`}
-                                    >
-                                        <div
-                                            className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isYearly ? 'left-7' : 'left-1'}`}
-                                        />
-                                    </button>
-                                    <button
-                                        onClick={() => setIsYearly(true)}
-                                        className={`text-sm font-bold ${isYearly ? 'text-white' : 'text-zinc-500'}`}
-                                    >
-                                        Yearly
-                                    </button>
-                                    {isYearly && (
-                                        <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full">
-                                            Save 45%
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-5xl font-black text-white">
-                                        {isYearly ? '$39' : '$5.99'}
-                                    </span>
-                                    <span className="text-zinc-500">
-                                        {isYearly ? '/year' : '/month'}
-                                    </span>
-                                </div>
-                            </div>
-                            <p className="text-zinc-400 mb-8">For inbox power users</p>
-                            <ul className="space-y-4 mb-8">
-                                {[
-                                    "Unlimited swipes",
-                                    "All email providers",
-                                    "Autopilot rules",
-                                    "Priority support",
-                                    "Bulk operations",
-                                ].map((f, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
-                                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                                            <span className="text-emerald-400 text-xs">✓</span>
-                                        </div>
-                                        {f}
-                                    </li>
-                                ))}
-                            </ul>
-                            <Link
-                                href="/login"
-                                className="block w-full py-4 text-center bg-emerald-500 text-zinc-950 font-bold rounded-2xl hover:bg-emerald-400 transition-colors shadow-[0_0_30px_rgba(16,185,129,0.2)]"
-                            >
-                                Upgrade to Pro
-                            </Link>
-                        </div>
-
-                        {/* Teams/Agency Tier */}
-                        <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 relative">
-                            <div className="mb-6">
-                                <h3 className="text-2xl font-black mb-2">Teams</h3>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-4xl font-black">Custom</span>
-                                </div>
-                            </div>
-                            <p className="text-zinc-400 mb-8">For agencies & larger teams</p>
-                            <ul className="space-y-4 mb-8">
-                                {[
-                                    "Everything in Pro",
-                                    "Shared team inboxes",
-                                    "Admin dashboard",
-                                    "Priority onboarding",
-                                    "Dedicated support",
-                                ].map((f, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
-                                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
-                                            <span className="text-emerald-400 text-xs">✓</span>
-                                        </div>
-                                        {f}
-                                    </li>
-                                ))}
-                            </ul>
-                            <a
-                                href="mailto:hello@swipeemail.com"
-                                className="block w-full py-4 text-center bg-zinc-800 text-white font-bold rounded-2xl hover:bg-zinc-700 transition-colors"
-                            >
-                                Contact Us
-                            </a>
-                        </div>
-                    </div>
-
-                    {/* Competitor Callouts */}
-                    <div className="grid sm:grid-cols-2 gap-4 text-sm mb-12">
-                        <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/20 flex items-start gap-3">
-                            <span className="text-red-400 text-lg">⚠️</span>
-                            <p className="text-zinc-400">
-                                <span className="text-red-400 font-bold">Unlike some competitors</span>, we don't sell your inbox to advertisers. Your data stays yours.
-                            </p>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex items-start gap-3">
-                            <span className="text-emerald-400 text-lg">💸</span>
-                            <p className="text-zinc-400">
-                                <span className="text-emerald-400 font-bold">Other tools charge $9.99/mo.</span> We're $5.99. Same result, half the price.
-                            </p>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-3">
-                            <span className="text-blue-400 text-lg">🎯</span>
-                            <p className="text-zinc-400">
-                                <span className="text-blue-400 font-bold">No confusing tier structures.</span> Just Free or Pro. That's it.
-                            </p>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-purple-500/5 border border-purple-500/20 flex items-start gap-3">
-                            <span className="text-purple-400 text-lg">♾️</span>
-                            <p className="text-zinc-400">
-                                <span className="text-purple-400 font-bold">Some tools charge extra per account.</span> We don't. Unlimited accounts in Pro.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Final CTA */}
-            <section className="py-32 px-6 relative">
-                <div className="max-w-3xl mx-auto text-center glass p-16 md:p-24 rounded-[3rem] border-zinc-800/50 relative overflow-hidden">
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 8: FINAL CTA
+            ═══════════════════════════════════════════════════════════════ */}
+            <section className="py-20 px-6">
+                <div className="max-w-2xl mx-auto text-center glass p-12 md:p-16 rounded-[2rem] border-zinc-800/50 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
-                    <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-[0.9]">READY TO RECLAIM<br />YOUR TIME?</h2>
-                    <p className="text-zinc-400 mb-12 text-xl font-medium">Join thousands of users who have mastered their inbox.</p>
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-4 leading-tight">
+                        READY TO RECLAIM<br />YOUR TIME?
+                    </h2>
+                    <p className="text-zinc-400 mb-8">Join thousands who have mastered their inbox.</p>
                     <Link
                         href={ctaHref}
-                        className="inline-flex items-center gap-2 px-12 py-6 bg-emerald-500 text-zinc-950 text-base rounded-full font-black tracking-widest uppercase hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
+                        className="inline-flex items-center gap-2 px-10 py-5 bg-emerald-500 text-zinc-950 rounded-full font-black tracking-widest uppercase hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
                     >
                         {ctaLabel}
-                        <ArrowRight className="w-6 h-6" />
+                        <ArrowRight className="w-5 h-5" />
                     </Link>
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-12 px-6 border-t border-zinc-900">
-                <div className="max-w-6xl mx-auto">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 9: FOOTER
+            ═══════════════════════════════════════════════════════════════ */}
+            <footer className="py-8 px-6 border-t border-zinc-900">
+                <div className="max-w-5xl mx-auto">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
-                            <img src="/logo.png" alt="Swipe Logo" className="w-8 h-8 object-contain" />
-                            <span className="font-heading font-bold">Swipe</span>
+                            <img src="/logo.png" alt="Swipe" className="w-6 h-6 object-contain" />
+                            <span className="font-bold">Swipe</span>
                         </div>
-                        <div className="flex items-center gap-6 text-sm">
-                            <Link href="/terms" className="text-zinc-500 hover:text-emerald-400 transition-colors">
-                                Terms of Service
-                            </Link>
-                            <Link href="/privacy" className="text-zinc-500 hover:text-emerald-400 transition-colors">
-                                Privacy Policy
-                            </Link>
-                            <a href="mailto:hello@swipeemail.com" className="text-zinc-500 hover:text-emerald-400 transition-colors">
-                                Contact
-                            </a>
+                        <div className="flex items-center gap-4 text-xs">
+                            <Link href="/terms" className="text-zinc-500 hover:text-emerald-400 transition-colors">Terms</Link>
+                            <Link href="/privacy" className="text-zinc-500 hover:text-emerald-400 transition-colors">Privacy</Link>
+                            <a href="mailto:hello@swipeemail.com" className="text-zinc-500 hover:text-emerald-400 transition-colors">Contact</a>
                         </div>
                     </div>
-                    <div className="mt-8 pt-8 border-t border-zinc-900 text-center">
-                        <p className="text-zinc-500 text-sm">© 2026 Swipe Inc. All rights reserved.</p>
+                    <div className="mt-6 pt-6 border-t border-zinc-900 text-center">
+                        <p className="text-zinc-500 text-xs">© 2026 Swipe Inc. All rights reserved.</p>
                     </div>
                 </div>
             </footer>

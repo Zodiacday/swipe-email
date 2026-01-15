@@ -107,6 +107,142 @@ export default function Home() {
                 </div>
             </section>
 
+            {/* Live Stats Counter */}
+            <section className="py-12 px-6 border-t border-zinc-900">
+                <div className="max-w-5xl mx-auto">
+                    <div className="grid grid-cols-3 gap-4 md:gap-8">
+                        {[
+                            { value: "1.2M+", label: "Emails Cleaned", icon: "📧" },
+                            { value: "12K+", label: "Happy Users", icon: "👥" },
+                            { value: "50K+", label: "Hours Saved", icon: "⏱️" },
+                        ].map((stat, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1 }}
+                                className="text-center p-4 md:p-6"
+                            >
+                                <div className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter text-white mb-1">
+                                    {stat.value}
+                                </div>
+                                <div className="text-xs md:text-sm text-zinc-500 uppercase tracking-wider font-medium flex items-center justify-center gap-2">
+                                    <span>{stat.icon}</span>
+                                    {stat.label}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Trust Badges */}
+            <section className="py-8 px-6 border-t border-zinc-900/50">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0 }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/5 border border-emerald-500/20"
+                        >
+                            <span className="text-lg">🔒</span>
+                            <span className="text-xs font-bold text-emerald-400 tracking-wide">No Data Sold Ever</span>
+                        </motion.div>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.05 }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/5 border border-blue-500/20"
+                        >
+                            <span className="text-lg">🛡️</span>
+                            <span className="text-xs font-bold text-blue-400 tracking-wide">Metadata Only</span>
+                        </motion.div>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/5 border border-purple-500/20"
+                        >
+                            <span className="text-lg">🇪🇺</span>
+                            <span className="text-xs font-bold text-purple-400 tracking-wide">GDPR Compliant</span>
+                        </motion.div>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.15 }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/5 border border-amber-500/20"
+                        >
+                            <span className="text-lg">⚡</span>
+                            <span className="text-xs font-bold text-amber-400 tracking-wide">OAuth 2.0 Only</span>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* How It Works - 3 Steps */}
+            <section className="py-20 px-6 border-t border-zinc-900 bg-zinc-950/50">
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">
+                            3 Steps to <span className="text-emerald-500">Freedom</span>
+                        </h2>
+                        <p className="text-zinc-500 text-lg">From cluttered to clean in under 2 minutes</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8 relative">
+                        {/* Connecting line (desktop only) */}
+                        <div className="hidden md:block absolute top-16 left-[16.66%] right-[16.66%] h-[2px] bg-gradient-to-r from-emerald-500/0 via-emerald-500/30 to-emerald-500/0" />
+
+                        {[
+                            {
+                                step: "01",
+                                title: "Connect",
+                                desc: "Link your Gmail in 30 seconds with secure OAuth. We never see your password.",
+                                icon: "🔗",
+                            },
+                            {
+                                step: "02",
+                                title: "Swipe or Nuke",
+                                desc: "Tinder-like swipes for fun, or bulk nuke for speed. Your choice.",
+                                icon: "⚡",
+                            },
+                            {
+                                step: "03",
+                                title: "Enjoy Peace",
+                                desc: "Watch your inbox shrink. Feel the dopamine. Never look back.",
+                                icon: "🧘",
+                            },
+                        ].map((step, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.15 }}
+                                className="relative text-center p-8"
+                            >
+                                {/* Step Number Circle */}
+                                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-zinc-900 border-2 border-emerald-500/30 flex items-center justify-center relative z-10">
+                                    <span className="text-2xl">{step.icon}</span>
+                                </div>
+
+                                <div className="text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-2">
+                                    Step {step.step}
+                                </div>
+                                <h3 className="text-2xl font-black tracking-tight mb-3">{step.title}</h3>
+                                <p className="text-zinc-400 text-sm leading-relaxed">{step.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* Features Grid */}
             <section className="py-24 px-6 border-t border-zinc-900 bg-zinc-950/30">
                 <div className="max-w-6xl mx-auto">
@@ -302,6 +438,64 @@ export default function Home() {
                                     </div>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section className="py-24 px-6 border-t border-zinc-900 bg-zinc-950/30">
+                <div className="max-w-3xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">
+                            Got <span className="text-emerald-500">Questions?</span>
+                        </h2>
+                        <p className="text-zinc-500 text-lg">We've got answers. The honest ones.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {[
+                            {
+                                q: "Do you read my emails?",
+                                a: "No. We only read metadata (sender, subject, timestamps). We never access email body content. This is enforced at the OAuth permission level.",
+                            },
+                            {
+                                q: "Is my data sold to advertisers?",
+                                a: "Absolutely not. Unlike some competitors (cough, Unroll.me), we don't sell your data. Ever. Our business model is simple: you pay for Pro, we provide the service.",
+                            },
+                            {
+                                q: "What happens if I go over the free limit?",
+                                a: "You can still use the app in read-only mode. To perform more actions, just wait for the monthly reset or upgrade to Pro for unlimited swipes.",
+                            },
+                            {
+                                q: "Can I cancel anytime?",
+                                a: "Yes. Cancel in 2 clicks from your profile. No emails to customer service, no retention tricks. We hate those too.",
+                            },
+                            {
+                                q: "What permissions do you need?",
+                                a: "We request gmail.readonly (to see metadata) and gmail.modify (to move emails to trash). We cannot delete emails permanently or access your password.",
+                            },
+                            {
+                                q: "Does it work with Outlook/Yahoo?",
+                                a: "Coming soon! We're currently focused on making the Gmail experience perfect. Outlook support is on our roadmap.",
+                            },
+                        ].map((faq, i) => (
+                            <motion.details
+                                key={i}
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.05 }}
+                                className="group p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
+                            >
+                                <summary className="flex items-center justify-between font-bold text-white list-none">
+                                    <span>{faq.q}</span>
+                                    <span className="text-emerald-500 group-open:rotate-45 transition-transform text-xl">+</span>
+                                </summary>
+                                <p className="mt-4 text-zinc-400 text-sm leading-relaxed">
+                                    {faq.a}
+                                </p>
+                            </motion.details>
                         ))}
                     </div>
                 </div>

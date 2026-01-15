@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Sparkles, ArrowRight, Zap, LayoutDashboard, Target } from "lucide-react";
 import { Particles, Meteors } from "@/components/ui";
 import { HeroDemo } from "@/components/HeroDemo/HeroDemo";
@@ -505,7 +506,7 @@ export default function Home() {
                     <div className="max-w-5xl mx-auto">
                         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                             <div className="flex items-center gap-2">
-                                <img src="/logo.png" alt="Swipe" className="w-6 h-6 object-contain" />
+                                <Image src="/logo.png" alt="Swipe" width={24} height={24} className="object-contain" />
                                 <span className="font-bold">Swipe</span>
                             </div>
                             <div className="flex items-center gap-4 text-xs">

@@ -6,6 +6,7 @@
  */
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function Loading() {
     return (
@@ -26,7 +27,7 @@ export default function Loading() {
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                     className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"
                 >
-                    <img src="/logo.png" alt="Swipe" className="w-10 h-10 object-contain" />
+                    <Image src="/logo.png" alt="Swipe" width={40} height={40} className="object-contain" priority />
                 </motion.div>
 
                 {/* Loading bar */}

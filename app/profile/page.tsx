@@ -8,6 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
 import { LogOut, Mail, Calendar, Trash2, Shield, User, Clock, Settings, ChevronRight, X, Heart, ShieldOff } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useEmailContext } from "@/contexts/EmailContext";
 import { useState } from "react";
 
@@ -44,7 +45,7 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-6">
                         <div className="w-24 h-24 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
                             {user.image ? (
-                                <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                                <Image src={user.image} alt={user.name} width={96} height={96} className="w-full h-full object-cover" />
                             ) : (
                                 <User className="w-10 h-10 text-emerald-500" />
                             )}

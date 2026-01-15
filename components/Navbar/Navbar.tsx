@@ -15,6 +15,7 @@ import { Menu, X, Zap, User, LogOut, LayoutDashboard, Settings, Shield, ChevronD
 import { useSession, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { StreakBadge } from "@/components/StreakBadge";
@@ -123,7 +124,7 @@ export function Navbar() {
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
                                 >
                                     {session.user?.image ? (
-                                        <img src={session.user.image} alt="" className="w-6 h-6 rounded-full" />
+                                        <Image src={session.user.image} alt="" width={24} height={24} className="rounded-full" />
                                     ) : (
                                         <User className="w-5 h-5 text-zinc-400" />
                                     )}

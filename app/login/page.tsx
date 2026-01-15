@@ -6,6 +6,7 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Shield, Check, Sparkles } from "lucide-react";
@@ -115,7 +116,16 @@ export default function LoginPage() {
                             </div>
                         </div>
                     </div>
-                    <p className="text-[10px] text-zinc-600 mt-4 font-mono text-center">
+                    <div className="flex justify-center gap-4 mt-4 text-[10px] text-zinc-500">
+                        <Link href="/privacy" className="hover:text-emerald-400 transition-colors">
+                            Privacy Policy
+                        </Link>
+                        <span>•</span>
+                        <Link href="/terms" className="hover:text-emerald-400 transition-colors">
+                            Terms of Service
+                        </Link>
+                    </div>
+                    <p className="text-[10px] text-zinc-600 mt-3 font-mono text-center">
                         v2.0.1 • SECURE CONNECTION
                     </p>
                 </div>

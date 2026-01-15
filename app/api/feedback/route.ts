@@ -61,6 +61,14 @@ export async function POST(request: NextRequest) {
 
         // Check if Discord webhook is configured
         const webhookUrl = process.env.DISCORD_FEEDBACK_WEBHOOK_URL;
+        console.log("[Feedback API] Webhook URL present:", !!webhookUrl);
+
+        if (!webhookUrl) {
+            return NextResponse.json(
+                { error: "Discord webhook not configured on server. Please restart your dev server." },
+                { status: 500 }
+            );
+        }
 
         if (webhookUrl) {
             // Send to Discord

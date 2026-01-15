@@ -59,6 +59,7 @@ export default function FeedbackPage() {
     const [message, setMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,6 +68,7 @@ export default function FeedbackPage() {
         setIsSubmitting(true);
 
         try {
+            setSubmitError(null);
             const response = await fetch("/api/feedback", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -76,16 +78,16 @@ export default function FeedbackPage() {
                 }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Failed to submit feedback");
+                throw new Error(data.error || "Failed to submit feedback");
             }
 
             setIsSubmitted(true);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Feedback error:", error);
-            // Still show success for now (could add error toast)
-            setIsSubmitted(true);
+            setSubmitError(error.message || "Something went wrong. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -252,6 +254,13 @@ export default function FeedbackPage() {
                                     </div>
                                 )}
 
+                                {submitError && (
+                                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-sm flex items-center gap-3">
+                                        <Bug className="w-5 h-5 flex-shrink-0" />
+                                        <p>{submitError}</p>
+                                    </div>
+                                )}
+
                                 {/* Submit Button */}
                                 <motion.button
                                     type="submit"
@@ -272,7 +281,7 @@ export default function FeedbackPage() {
                                     ) : (
                                         <>
                                             <Send className="w-4 h-4" />
-                                            Send Feedback
+                                            {submitError ? "Try Again" : "Send Feedback"}
                                         </>
                                     )}
                                 </motion.button>

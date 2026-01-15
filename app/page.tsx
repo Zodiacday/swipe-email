@@ -169,7 +169,7 @@ export default function Home() {
                         <div className="hidden md:block absolute top-12 left-[16.66%] right-[16.66%] h-[2px] bg-gradient-to-r from-emerald-500/0 via-emerald-500/30 to-emerald-500/0" />
 
                         {[
-                            { step: "01", title: "Connect", desc: "Link Gmail in 30 seconds. We never see your password.", icon: "🔗" },
+                            { step: "01", title: "Connect", desc: "Link your email in 30 seconds. We never see your password.", icon: "🔗" },
                             { step: "02", title: "Swipe or Nuke", desc: "Tinder-like swipes for fun, or bulk nuke for speed.", icon: "⚡" },
                             { step: "03", title: "Enjoy Peace", desc: "Watch your inbox shrink. Feel the dopamine.", icon: "🧘" },
                         ].map((step, i) => (
@@ -238,7 +238,7 @@ export default function Home() {
                                 <LayoutDashboard className="w-6 h-6 text-emerald-400" />
                             </div>
                             <h3 className="text-xl font-black mb-2">Command Center</h3>
-                            <p className="text-zinc-400 text-sm mb-4">Bulk operations. See senders ranked by danger score.</p>
+                            <p className="text-zinc-400 text-sm mb-4">Dashboard management. Manage all senders in one place.</p>
                             <div className="bg-zinc-900 rounded-xl p-3 space-y-1.5">
                                 {[
                                     { name: "spam@newsletter.co", count: 127, hot: true },
@@ -258,8 +258,8 @@ export default function Home() {
             {/* ═══════════════════════════════════════════════════════════════
                 SECTION 5: PRICING (moved up!)
             ═══════════════════════════════════════════════════════════════ */}
-            <section id="pricing" className="py-16 px-6 border-t border-zinc-900 bg-zinc-950/50">
-                <div className="max-w-4xl mx-auto">
+            <section id="pricing" className="py-20 px-6 border-t border-zinc-900 bg-zinc-950/50">
+                <div className="max-w-5xl mx-auto">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-3">
                             Simple Pricing. <span className="text-emerald-500">No BS.</span>
@@ -267,60 +267,142 @@ export default function Home() {
                         <p className="text-zinc-500">Other tools charge $10/mo and sell your data. We don't.</p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-                        {/* Free */}
-                        <div className="p-6 rounded-3xl bg-zinc-900/50 border border-zinc-800">
-                            <h3 className="text-xl font-black mb-1">Free</h3>
-                            <div className="flex items-baseline gap-1 mb-4">
-                                <span className="text-4xl font-black">$0</span>
-                                <span className="text-zinc-500 text-sm">/forever</span>
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {/* Free Tier */}
+                        <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 relative">
+                            <div className="mb-6">
+                                <h3 className="text-2xl font-black mb-2">Free</h3>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-5xl font-black">$0</span>
+                                    <span className="text-zinc-500">/forever</span>
+                                </div>
                             </div>
-                            <ul className="space-y-2 mb-6">
-                                {["50 swipes/day", "1 email account", "Gmail support"].map((f, i) => (
-                                    <li key={i} className="flex items-center gap-2 text-sm text-zinc-300">
-                                        <span className="text-emerald-400">✓</span>
+                            <p className="text-zinc-400 mb-8">Perfect for casual inbox cleaners</p>
+                            <ul className="space-y-4 mb-8">
+                                {[
+                                    "50 swipes per day",
+                                    "1 email account",
+                                    "Basic categories",
+                                    "Email support",
+                                ].map((f, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
+                                            <span className="text-emerald-400 text-xs">✓</span>
+                                        </div>
                                         {f}
                                     </li>
                                 ))}
                             </ul>
-                            <Link href="/login" className="block w-full py-3 text-center bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition-colors">
-                                Start Free
+                            <Link
+                                href="/login"
+                                className="block w-full py-4 text-center bg-zinc-800 text-white font-bold rounded-2xl hover:bg-zinc-700 transition-colors"
+                            >
+                                Get Started Free
                             </Link>
                         </div>
 
-                        {/* Pro */}
-                        <div className="p-6 rounded-3xl bg-zinc-950 border-2 border-emerald-500/50 relative">
-                            <div className="absolute top-4 right-4 px-2 py-0.5 bg-emerald-500 text-zinc-950 text-[9px] font-black uppercase rounded-full">Popular</div>
-                            <h3 className="text-xl font-black text-emerald-400 mb-1">Pro</h3>
-
-                            {/* Toggle */}
-                            <div className="flex items-center gap-2 mb-2">
-                                <button onClick={() => setIsYearly(false)} className={`text-xs font-bold ${!isYearly ? 'text-white' : 'text-zinc-500'}`}>Monthly</button>
-                                <button
-                                    onClick={() => setIsYearly(!isYearly)}
-                                    className={`w-10 h-5 rounded-full relative transition-colors ${isYearly ? 'bg-emerald-500' : 'bg-zinc-700'}`}
-                                >
-                                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${isYearly ? 'left-5' : 'left-0.5'}`} />
-                                </button>
-                                <button onClick={() => setIsYearly(true)} className={`text-xs font-bold ${isYearly ? 'text-white' : 'text-zinc-500'}`}>Yearly</button>
-                                {isYearly && <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full">-45%</span>}
+                        {/* Pro Tier */}
+                        <div className="p-8 rounded-3xl bg-zinc-950 border-2 border-emerald-500/50 relative overflow-hidden">
+                            <div className="absolute top-4 right-4 px-3 py-1 bg-emerald-500 text-zinc-950 text-[10px] font-black uppercase tracking-widest rounded-full">
+                                Most Popular
                             </div>
+                            <div className="mb-6">
+                                <h3 className="text-2xl font-black text-emerald-400 mb-2">Pro</h3>
 
-                            <div className="flex items-baseline gap-1 mb-4">
-                                <span className="text-4xl font-black">{isYearly ? '$39' : '$5.99'}</span>
-                                <span className="text-zinc-500 text-sm">{isYearly ? '/year' : '/mo'}</span>
+                                {/* Billing Toggle */}
+                                <div className="flex items-center gap-3 mb-4">
+                                    <button
+                                        onClick={() => setIsYearly(false)}
+                                        className={`text-sm font-bold ${!isYearly ? 'text-white' : 'text-zinc-500'}`}
+                                    >
+                                        Monthly
+                                    </button>
+                                    <button
+                                        onClick={() => setIsYearly(!isYearly)}
+                                        className={`w-12 h-6 rounded-full relative transition-colors ${isYearly ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                                    >
+                                        <div
+                                            className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isYearly ? 'left-7' : 'left-1'}`}
+                                        />
+                                    </button>
+                                    <button
+                                        onClick={() => setIsYearly(true)}
+                                        className={`text-sm font-bold ${isYearly ? 'text-white' : 'text-zinc-500'}`}
+                                    >
+                                        Yearly
+                                    </button>
+                                    {isYearly && (
+                                        <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full">
+                                            Save 45%
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-5xl font-black text-white">
+                                        {isYearly ? '$39' : '$5.99'}
+                                    </span>
+                                    <span className="text-zinc-500">
+                                        {isYearly ? '/year' : '/month'}
+                                    </span>
+                                </div>
                             </div>
-                            <ul className="space-y-2 mb-6">
-                                {["Unlimited swipes", "All providers", "Bulk operations", "Priority support"].map((f, i) => (
-                                    <li key={i} className="flex items-center gap-2 text-sm text-zinc-300">
-                                        <span className="text-emerald-400">✓</span>
+                            <p className="text-zinc-400 mb-8">For inbox power users</p>
+                            <ul className="space-y-4 mb-8">
+                                {[
+                                    "Unlimited swipes",
+                                    "All email providers",
+                                    "Autopilot rules",
+                                    "Priority support",
+                                    "Bulk operations",
+                                ].map((f, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                                            <span className="text-emerald-400 text-xs">✓</span>
+                                        </div>
                                         {f}
                                     </li>
                                 ))}
                             </ul>
-                            <Link href="/login" className="block w-full py-3 text-center bg-emerald-500 text-zinc-950 font-bold rounded-xl hover:bg-emerald-400 transition-colors">
+                            <Link
+                                href="/login"
+                                className="block w-full py-4 text-center bg-emerald-500 text-zinc-950 font-bold rounded-2xl hover:bg-emerald-400 transition-colors shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+                            >
                                 Upgrade to Pro
                             </Link>
+                        </div>
+
+                        {/* Teams/Agency Tier */}
+                        <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 relative">
+                            <div className="mb-6">
+                                <h3 className="text-2xl font-black mb-2">Teams</h3>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-4xl font-black">Custom</span>
+                                </div>
+                            </div>
+                            <p className="text-zinc-400 mb-8">For agencies & larger teams</p>
+                            <ul className="space-y-4 mb-8">
+                                {[
+                                    "Everything in Pro",
+                                    "Shared team inboxes",
+                                    "Admin dashboard",
+                                    "Priority onboarding",
+                                    "Dedicated support",
+                                ].map((f, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
+                                            <span className="text-emerald-400 text-xs">✓</span>
+                                        </div>
+                                        {f}
+                                    </li>
+                                ))}
+                            </ul>
+                            <a
+                                href="mailto:hello@swipeemail.com"
+                                className="block w-full py-4 text-center bg-zinc-800 text-white font-bold rounded-2xl hover:bg-zinc-700 transition-colors"
+                            >
+                                Contact Us
+                            </a>
                         </div>
                     </div>
                 </div>

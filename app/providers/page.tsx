@@ -231,7 +231,7 @@ export default function ProvidersPage() {
                 {/* Add Provider Modal - Obsidian Mint Styled */}
                 {showAddProvider && (
                     <motion.div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+                        className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 pt-24"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         onClick={() => setShowAddProvider(false)}

@@ -186,7 +186,13 @@ export default function SwipePage() {
     const currentEmail = remainingEmails[0];
 
     return (
-        <div className="min-h-screen bg-black overflow-hidden flex flex-col relative select-none font-sans">
+        <div className="min-h-screen bg-black overflow-hidden flex flex-col relative select-none font-sans" role="application" aria-label="Email swipe interface">
+            {/* Screen reader keyboard shortcuts announcement */}
+            <div className="sr-only" aria-live="polite">
+                Use arrow keys to manage emails: Left arrow to trash, Right arrow to keep, Up arrow to unsubscribe, Down arrow to skip.
+                Currently viewing email from {currentEmail.senderName || currentEmail.sender}.
+            </div>
+
             {/* Top Spacer for Navbar */}
             <div className="h-20" />
 

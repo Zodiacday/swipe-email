@@ -79,14 +79,14 @@ export default function Home() {
                             >
                                 <Link
                                     href={ctaHref}
-                                    className="w-full sm:w-auto px-10 py-5 bg-emerald-500 text-zinc-950 font-black tracking-widest text-sm rounded-full hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.2)] group active:scale-95"
+                                    className="w-full sm:w-auto px-10 py-5 bg-emerald-500 text-zinc-950 font-black tracking-widest text-sm rounded-full hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.2)] group active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
                                 >
                                     {ctaLabel}
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                                 <Link
                                     href="#pricing"
-                                    className="w-full sm:w-auto px-10 py-5 border border-zinc-800 text-white font-black tracking-widest text-sm rounded-full hover:bg-zinc-900 transition-all flex items-center justify-center active:scale-95"
+                                    className="w-full sm:w-auto px-10 py-5 border border-zinc-800 text-white font-black tracking-widest text-sm rounded-full hover:bg-zinc-900 transition-all flex items-center justify-center active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                                 >
                                     SEE PRICING
                                 </Link>

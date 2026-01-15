@@ -121,7 +121,10 @@ export function Navbar() {
                             <div className="relative" ref={userMenuRef}>
                                 <button
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
+                                    aria-label="Open user menu"
+                                    aria-expanded={userMenuOpen}
+                                    aria-haspopup="menu"
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
                                 >
                                     {session.user?.image ? (
                                         <Image src={session.user.image} alt="" width={24} height={24} className="rounded-full" />

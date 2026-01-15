@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar/Navbar";
 import { AuthProvider } from "@/components/AuthProvider/AuthProvider";
 import { AuthErrorHandler } from "@/components/AuthErrorHandler";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { EmailProvider } from "@/contexts/EmailContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { ConfirmModalProvider } from "@/hooks/useConfirmModal";
@@ -118,6 +119,7 @@ export default function RootLayout({
                 </a>
                 <Navbar />
                 <AuthErrorHandler />
+                <OfflineIndicator />
                 <main id="main-content" tabIndex={-1}>
                   {children}
                 </main>

@@ -37,7 +37,8 @@ export function PaywallModal({ isOpen, onClose, onUpgrade }: PaywallModalProps) 
                         {/* Close button */}
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                            aria-label="Close upgrade modal"
+                            className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-lg"
                         >
                             <X className="w-5 h-5" />
                         </button>

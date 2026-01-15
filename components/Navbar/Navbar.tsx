@@ -11,7 +11,7 @@
 
 "use client";
 
-import { Menu, X, Zap, User, LogOut, LayoutDashboard, Settings, Shield, ChevronDown, Sparkles, Bot } from "lucide-react";
+import { Menu, X, Zap, User, LogOut, LayoutDashboard, Settings, Shield, ChevronDown, Sparkles, Bot, Crown } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -164,6 +164,18 @@ export function Navbar() {
                                                         </Link>
                                                     );
                                                 })}
+
+                                                <div className="h-[1px] bg-zinc-800 my-2" />
+
+                                                {/* Upgrade CTA */}
+                                                <Link
+                                                    href="/#pricing"
+                                                    onClick={() => setUserMenuOpen(false)}
+                                                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-500/20 text-amber-400 hover:border-amber-500/40 transition-colors"
+                                                >
+                                                    <Crown className="w-4 h-4" />
+                                                    Upgrade to Pro
+                                                </Link>
 
                                                 <div className="h-[1px] bg-zinc-800 my-2" />
 

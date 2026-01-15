@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * 404 Not Found Page
  * Shows when user navigates to non-existent route

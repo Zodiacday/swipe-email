@@ -44,7 +44,7 @@ export function getAnalytics(): SwipeAnalytics {
 /**
  * Update analytics based on an action
  */
-export function updateAnalytics(action: "trash" | "keep" | "block" | "nuke", count: number = 1): SwipeAnalytics {
+export function updateAnalytics(action: "trash" | "keep" | "block" | "nuke" | "unsubscribe", count: number = 1): SwipeAnalytics {
     const current = getAnalytics();
     const updated = { ...current };
 
@@ -61,6 +61,10 @@ export function updateAnalytics(action: "trash" | "keep" | "block" | "nuke", cou
             break;
         case "nuke":
             updated.totalNukes += 1;
+            updated.totalEmailsTrashed += count;
+            break;
+        case "unsubscribe":
+            updated.totalSendersBlocked += 1; // Count as "blocked" for now
             updated.totalEmailsTrashed += count;
             break;
     }

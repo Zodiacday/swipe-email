@@ -46,6 +46,7 @@ interface EmailContextType {
     removeEmailFromLocal: (id: string) => void;
     blockSender: (senderEmail: string) => Promise<{ success: boolean; filterId?: string; emailsDeleted?: number }>;
     nukeDomain: (domain: string, confirm?: boolean) => Promise<{ success: boolean; requiresConfirmation?: boolean; filterId?: string; emailsDeleted?: number }>;
+    unsubscribeSender: (email: NormalizedEmail) => Promise<{ success: boolean; method?: string; error?: string }>;
     markPersonal: (senderEmail: string) => void;
     personalSenders: Set<string>;
     blockedSenders: Set<string>;
@@ -134,6 +135,7 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         removeEmailFromLocal: emailActions.removeEmailFromLocal,
         blockSender: emailActions.blockSender,
         nukeDomain: emailActions.nukeDomain,
+        unsubscribeSender: emailActions.unsubscribeSender,
         markPersonal,
         personalSenders: senderManagement.personalSenders,
         blockedSenders: senderManagement.blockedSenders,

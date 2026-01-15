@@ -25,6 +25,7 @@ export interface UseEmailActionsResult {
     removeEmailFromLocal: (id: string) => void;
     blockSender: (senderEmail: string) => Promise<{ success: boolean; filterId?: string; emailsDeleted?: number }>;
     nukeDomain: (domain: string, confirm?: boolean) => Promise<{ success: boolean; requiresConfirmation?: boolean; filterId?: string; emailsDeleted?: number }>;
+    unsubscribeSender: (email: NormalizedEmail) => Promise<{ success: boolean; method?: string; error?: string }>;
 }
 
 interface UseEmailActionsParams {
@@ -253,6 +254,36 @@ export function useEmailActions({
         setEmails(prev => prev.filter(e => e.id !== id));
     }, [setEmails]);
 
+    // --- Unsubscribe from Sender ---
+    const unsubscribeSender = useCallback(async (email: NormalizedEmail) => {
+        try {
+            const res = await fetch("/api/gmail/unsubscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                // Also remove emails from this sender locally after unsubscribe
+                const senderEmail = email.sender.toLowerCase();
+                setEmails(prev => prev.filter(e => e.sender.toLowerCase() !== senderEmail));
+
+                updateAnalytics("unsubscribe");
+                window.dispatchEvent(new CustomEvent("analytics_updated"));
+            }
+
+            return {
+                success: data.success,
+                method: data.method,
+                error: data.error
+            };
+        } catch (err) {
+            console.error("Unsubscribe failed:", err);
+            return { success: false, error: "Network error" };
+        }
+    }, [setEmails]);
+
     return {
         undoStack,
         canUndo: undoStack.length > 0,
@@ -263,5 +294,6 @@ export function useEmailActions({
         removeEmailFromLocal,
         blockSender,
         nukeDomain,
+        unsubscribeSender,
     };
 }

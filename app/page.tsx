@@ -140,7 +140,116 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Social Proof / Testimonials */}
+            {/* Two Modes Section */}
+            <section className="py-24 px-6 border-t border-zinc-900">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">
+                            Two Ways to <span className="text-emerald-500">Dominate</span>
+                        </h2>
+                        <p className="text-zinc-400 text-lg max-w-xl mx-auto">
+                            Choose your cleaning style. Gamified swipes for fun, or bulk nukes for power users.
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {/* Swipe Mode Card */}
+                        <motion.div
+                            whileHover={{ y: -8, scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            className="relative p-8 rounded-[32px] bg-zinc-950 border border-zinc-800 hover:border-emerald-500/30 transition-colors group overflow-hidden"
+                        >
+                            {/* Glow effect */}
+                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-colors" />
+
+                            <div className="relative z-10">
+                                {/* Icon */}
+                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-6">
+                                    <Zap className="w-8 h-8 text-emerald-400" />
+                                </div>
+
+                                <h3 className="text-2xl font-black tracking-tight mb-3 text-white">
+                                    The Swipe
+                                </h3>
+                                <p className="text-zinc-400 mb-6 leading-relaxed">
+                                    Tinder for your inbox. Swipe left to trash, right to keep.
+                                    Satisfying gestures, one email at a time.
+                                </p>
+
+                                {/* Mini preview */}
+                                <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800">
+                                    <div className="flex items-center justify-center gap-8">
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-red-400">←</div>
+                                            <div className="text-[10px] uppercase text-zinc-500 tracking-wider">Trash</div>
+                                        </div>
+                                        <div className="w-16 h-20 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                                            <div className="w-8 h-8 rounded-full bg-emerald-500/20" />
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-emerald-400">→</div>
+                                            <div className="text-[10px] uppercase text-zinc-500 tracking-wider">Keep</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-6 flex items-center gap-2 text-sm text-emerald-400">
+                                    <span className="font-bold">Perfect for:</span>
+                                    <span className="text-zinc-400">New users, daily cleanups, satisfying dopamine hits</span>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Command Center Card */}
+                        <motion.div
+                            whileHover={{ y: -8, scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            className="relative p-8 rounded-[32px] bg-zinc-950 border border-zinc-800 hover:border-emerald-500/30 transition-colors group overflow-hidden"
+                        >
+                            {/* Glow effect */}
+                            <div className="absolute -top-20 -left-20 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-colors" />
+
+                            <div className="relative z-10">
+                                {/* Icon */}
+                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-6">
+                                    <Target className="w-8 h-8 text-emerald-400" />
+                                </div>
+
+                                <h3 className="text-2xl font-black tracking-tight mb-3 text-white">
+                                    Command Center
+                                </h3>
+                                <p className="text-zinc-400 mb-6 leading-relaxed">
+                                    Bulk operations dashboard. See all senders ranked by danger score.
+                                    Nuke entire domains in one click.
+                                </p>
+
+                                {/* Mini dashboard preview */}
+                                <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800">
+                                    <div className="space-y-2">
+                                        {[
+                                            { name: "newsletter@spam.com", count: 127, danger: true },
+                                            { name: "promo@deals.co", count: 56, danger: false },
+                                            { name: "social@updates.io", count: 34, danger: false },
+                                        ].map((s, i) => (
+                                            <div key={i} className="flex items-center justify-between text-xs">
+                                                <span className="text-zinc-400 truncate">{s.name}</span>
+                                                <span className={`font-mono ${s.danger ? "text-red-400" : "text-zinc-500"}`}>
+                                                    {s.count}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mt-6 flex items-center gap-2 text-sm text-emerald-400">
+                                    <span className="font-bold">Perfect for:</span>
+                                    <span className="text-zinc-400">Power users, mass cleanups, surgical strikes</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
             <section className="py-20 px-6 border-t border-zinc-900 bg-zinc-950/50">
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-12">

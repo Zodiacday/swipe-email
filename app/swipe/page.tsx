@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Zap, LayoutDashboard, Trash2, Check, RefreshCw, ArrowLeft } from "lucide-react";
+import { Zap, LayoutDashboard, Trash2, Check, RefreshCw, ArrowLeft, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEmailContext } from "@/contexts/EmailContext";
@@ -89,9 +89,10 @@ export default function SwipePage() {
                 ).length;
 
                 if (remainingFromSender >= 3) {
-                    showToast(`Trashed ✓`, {
+                    // Only show toast for bulk nuke suggestion
+                    showToast(`Trashed from ${currentEmail.senderName || currentEmail.sender.split('@')[0]}`, {
                         type: "success",
-                        duration: 6000,
+                        duration: 5000,
                         action: {
                             label: `Nuke ${remainingFromSender} more`,
                             onClick: async () => {
@@ -105,34 +106,17 @@ export default function SwipePage() {
                                     return next;
                                 });
                                 playSound("success");
-                                showToast(`Nuked ${remainingFromSender} emails!`, { type: "success" });
-                            }
-                        }
-                    });
-                } else {
-                    showToast("Trashed ✓", {
-                        type: "success",
-                        undoAction: async () => {
-                            playSound("undo");
-                            const success = await undoLastAction();
-                            if (success) {
-                                setProcessedIds(prev => {
-                                    const next = new Set(prev);
-                                    next.delete(currentEmail.id);
-                                    return next;
-                                });
-                                showToast("Restored ✓", { type: "info" });
                             }
                         }
                     });
                 }
+                // No toast for normal trash - silent success
             } catch {
                 showToast("Failed to trash", { type: "error" });
             }
         } else {
-            // RIGHT = KEEP
+            // RIGHT = KEEP - silent, no toast
             setSessionStats(s => ({ ...s, reviewed: s.reviewed + 1, kept: s.kept + 1 }));
-            showToast("Kept ✓", { type: "info" });
         }
 
         // Celebration milestones
@@ -248,15 +232,6 @@ export default function SwipePage() {
                     >
                         <Zap className="w-4 h-4" />
                     </button>
-                    {canUndo && (
-                        <button
-                            onClick={undoLastAction}
-                            className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-200 font-bold rounded-xl text-sm flex items-center gap-1.5"
-                        >
-                            <ArrowLeft className="w-3 h-3" />
-                            Undo
-                        </button>
-                    )}
                     <Link
                         href="/mode-select"
                         className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400"
@@ -317,14 +292,38 @@ export default function SwipePage() {
                     </AnimatePresence>
                 </div>
 
-                {/* Bottom Controls */}
-                <div className="mt-4 sm:mt-6 flex items-center justify-center gap-4 sm:gap-6">
+                {/* Bottom Controls - Trash | Undo | Keep */}
+                <div className="mt-4 sm:mt-6 flex items-center justify-center gap-3 sm:gap-5">
                     <MagneticButton
                         onClick={() => handleSwipe("left")}
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-zinc-900 border border-zinc-700 hover:bg-red-500 hover:border-red-500 text-zinc-400 hover:text-white flex items-center justify-center shadow-lg transition-all"
                         title="Trash"
                     >
                         <Trash2 className="w-6 h-6 sm:w-7 sm:h-7" />
+                    </MagneticButton>
+
+                    {/* Undo Button (center) */}
+                    <MagneticButton
+                        onClick={async () => {
+                            if (!canUndo) return;
+                            playSound("undo");
+                            const success = await undoLastAction();
+                            if (success) {
+                                // Remove last processed ID
+                                setProcessedIds(prev => {
+                                    const arr = [...prev];
+                                    arr.pop();
+                                    return new Set(arr);
+                                });
+                            }
+                        }}
+                        className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center shadow-lg transition-all ${canUndo
+                            ? 'bg-zinc-800 border-zinc-600 text-zinc-300 hover:bg-amber-500 hover:border-amber-500 hover:text-white'
+                            : 'bg-zinc-900/50 border-zinc-800 text-zinc-700 cursor-not-allowed'
+                            }`}
+                        title="Undo last action"
+                    >
+                        <Undo2 className="w-5 h-5" />
                     </MagneticButton>
 
                     <MagneticButton

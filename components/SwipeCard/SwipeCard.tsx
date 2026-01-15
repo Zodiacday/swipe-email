@@ -37,44 +37,32 @@ export function SwipeCard({
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
-    // Calculate card dimensions
+    // Calculate card dimensions - TINDER-LIKE THRESHOLDS
+    // Much lower thresholds = snappier, more responsive feel
     const cardWidth = 320;
     const cardHeight = 420;
-    const horizontalThreshold = cardWidth * 0.25;
-    const verticalThreshold = cardHeight * 0.2;
+    const horizontalThreshold = cardWidth * 0.12;  // ~38px - Tinder-like (was 0.25)
+    const velocityThreshold = 300;  // px/s - lower = easier flicks (was 500)
 
-    // Transform rotation based on horizontal drag
-    const rotate = useTransform(x, [-cardWidth, 0, cardWidth], [-8, 0, 8]);
-    const opacity = useTransform(x, [-cardWidth, -horizontalThreshold, 0, horizontalThreshold, cardWidth], [0.5, 1, 1, 1, 0.5]);
+    // Transform rotation based on horizontal drag - more dramatic rotation
+    const rotate = useTransform(x, [-cardWidth, 0, cardWidth], [-15, 0, 15]);
+    const opacity = useTransform(x, [-cardWidth, -horizontalThreshold * 2, 0, horizontalThreshold * 2, cardWidth], [0.5, 1, 1, 1, 0.5]);
 
-    // Action feedback transforms
-    const deleteOpacity = useTransform(x, [-horizontalThreshold, -horizontalThreshold / 2], [1, 0]);
-    const unsubOpacity = useTransform(x, [horizontalThreshold / 2, horizontalThreshold], [0, 1]);
-    const blockOpacity = useTransform(y, [-verticalThreshold, -verticalThreshold / 2], [1, 0]);
-    const keepOpacity = useTransform(y, [verticalThreshold / 2, verticalThreshold], [0, 1]);
+    // Action feedback transforms - SIMPLIFIED: Left=Trash, Right=Keep
+    const trashOpacity = useTransform(x, [-horizontalThreshold, -horizontalThreshold / 3], [1, 0]);
+    const keepOpacity = useTransform(x, [horizontalThreshold / 3, horizontalThreshold], [0, 1]);
 
-    // Dynamic background bleed based on direction
+    // Dynamic background bleed - SIMPLIFIED: horizontal only
     const cardBgOverlay = useTransform(
-        [x, y],
-        (latest: number[]) => {
-            const [latestX, latestY] = latest;
+        x,
+        (latestX: number) => {
             const absX = Math.abs(latestX);
-            const absY = Math.abs(latestY);
-            if (absX < 20 && absY < 20) return "rgba(0,0,0,0)";
+            if (absX < 15) return "rgba(0,0,0,0)";
 
-            if (absX > absY) {
-                // Horizontal dominant
-                const opacity = Math.min(absX / (cardWidth * 0.4), 0.2);
-                return latestX < 0
-                    ? `rgba(239, 68, 68, ${opacity})` // red
-                    : `rgba(59, 130, 246, ${opacity})`; // blue
-            } else {
-                // Vertical dominant
-                const opacity = Math.min(absY / (cardHeight * 0.4), 0.2);
-                return latestY < 0
-                    ? `rgba(249, 115, 22, ${opacity})` // orange
-                    : `rgba(16, 185, 129, ${opacity})`; // emerald
-            }
+            const intensity = Math.min(absX / (cardWidth * 0.3), 0.25);
+            return latestX < 0
+                ? `rgba(239, 68, 68, ${intensity})` // red = trash
+                : `rgba(16, 185, 129, ${intensity})`; // emerald = keep
         }
     );
 
@@ -91,25 +79,19 @@ export function SwipeCard({
         setIsDragging(false);
         const { offset, velocity } = info;
 
-        // Determine if swipe should complete based on threshold or velocity
-        const swipeRight =
-            offset.x > horizontalThreshold || velocity.x > 500;
+        // SIMPLIFIED: Left=Trash, Right=Keep
+        // Tinder-like: low threshold OR quick flick triggers action
         const swipeLeft =
-            offset.x < -horizontalThreshold || velocity.x < -500;
-        const swipeUp =
-            offset.y < -verticalThreshold || velocity.y < -500;
-        const swipeDown =
-            offset.y > verticalThreshold || velocity.y > 500;
+            offset.x < -horizontalThreshold || velocity.x < -velocityThreshold;
+        const swipeRight =
+            offset.x > horizontalThreshold || velocity.x > velocityThreshold;
 
         if (swipeLeft) {
-            onSwipe("delete");
+            onSwipe("delete");  // ← Left = Trash
         } else if (swipeRight) {
-            onSwipe("unsubscribe");
-        } else if (swipeUp) {
-            onSwipe("block");
-        } else if (swipeDown) {
-            onSwipe("keep");
+            onSwipe("keep");     // → Right = Keep
         }
+        // No action = card snaps back (user didn't commit)
     };
 
     const handlePointerDown = () => {
@@ -169,30 +151,18 @@ export function SwipeCard({
                     style={{ backgroundColor: cardBgOverlay }}
                     className="absolute inset-0 rounded-[2rem] pointer-events-none z-0"
                 />
-                {/* Action Overlays */}
+                {/* Action Overlays - SIMPLIFIED: Left=Trash, Right=Keep */}
                 <motion.div
-                    style={{ opacity: deleteOpacity }}
-                    className="absolute inset-0 bg-red-500/10 rounded-[2rem] flex items-center justify-center pointer-events-none border-2 border-red-500/20"
+                    style={{ opacity: trashOpacity }}
+                    className="absolute inset-0 bg-red-500/10 rounded-[2rem] flex items-center justify-center pointer-events-none border-2 border-red-500/30"
                 >
-                    <Trash2 className="w-20 h-20 text-red-500 opacity-40" />
-                </motion.div>
-                <motion.div
-                    style={{ opacity: unsubOpacity }}
-                    className="absolute inset-0 bg-blue-500/10 rounded-[2rem] flex items-center justify-center pointer-events-none border-2 border-blue-500/20"
-                >
-                    <MailX className="w-20 h-20 text-blue-500 opacity-40" />
-                </motion.div>
-                <motion.div
-                    style={{ opacity: blockOpacity }}
-                    className="absolute inset-0 bg-orange-500/10 rounded-[2rem] flex items-center justify-center pointer-events-none border-2 border-orange-500/20"
-                >
-                    <Ban className="w-20 h-20 text-orange-500 opacity-40" />
+                    <Trash2 className="w-20 h-20 text-red-500 opacity-50" />
                 </motion.div>
                 <motion.div
                     style={{ opacity: keepOpacity }}
-                    className="absolute inset-0 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center pointer-events-none border-2 border-emerald-500/20"
+                    className="absolute inset-0 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center pointer-events-none border-2 border-emerald-500/30"
                 >
-                    <Check className="w-20 h-20 text-emerald-500 opacity-40" />
+                    <Check className="w-20 h-20 text-emerald-500 opacity-50" />
                 </motion.div>
 
                 {/* Card Content */}

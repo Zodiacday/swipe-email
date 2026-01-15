@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Feedback Page - Obsidian Mint Edition
- * Collects user feedback, feature requests, and bug reports
+ * Feedback Page - Premium Minimal Redesign
+ * Ultra-spacious, clean, Linear/Raycast-inspired
  */
 
 import { useState } from "react";
@@ -23,34 +23,10 @@ import { useSession } from "next-auth/react";
 type FeedbackType = "general" | "feature" | "bug" | "love";
 
 const FEEDBACK_TYPES = [
-    {
-        id: "general" as FeedbackType,
-        label: "General Feedback",
-        icon: MessageSquare,
-        color: "zinc",
-        description: "Share your thoughts"
-    },
-    {
-        id: "feature" as FeedbackType,
-        label: "Feature Request",
-        icon: Lightbulb,
-        color: "amber",
-        description: "What should we build next?"
-    },
-    {
-        id: "bug" as FeedbackType,
-        label: "Report a Bug",
-        icon: Bug,
-        color: "red",
-        description: "Something not working?"
-    },
-    {
-        id: "love" as FeedbackType,
-        label: "Share the Love",
-        icon: Heart,
-        color: "pink",
-        description: "Tell us what you love!"
-    },
+    { id: "general" as FeedbackType, label: "General", icon: MessageSquare, colors: "bg-zinc-800 text-zinc-300 border-zinc-700 hover:border-zinc-600", activeColors: "bg-zinc-700 text-white border-zinc-500 ring-2 ring-zinc-500/30" },
+    { id: "feature" as FeedbackType, label: "Feature", icon: Lightbulb, colors: "bg-amber-500/10 text-amber-400 border-amber-500/30 hover:border-amber-500/50", activeColors: "bg-amber-500/20 text-amber-300 border-amber-500 ring-2 ring-amber-500/30" },
+    { id: "bug" as FeedbackType, label: "Bug", icon: Bug, colors: "bg-red-500/10 text-red-400 border-red-500/30 hover:border-red-500/50", activeColors: "bg-red-500/20 text-red-300 border-red-500 ring-2 ring-red-500/30" },
+    { id: "love" as FeedbackType, label: "Love", icon: Heart, colors: "bg-pink-500/10 text-pink-400 border-pink-500/30 hover:border-pink-500/50", activeColors: "bg-pink-500/20 text-pink-300 border-pink-500 ring-2 ring-pink-500/30" },
 ];
 
 export default function FeedbackPage() {
@@ -66,9 +42,9 @@ export default function FeedbackPage() {
         if (!message.trim() || !selectedType) return;
 
         setIsSubmitting(true);
+        setSubmitError(null);
 
         try {
-            setSubmitError(null);
             const response = await fetch("/api/feedback", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -97,38 +73,21 @@ export default function FeedbackPage() {
         setSelectedType(null);
         setMessage("");
         setIsSubmitted(false);
-    };
-
-    const getTypeColor = (type: string) => {
-        switch (type) {
-            case "amber": return "border-amber-500/30 bg-amber-500/10 text-amber-400";
-            case "red": return "border-red-500/30 bg-red-500/10 text-red-400";
-            case "pink": return "border-pink-500/30 bg-pink-500/10 text-pink-400";
-            default: return "border-zinc-700 bg-zinc-800/50 text-zinc-400";
-        }
-    };
-
-    const getActiveColor = (type: string) => {
-        switch (type) {
-            case "amber": return "border-amber-500 bg-amber-500/20 text-amber-300 ring-2 ring-amber-500/30";
-            case "red": return "border-red-500 bg-red-500/20 text-red-300 ring-2 ring-red-500/30";
-            case "pink": return "border-pink-500 bg-pink-500/20 text-pink-300 ring-2 ring-pink-500/30";
-            default: return "border-emerald-500 bg-emerald-500/20 text-emerald-300 ring-2 ring-emerald-500/30";
-        }
+        setSubmitError(null);
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 pt-24 pb-16 px-6">
-            {/* Background */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[150px]" />
+        <div className="min-h-screen bg-zinc-950 text-zinc-100">
+            {/* Subtle background glow */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-emerald-500/[0.03] rounded-full blur-[150px]" />
             </div>
 
-            <div className="max-w-2xl mx-auto relative z-10">
+            <div className="relative z-10 max-w-xl mx-auto px-6 pt-32 pb-20">
                 {/* Back Link */}
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-zinc-500 hover:text-emerald-400 transition-colors mb-8"
+                    className="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors text-sm mb-16"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Back
@@ -139,40 +98,40 @@ export default function FeedbackPage() {
                         /* Success State */
                         <motion.div
                             key="success"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            className="text-center py-16"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="text-center"
                         >
                             <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ type: "spring", delay: 0.1 }}
-                                className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"
+                                className="w-20 h-20 mx-auto mb-10 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center"
                             >
-                                <Check className="w-12 h-12 text-emerald-400" />
+                                <Check className="w-10 h-10 text-emerald-400" />
                             </motion.div>
 
-                            <h1 className="text-3xl font-black tracking-tighter mb-4">
-                                Thank You! 💚
+                            <h1 className="text-3xl font-semibold tracking-tight mb-4">
+                                Thank you
                             </h1>
-                            <p className="text-zinc-400 mb-8 max-w-md mx-auto">
-                                Your feedback means the world to us. We read every message and use it to make Swipe better.
+                            <p className="text-zinc-500 mb-12 max-w-sm mx-auto leading-relaxed">
+                                Your feedback helps us build a better product. We read every message.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-3 justify-center">
                                 <button
                                     onClick={handleReset}
-                                    className="px-6 py-3 bg-zinc-900 border border-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors"
+                                    className="px-5 py-2.5 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
                                 >
-                                    Send More Feedback
+                                    Send more feedback
                                 </button>
                                 <Link
                                     href="/mode-select"
-                                    className="px-6 py-3 bg-emerald-500 text-zinc-950 font-bold rounded-xl hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2"
+                                    className="px-5 py-2.5 bg-emerald-500 text-zinc-950 text-sm font-semibold rounded-full hover:bg-emerald-400 transition-colors inline-flex items-center justify-center gap-2"
                                 >
                                     <Sparkles className="w-4 h-4" />
-                                    Back to App
+                                    Back to app
                                 </Link>
                             </div>
                         </motion.div>
@@ -184,18 +143,14 @@ export default function FeedbackPage() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                         >
-                            {/* Header */}
-                            <div className="text-center mb-10">
-                                <h1 className="text-4xl font-black tracking-tighter mb-3">
-                                    We're All Ears 👂
-                                </h1>
-                                <p className="text-zinc-400 max-w-md mx-auto">
-                                    Help us make Swipe better. Your feedback directly shapes what we build next.
-                                </p>
-                            </div>
+                            {/* Heading */}
+                            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-center mb-16">
+                                Tell us what you{" "}
+                                <span className="text-emerald-400">think</span>
+                            </h1>
 
-                            {/* Feedback Type Selection */}
-                            <div className="grid grid-cols-2 gap-3 mb-8">
+                            {/* Feedback Type Pills */}
+                            <div className="flex flex-wrap justify-center gap-3 mb-12">
                                 {FEEDBACK_TYPES.map((type) => {
                                     const Icon = type.icon;
                                     const isActive = selectedType === type.id;
@@ -205,14 +160,11 @@ export default function FeedbackPage() {
                                             onClick={() => setSelectedType(type.id)}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
-                                            className={`p-4 rounded-2xl border text-left transition-all ${isActive
-                                                ? getActiveColor(type.color)
-                                                : getTypeColor(type.color)
+                                            className={`px-5 py-2.5 rounded-full border text-sm font-medium transition-all inline-flex items-center gap-2 ${isActive ? type.activeColors : type.colors
                                                 }`}
                                         >
-                                            <Icon className="w-5 h-5 mb-2" />
-                                            <div className="font-bold text-sm">{type.label}</div>
-                                            <div className="text-xs opacity-60 mt-0.5">{type.description}</div>
+                                            <Icon className="w-4 h-4" />
+                                            {type.label}
                                         </motion.button>
                                     );
                                 })}
@@ -220,79 +172,61 @@ export default function FeedbackPage() {
 
                             {/* Message Form */}
                             <form onSubmit={handleSubmit}>
-                                <div className="mb-6">
-                                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                                        Your Message
-                                    </label>
-                                    <textarea
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        placeholder={
-                                            selectedType === "feature"
-                                                ? "I wish Swipe could..."
-                                                : selectedType === "bug"
-                                                    ? "When I try to... it shows..."
-                                                    : selectedType === "love"
-                                                        ? "I absolutely love how Swipe..."
-                                                        : "Tell us what's on your mind..."
-                                        }
-                                        rows={6}
-                                        className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-white placeholder-zinc-600 resize-none focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                                    />
-                                </div>
+                                <textarea
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    placeholder="Share your thoughts, ideas, or report issues here..."
+                                    rows={6}
+                                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 text-white placeholder-zinc-600 resize-none focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-all text-[15px] leading-relaxed"
+                                />
 
-                                {/* User Info (if logged in) */}
+                                {/* Sending as (if logged in) */}
                                 {session?.user?.email && (
-                                    <div className="mb-6 p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-sm font-bold">
-                                            {session.user.name?.[0] || "?"}
-                                        </div>
-                                        <div className="text-sm">
-                                            <div className="text-zinc-400">Sending as</div>
-                                            <div className="text-white font-medium">{session.user.email}</div>
-                                        </div>
-                                    </div>
+                                    <p className="text-zinc-600 text-sm mt-4 text-center">
+                                        Sending as {session.user.email}
+                                    </p>
                                 )}
 
+                                {/* Error Display */}
                                 {submitError && (
-                                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-sm flex items-center gap-3">
-                                        <Bug className="w-5 h-5 flex-shrink-0" />
-                                        <p>{submitError}</p>
+                                    <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center">
+                                        {submitError}
                                     </div>
                                 )}
 
                                 {/* Submit Button */}
-                                <motion.button
-                                    type="submit"
-                                    disabled={!selectedType || !message.trim() || isSubmitting}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className={`w-full py-4 rounded-2xl font-black tracking-widest text-sm uppercase flex items-center justify-center gap-2 transition-all ${selectedType && message.trim()
-                                        ? "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
-                                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
-                                        }`}
-                                >
-                                    {isSubmitting ? (
-                                        <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                            className="w-5 h-5 border-2 border-zinc-950 border-t-transparent rounded-full"
-                                        />
-                                    ) : (
-                                        <>
-                                            <Send className="w-4 h-4" />
-                                            {submitError ? "Try Again" : "Send Feedback"}
-                                        </>
-                                    )}
-                                </motion.button>
+                                <div className="mt-10 flex justify-center">
+                                    <motion.button
+                                        type="submit"
+                                        disabled={!selectedType || !message.trim() || isSubmitting}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className={`px-8 py-3.5 rounded-full text-sm font-semibold transition-all inline-flex items-center gap-2 ${selectedType && message.trim()
+                                                ? "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.15)]"
+                                                : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                                            }`}
+                                    >
+                                        {isSubmitting ? (
+                                            <motion.div
+                                                animate={{ rotate: 360 }}
+                                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                                className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full"
+                                            />
+                                        ) : (
+                                            <>
+                                                <Send className="w-4 h-4" />
+                                                Send Feedback
+                                            </>
+                                        )}
+                                    </motion.button>
+                                </div>
                             </form>
 
-                            {/* Footer Note */}
-                            <p className="text-center text-zinc-600 text-xs mt-8">
-                                We read every message. Seriously.
-                                <br />
+                            {/* Footer */}
+                            <p className="text-center text-zinc-600 text-sm mt-16">
+                                Or email us at{" "}
                                 <a href="mailto:hello@swipeemail.com" className="text-emerald-500 hover:underline">
-                                    Or email us directly
+                                    hello@swipeemail.com
                                 </a>
                             </p>
                         </motion.div>

@@ -228,24 +228,33 @@ export default function ProvidersPage() {
                     <span className="font-black tracking-widest uppercase text-sm">Add Email Account</span>
                 </motion.button>
 
-                {/* Add Provider Modal */}
+                {/* Add Provider Modal - Obsidian Mint Styled */}
                 {showAddProvider && (
                     <motion.div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         onClick={() => setShowAddProvider(false)}
                     >
                         <motion.div
-                            className="bg-gradient-to-br from-gray-900 to-gray-950 rounded-3xl p-8 max-w-md w-full border border-white/10"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-zinc-950 border border-zinc-800 rounded-[32px] p-8 max-w-md w-full shadow-2xl"
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <h3 className="text-2xl font-black text-white mb-6">
-                                Choose Provider
-                            </h3>
+                            {/* Modal Header */}
+                            <div className="text-center mb-8">
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                                    <Plus className="w-8 h-8 text-emerald-400" />
+                                </div>
+                                <h3 className="text-2xl font-black text-white tracking-tight uppercase italic">
+                                    Add <span className="text-emerald-500 not-italic">Account</span>
+                                </h3>
+                                <p className="text-sm text-zinc-500 mt-1">Choose your email provider</p>
+                            </div>
 
+                            {/* Provider List */}
                             <div className="space-y-3">
                                 {(
                                     Object.entries(PROVIDER_INFO) as [
@@ -253,27 +262,30 @@ export default function ProvidersPage() {
                                         (typeof PROVIDER_INFO)[keyof typeof PROVIDER_INFO]
                                     ][]
                                 ).map(([key, info]) => (
-                                    <button
+                                    <motion.button
                                         key={key}
                                         onClick={() => handleConnect(key)}
-                                        className="w-full p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all flex items-center gap-4"
+                                        className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-emerald-500/40 hover:bg-zinc-900/80 transition-all flex items-center gap-4 group"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
                                     >
                                         <div
-                                            className={`w-12 h-12 rounded-lg bg-gradient-to-br ${info.color} flex items-center justify-center text-xl`}
+                                            className={`w-12 h-12 rounded-xl bg-gradient-to-br ${info.color} flex items-center justify-center text-xl shadow-lg`}
                                         >
                                             {info.icon}
                                         </div>
-                                        <span className="flex-1 text-left font-semibold text-white">
+                                        <span className="flex-1 text-left font-bold text-zinc-200 group-hover:text-white transition-colors">
                                             {info.name}
                                         </span>
-                                        <ChevronRight className="w-5 h-5 text-gray-400" />
-                                    </button>
+                                        <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-emerald-400 transition-colors" />
+                                    </motion.button>
                                 ))}
                             </div>
 
+                            {/* Cancel Button */}
                             <button
                                 onClick={() => setShowAddProvider(false)}
-                                className="w-full mt-6 py-3 text-gray-400 hover:text-white transition-colors"
+                                className="w-full mt-6 py-3 text-zinc-500 hover:text-zinc-300 transition-colors font-bold text-sm uppercase tracking-widest"
                             >
                                 Cancel
                             </button>

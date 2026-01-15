@@ -512,6 +512,7 @@ export default function Home() {
                             <div className="flex items-center gap-4 text-xs">
                                 <Link href="/terms" className="text-zinc-500 hover:text-emerald-400 transition-colors">Terms</Link>
                                 <Link href="/privacy" className="text-zinc-500 hover:text-emerald-400 transition-colors">Privacy</Link>
+                                <Link href="/feedback" className="text-zinc-500 hover:text-emerald-400 transition-colors">Feedback</Link>
                                 <a href="mailto:hello@swipeemail.com" className="text-zinc-500 hover:text-emerald-400 transition-colors">Contact</a>
                             </div>
                         </div>

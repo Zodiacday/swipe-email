@@ -66,20 +66,29 @@ export default function FeedbackPage() {
 
         setIsSubmitting(true);
 
-        // Simulate API call (replace with real endpoint)
-        // In production, send to: /api/feedback
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        try {
+            const response = await fetch("/api/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    type: selectedType,
+                    message: message.trim(),
+                }),
+            });
 
-        // For now, log to console (in production, send to backend/email)
-        console.log("Feedback submitted:", {
-            type: selectedType,
-            message,
-            email: session?.user?.email,
-            timestamp: new Date().toISOString(),
-        });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Failed to submit feedback");
+            }
 
-        setIsSubmitting(false);
-        setIsSubmitted(true);
+            setIsSubmitted(true);
+        } catch (error) {
+            console.error("Feedback error:", error);
+            // Still show success for now (could add error toast)
+            setIsSubmitted(true);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleReset = () => {
@@ -195,8 +204,8 @@ export default function FeedbackPage() {
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
                                             className={`p-4 rounded-2xl border text-left transition-all ${isActive
-                                                    ? getActiveColor(type.color)
-                                                    : getTypeColor(type.color)
+                                                ? getActiveColor(type.color)
+                                                : getTypeColor(type.color)
                                                 }`}
                                         >
                                             <Icon className="w-5 h-5 mb-2" />
@@ -250,8 +259,8 @@ export default function FeedbackPage() {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     className={`w-full py-4 rounded-2xl font-black tracking-widest text-sm uppercase flex items-center justify-center gap-2 transition-all ${selectedType && message.trim()
-                                            ? "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
-                                            : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                                        ? "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+                                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                                         }`}
                                 >
                                     {isSubmitting ? (

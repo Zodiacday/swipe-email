@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar/Navbar";
 import { AuthProvider } from "@/components/AuthProvider/AuthProvider";
 import { AuthErrorHandler } from "@/components/AuthErrorHandler";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import { EmailProvider } from "@/contexts/EmailContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { ConfirmModalProvider } from "@/hooks/useConfirmModal";
@@ -123,6 +124,7 @@ export default function RootLayout({
                 <main id="main-content" tabIndex={-1}>
                   {children}
                 </main>
+                <FeedbackButton />
                 <ConfirmModal />
               </ConfirmModalProvider>
             </ToastProvider>
